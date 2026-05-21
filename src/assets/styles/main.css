@@ -1,0 +1,292 @@
+/*
+	On importe d'abord les variables pour pouvoir les utiliser
+*/
+@import './variables.css';
+
+/*
+	Reset CSS : les navigateurs ont des styles par défaut différents.
+	Ce reset les neutralise pour partir d'une base propre et cohérente
+	sur Chrome, Firefox, Safari, etc.
+*/
+*, *::before, *::after {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+	/* box-sizing: border-box signifie que la largeur inclut les bordures
+		 et le padding. C'est beaucoup plus intuitif pour calculer les tailles. */
+}
+
+body {
+	font-family: 'Inter', 'Segoe UI', 'Helvetica Neue', sans-serif;
+	background-color: var(--fond-general);
+	color: var(--texte-principal);
+	font-size: 14px;
+	line-height: 1.6; /* Espace entre les lignes de texte */
+}
+
+/* ===== BOUTONS ===== */
+/*
+	On définit les styles de boutons ici une fois.
+	Dans les composants, on mettra juste class="btn-primaire"
+	et le bouton aura ce style automatiquement.
+*/
+.btn-primaire {
+	background-color: var(--couleur-accent);
+	color: var(--texte-blanc);
+	border: none;
+	padding: 10px 20px;
+	border-radius: var(--bordure-radius-petit);
+	font-size: 14px;
+	font-weight: 600;
+	cursor: pointer; /* Montre un curseur "main" au survol */
+	transition: opacity 0.2s ease; /* Animation douce au survol */
+	display: inline-flex;
+	align-items: center;
+	gap: 6px; /* Espace entre l'icône et le texte du bouton */
+}
+
+.btn-primaire:hover {
+	opacity: 0.9; /* Légèrement transparent au survol */
+}
+
+.btn-primaire:disabled {
+	opacity: 0.5;
+	cursor: not-allowed; /* Montre un curseur "interdit" */
+}
+
+.btn-secondaire {
+	background-color: transparent;
+	color: var(--texte-principal);
+	border: 1px solid var(--bordure);
+	padding: 10px 20px;
+	border-radius: var(--bordure-radius-petit);
+	font-size: 14px;
+	cursor: pointer;
+	transition: background-color 0.2s;
+}
+
+.btn-secondaire:hover {
+	background-color: var(--fond-general);
+}
+
+.btn-danger {
+	background-color: var(--couleur-danger);
+	color: white;
+	border: none;
+	padding: 8px 16px;
+	border-radius: var(--bordure-radius-petit);
+	cursor: pointer;
+	font-size: 14px;
+}
+
+/* ===== BADGES DE STATUT ===== */
+/*
+	Les badges sont de petites étiquettes colorées qui indiquent un statut.
+	Exemple : 🟢 Disponible, 🔴 Loué, 🟡 Réservé
+*/
+.badge {
+	display: inline-block;
+	padding: 4px 10px;
+	border-radius: 20px; /* Arrondi maximal pour forme de pilule */
+	font-size: 12px;
+	font-weight: 600;
+}
+
+/* Chaque statut a sa propre couleur de fond et de texte */
+.badge-disponible { background-color: #dcfce7; color: #16a34a; }
+.badge-reserve    { background-color: #fef9c3; color: #a16207; }
+.badge-loue       { background-color: #fee2e2; color: #dc2626; }
+.badge-archive    { background-color: #f3f4f6; color: #6b7280; }
+.badge-en_attente { background-color: #fef9c3; color: #a16207; }
+.badge-confirmee  { background-color: #dcfce7; color: #16a34a; }
+.badge-refusee    { background-color: #fee2e2; color: #dc2626; }
+.badge-en_cours   { background-color: #dbeafe; color: #1d4ed8; }
+.badge-expire     { background-color: #fee2e2; color: #dc2626; }
+.badge-paye       { background-color: #dcfce7; color: #16a34a; }
+.badge-en_retard  { background-color: #fee2e2; color: #dc2626; }
+
+/* ===== CARTES ===== */
+/*
+	Une "carte" est un bloc blanc avec une ombre qui contient du contenu.
+	C'est l'élément de base de l'interface.
+*/
+.carte {
+	background-color: var(--fond-carte);
+	border-radius: var(--bordure-radius);
+	box-shadow: var(--ombre-carte);
+	padding: 24px;
+}
+
+/* ===== FORMULAIRES ===== */
+.champ {
+	margin-bottom: 16px;
+}
+
+.champ label {
+	display: block;
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--texte-principal);
+	margin-bottom: 6px;
+}
+
+.champ input,
+.champ select,
+.champ textarea {
+	width: 100%;
+	padding: 10px 14px;
+	border: 1px solid var(--bordure);
+	border-radius: var(--bordure-radius-petit);
+	font-size: 14px;
+	font-family: inherit; /* Utilise la même police que le reste de l'app */
+	outline: none;
+	transition: border-color 0.2s;
+	color: var(--texte-principal);
+	background-color: white;
+}
+
+/* Met la bordure en orange quand le champ est actif (focus) */
+.champ input:focus,
+.champ select:focus,
+.champ textarea:focus {
+	border-color: var(--couleur-accent);
+	box-shadow: 0 0 0 3px rgba(232, 160, 32, 0.1);
+}
+
+/* ===== MODALES ===== */
+/*
+	Une modale est une fenêtre qui s'ouvre par-dessus la page.
+	Elle bloque l'interaction avec le reste de la page.
+*/
+.modal-overlay {
+	/* fixed + inset:0 = couvre tout l'écran */
+	position: fixed;
+	inset: 0;
+	/* Fond semi-transparent noir */
+	background-color: rgba(0, 0, 0, 0.5);
+	/* Centre le contenu de la modale */
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	/* z-index élevé pour être au-dessus de tout */
+	z-index: 1000;
+	/* Légère animation d'apparition */
+	animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+	from { opacity: 0; }
+	to   { opacity: 1; }
+}
+
+.modal {
+	background-color: white;
+	border-radius: 16px;
+	padding: 32px;
+	width: 100%;
+	max-width: 540px;
+	/* Permet le scroll si le contenu est trop long */
+	max-height: 90vh;
+	overflow-y: auto;
+	animation: slideUp 0.2s ease;
+}
+
+@keyframes slideUp {
+	from { transform: translateY(20px); opacity: 0; }
+	to   { transform: translateY(0);    opacity: 1; }
+}
+
+.modal-titre {
+	font-size: 18px;
+	font-weight: 700;
+	color: var(--couleur-primaire);
+	margin-bottom: 24px;
+}
+
+.modal-actions {
+	display: flex;
+	gap: 12px;
+	justify-content: flex-end;
+	margin-top: 24px;
+	padding-top: 20px;
+	border-top: 1px solid var(--bordure);
+}
+
+/* ===== TABLEAU ===== */
+.tableau {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.tableau th {
+	padding: 12px 16px;
+	text-align: left;
+	font-size: 11px;
+	font-weight: 700;
+	color: var(--texte-secondaire);
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	background-color: var(--fond-general);
+	border-bottom: 1px solid var(--bordure);
+}
+
+.tableau td {
+	padding: 14px 16px;
+	border-bottom: 1px solid var(--bordure);
+	color: var(--texte-principal);
+	font-size: 14px;
+}
+
+.tableau tr:last-child td {
+	border-bottom: none;
+}
+
+.tableau tr:hover td {
+	background-color: #f9fafb;
+}
+
+/* ===== GRILLES ===== */
+/* Les grilles permettent de disposer des éléments en colonnes */
+.grille-2 {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 20px;
+}
+
+.grille-3 {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 20px;
+}
+
+.grille-4 {
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	gap: 20px;
+}
+
+/* Sur mobile, toutes les grilles deviennent une seule colonne */
+@media (max-width: 768px) {
+	.grille-2, .grille-3, .grille-4 {
+		grid-template-columns: 1fr;
+	}
+}
+
+/* ===== ÉTAT VIDE ===== */
+/* Affiché quand une liste est vide */
+.message-vide {
+	text-align: center;
+	padding: 60px 20px;
+	color: var(--texte-secondaire);
+}
+
+.message-vide-icone {
+	font-size: 48px;
+	margin-bottom: 12px;
+	display: block;
+}
+
+.message-vide-texte {
+	font-size: 16px;
+	margin-bottom: 4px;
+}

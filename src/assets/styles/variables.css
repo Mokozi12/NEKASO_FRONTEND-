@@ -1,0 +1,36 @@
+/*
+	Les variables CSS (custom properties) sont définies ici une seule fois.
+	Ensuite on les utilise partout avec var(--nom-de-la-variable).
+	Si un jour tu veux changer la couleur principale, tu ne changes
+	qu'ici et ça change partout dans l'application.
+*/
+:root {
+	/* Couleurs principales de NEKASO */
+	--couleur-primaire: #1a2e4a;    /* Bleu foncé : sidebar, titres importants */
+	--couleur-accent: #e8a020;      /* Orange : boutons d'action, liens actifs */
+	--couleur-succes: #22c55e;      /* Vert : statut disponible, succès */
+	--couleur-danger: #ef4444;      /* Rouge : erreurs, retards de paiement */
+	--couleur-warning: #f59e0b;     /* Jaune : statut réservé, avertissements */
+
+	/* Couleurs de fond */
+	--fond-general: #f5f7fa;        /* Fond gris clair de la page */
+	--fond-carte: #ffffff;          /* Fond blanc des cartes */
+	--fond-sidebar: #1a2e4a;        /* Fond de la barre latérale */
+
+	/* Couleurs de texte */
+	--texte-principal: #1f2937;     /* Texte foncé pour les titres et contenus */
+	--texte-secondaire: #6b7280;    /* Texte gris pour les informations secondaires */
+	--texte-blanc: #ffffff;
+
+	/* Bordures et arrondis */
+	--bordure: #e5e7eb;             /* Couleur des bordures */
+	--bordure-radius: 12px;         /* Arrondi des coins des cartes */
+	--bordure-radius-petit: 8px;    /* Arrondi des coins des boutons */
+
+	/* Ombres */
+	--ombre-carte: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+	/* Dimensions */
+	--sidebar-largeur: 260px;       /* Largeur de la barre latérale */
+	--header-hauteur: 64px;         /* Hauteur de la barre du haut */
+}
