@@ -20,11 +20,7 @@ export const biensService = {
     const formData = new FormData()
     formData.append('typeBien', 'APPARTEMENT')
     formData.append('adresse', 'Rue 10, Mermoz')
-    formData.append('surface', 120)
-    formData.append('nombrePieces', 3)
-    formData.append('loyer', 350000)
-    // Pour les photos multiples (MultipartFile[] côté Spring Boot) :
-    files.forEach(file => formData.append('photos', file))
+    formData.append('photo', fichierImage) ← le vrai fichier
   */
   creer: (formData) => api.post('/biens', formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
