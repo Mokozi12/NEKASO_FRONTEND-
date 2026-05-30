@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { authService } from '@/services/auth.service'
+import { mockUser } from '@/services/mockData'
 
 export const useAuthStore = defineStore('auth', () => {
   const token = ref(localStorage.getItem('nekaso_token') || null)
@@ -8,6 +9,7 @@ export const useAuthStore = defineStore('auth', () => {
   const isLoading = ref(false)
   const error = ref(null)
 
+  const utilisateurCourant = computed(() => user.value ?? mockUser)
   const isAuthenticated = computed(() => !!token.value)
   const nomComplet = computed(() => (user.value ? `${user.value.prenom} ${user.value.nom}` : ''))
   const isGestionnaire = computed(() => user.value?.role === 'GESTIONNAIRE')
@@ -80,6 +82,7 @@ export const useAuthStore = defineStore('auth', () => {
   return {
     token,
     user,
+    utilisateurCourant,
     isAuthenticated,
     nomComplet,
     isGestionnaire,

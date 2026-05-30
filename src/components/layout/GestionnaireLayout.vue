@@ -51,8 +51,9 @@ import HeaderGestionnaire from './HeaderGestionnaire.vue'
 }
 
 .layout-main {
-  flex: 1; /* Prend tout l'espace restant après le header */
-  padding: 24px;
+  flex: 1;
+  padding: 24px 28px 32px;
   background-color: var(--fond-general);
+  overflow-y: auto;
 }
 </style>

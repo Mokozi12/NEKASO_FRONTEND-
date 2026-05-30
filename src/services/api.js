@@ -76,11 +76,9 @@ api.interceptors.response.use(
     
     // Erreur 401 = Non authentifié (token absent, invalide ou expiré)
     // On déconnecte l'utilisateur et le redirige vers le login
-    if (error.response?.status === 401) {
+    if (error.response?.status === 401 && localStorage.getItem('nekaso_token')) {
       localStorage.removeItem('nekaso_token')
       localStorage.removeItem('nekaso_user')
-      // Redirection forcée vers la page de login
-      window.location.href = '/login'
     }
     
     // Erreur 403 = Authentifié mais accès interdit (mauvais rôle)

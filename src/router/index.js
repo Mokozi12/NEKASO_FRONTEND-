@@ -7,49 +7,53 @@ const router = createRouter({
     { path: '/', redirect: '/login' },
 
     {
-      path: '/login',
-      name: 'login',
-      component: () => import('@/views/auth/LoginView.vue'),
-      meta: { public: true }
-    },
-
-    {
       path: '/gestionnaire',
       component: () => import('@/components/layout/GestionnaireLayout.vue'),
-      meta: { requiresAuth: true, role: 'GESTIONNAIRE' },
+      meta: { title: 'NEKASO' },
       children: [
         {
           path: 'dashboard',
           name: 'dashboard',
-          component: () => import('@/views/gestionnaire/DashboardView.vue')
+          component: () => import('@/views/gestionnaire/DashboardView.vue'),
+          meta: { title: 'Tableau de bord NEKASO' },
         },
         {
           path: 'biens',
           name: 'biens',
-          component: () => import('@/views/gestionnaire/BiensView.vue')
+          component: () => import('@/views/gestionnaire/PlaceholderView.vue'),
+          meta: { title: 'Biens' },
         },
         {
           path: 'visites',
           name: 'visites',
-          component: () => import('@/views/gestionnaire/VisitesView.vue')
+          component: () => import('@/views/gestionnaire/PlaceholderView.vue'),
+          meta: { title: 'Visites' },
         },
         {
-          // ✅ AJOUTÉ : route manquante pour les demandes de location
           path: 'demandes-location',
           name: 'demandes-location',
-          component: () => import('@/views/gestionnaire/DemandesLocationView.vue')
+          component: () => import('@/views/gestionnaire/DemandesLocationView.vue'),
+          meta: { title: 'Demandes de location' },
         },
         {
           path: 'contrats',
           name: 'contrats',
-          component: () => import('@/views/gestionnaire/ContratsView.vue')
+          component: () => import('@/views/gestionnaire/PlaceholderView.vue'),
+          meta: { title: 'Contrats' },
         },
         {
           path: 'paiements',
           name: 'paiements',
-          component: () => import('@/views/gestionnaire/PaiementsView.vue')
-        }
-      ]
+          component: () => import('@/views/gestionnaire/PlaceholderView.vue'),
+          meta: { title: 'Paiements' },
+        },
+        {
+          path: 'parametres',
+          name: 'parametres',
+          component: () => import('@/views/gestionnaire/PlaceholderView.vue'),
+          meta: { title: 'Paramètres' },
+        },
+      ],
     },
 
     { path: '/:pathMatch(.*)*', redirect: '/gestionnaire/dashboard' }

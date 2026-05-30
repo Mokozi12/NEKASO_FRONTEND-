@@ -3,8 +3,12 @@
 // mockBiens → await biensService.getMesBiens()
 
 export const mockUser = {
-  id: 1, nom: 'Diallo', prenom: 'Moussa',
-  role: 'GESTIONNAIRE', telephone: '771234567', statut: 'ACTIF'
+  id: 1,
+  nom: 'Sarr',
+  prenom: 'Awa',
+  role: 'GESTIONNAIRE',
+  telephone: '771234567',
+  statut: 'ACTIF',
 }
 
 // ✅ CORRIGÉ : photos[] (tableau) au lieu de photo (champ unique)
@@ -37,9 +41,18 @@ export const mockBiens = [
 
 export const mockVisites = [
   {
-    id: 1, statut: 'EN_ATTENTE', dateCreation: '2024-05-15',
+    id: 1,
+    statut: 'EN_ATTENTE',
+    dateCreation: '2026-05-03',
+    locataire: { id: 3, nom: 'Sow', prenom: 'Moussa', telephone: '771234567' },
+    bien: { id: 2, adresse: 'Plateau, Dakar', typeBien: 'STUDIO', loyer: 150000 },
+  },
+  {
+    id: 10,
+    statut: 'EN_ATTENTE',
+    dateCreation: '2024-05-15',
     locataire: { id: 3, nom: 'Sow', prenom: 'Fatou', telephone: '771234567' },
-    bien: { id: 2, adresse: 'Avenue Cheikh Anta Diop', typeBien: 'STUDIO', loyer: 150000 }
+    bien: { id: 2, adresse: 'Avenue Cheikh Anta Diop', typeBien: 'STUDIO', loyer: 150000 },
   },
   {
     id: 2, statut: 'EN_ATTENTE', dateCreation: '2024-05-16',
@@ -75,19 +88,41 @@ export const mockContrats = [
 
 export const mockPaiements = [
   {
-    id: 1, montant: 350000, datePaiement: '2024-05-05', mois: '2024-05',
-    methodePaiement: 'ORANGE_MONEY', reference: 'OM-20240505-001', statut: 'PAYE',
+    id: 1,
+    montant: 350000,
+    datePaiement: '2024-05-05',
+    mois: '2024-05',
+    methodePaiement: 'ORANGE_MONEY',
+    reference: 'OM-20240505-001',
+    statut: 'PAYE',
     contratId: 1,
     locataire: { nom: 'Ba', prenom: 'Oumar', telephone: '776543210' },
-    bien: { adresse: 'Rue 10, Mermoz, Dakar' }
+    bien: { adresse: 'Rue 10, Mermoz, Dakar' },
   },
   {
-    id: 2, montant: 350000, datePaiement: null, mois: '2024-04',
-    methodePaiement: null, reference: null, statut: 'EN_RETARD',
+    id: 2,
+    montant: 350000,
+    datePaiement: null,
+    mois: '2026-04-05',
+    methodePaiement: null,
+    reference: null,
+    statut: 'EN_RETARD',
     contratId: 1,
-    locataire: { nom: 'Ba', prenom: 'Oumar', telephone: '776543210' },
-    bien: { adresse: 'Rue 10, Mermoz, Dakar' }
-  }
+    locataire: { nom: 'Tech', prenom: 'SARL Teranga', telephone: '771111111' },
+    bien: { adresse: 'Plateau, Dakar' },
+  },
+  {
+    id: 3,
+    montant: 350000,
+    datePaiement: null,
+    mois: '2026-04-05',
+    methodePaiement: null,
+    reference: null,
+    statut: 'EN_RETARD',
+    contratId: 2,
+    locataire: { nom: 'Tech', prenom: 'SARL Teranga', telephone: '771111111' },
+    bien: { adresse: 'Plateau, Dakar' },
+  },
 ]
 
 export const mockNotifications = [
@@ -96,15 +131,59 @@ export const mockNotifications = [
   { id: 3, type: 'PAIEMENT',  message: 'Loyer Mai 2024 enregistré pour Oumar Ba', dateEnvoi: '2024-05-05', lue: true }
 ]
 
+/** Données du tableau de bord (maquette NEKASO) */
 export const mockStats = {
-  totalBiens: 4, biensLoues: 1, biensDisponibles: 2, biensReserves: 1,
-  revenusMois: 350000, loyersEnRetard: 1, visitesEnAttente: 2,
-  demandesLocationEnAttente: 1, contratsExpirantBientot: 0, notificationsNonLues: 2,
+  totalBiens: 5,
+  biensLoues: 2,
+  biensDisponibles: 3,
+  biensReserves: 0,
+  revenusMois: 450000,
+  variationRevenus: 8.2,
+  tauxOccupation: 40,
+  variationOccupation: 5.0,
+  montantLoyersEnRetard: 700000,
+  variationLoyersRetard: -10.5,
+  loyersEnRetard: 2,
+  visitesEnAttente: 1,
+  demandesLocationEnAttente: 0,
+  contratsExpirantBientot: 0,
+  notificationsNonLues: 2,
   revenusParMois: [
-    { mois: 'Jan', montant: 0 },
-    { mois: 'Fév', montant: 350000 },
-    { mois: 'Mar', montant: 350000 },
-    { mois: 'Avr', montant: 350000 },
-    { mois: 'Mai', montant: 350000 }
-  ]
+    { mois: 'Nov', encaisse: 1650000, anneePrecedente: 1400000 },
+    { mois: 'Déc', encaisse: 1920000, anneePrecedente: 1580000 },
+    { mois: 'Jan', encaisse: 2100000, anneePrecedente: 1750000 },
+    { mois: 'Fév', encaisse: 2250000, anneePrecedente: 1900000 },
+    { mois: 'Mar', encaisse: 2380000, anneePrecedente: 2050000 },
+    { mois: 'Avr', encaisse: 2400000, anneePrecedente: 2200000 },
+  ],
+  portefeuille: [
+    { type: 'Appartement', count: 1, percent: 20, color: '#1a2234' },
+    { type: 'Studio', count: 1, percent: 20, color: '#22c55e' },
+    { type: 'Bureau', count: 1, percent: 20, color: '#4ade80' },
+    { type: 'Villa', count: 1, percent: 20, color: '#166534' },
+    { type: 'Chambre', count: 1, percent: 20, color: '#86efac' },
+  ],
+  loyersEnRetardListe: [
+    {
+      id: 1,
+      locataire: 'SARL Teranga Tech',
+      echeance: '2026-04-05',
+      montant: 350000,
+    },
+    {
+      id: 2,
+      locataire: 'SARL Teranga Tech',
+      echeance: '2026-04-05',
+      montant: 350000,
+    },
+  ],
+  visitesEnAttenteListe: [
+    {
+      id: 1,
+      nom: 'Moussa Sow',
+      bien: 'Studio Plateau',
+      dateHeure: '2026-05-03 10:00',
+      statut: 'EN_ATTENTE',
+    },
+  ],
 }
