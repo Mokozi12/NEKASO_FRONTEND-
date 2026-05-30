@@ -6,16 +6,16 @@
 */
 :root {
 	/* Couleurs principales de NEKASO */
-	--couleur-primaire: #1a2e4a;    /* Bleu foncé : sidebar, titres importants */
+	--couleur-primaire: #0E1B47;    /* Bleu très foncé : sidebar, titres importants */
 	--couleur-accent: #e8a020;      /* Orange : boutons d'action, liens actifs */
-	--couleur-succes: #22c55e;      /* Vert : statut disponible, succès */
-	--couleur-danger: #ef4444;      /* Rouge : erreurs, retards de paiement */
-	--couleur-warning: #f59e0b;     /* Jaune : statut réservé, avertissements */
+	--couleur-succes: #28a745;      /* Vert : statut disponible, succès */
+	--couleur-danger: #dc3545;      /* Rouge : erreurs, retards de paiement */
+	--couleur-warning: #ffc107;     /* Jaune : statut réservé, avertissements */
 
 	/* Couleurs de fond */
 	--fond-general: #f5f7fa;        /* Fond gris clair de la page */
 	--fond-carte: #ffffff;          /* Fond blanc des cartes */
-	--fond-sidebar: #1a2e4a;        /* Fond de la barre latérale */
+	--fond-sidebar: #ffffff;        /* Fond de la barre latérale - blanc */
 
 	/* Couleurs de texte */
 	--texte-principal: #1f2937;     /* Texte foncé pour les titres et contenus */

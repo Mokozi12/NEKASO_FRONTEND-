@@ -1,9 +1,8 @@
 <template>
   <aside class="sidebar">
-    <!-- Logo et nom de l'application -->
+    <!-- Logo -->
     <div class="sidebar-logo">
-      <span class="sidebar-logo-icone">🏠</span>
-      <span class="sidebar-logo-texte">NEKASO</span>
+      <img src="@/assets/img/logo.png" alt="NEKASO" class="sidebar-logo-img">
     </div>
 
     <!-- Liens de navigation -->
@@ -102,7 +101,7 @@ function seDeconnecter() {
   width: var(--sidebar-largeur); /* 260px */
   height: 100vh;
   background-color: var(--fond-sidebar);
-  color: white;
+  color: #333;
   display: flex;
   flex-direction: column;
   /* Ombre sur le côté droit pour séparer du contenu */
@@ -113,20 +112,14 @@ function seDeconnecter() {
 .sidebar-logo {
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: center;
   padding: 24px 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid #e0e0e0;
 }
 
-.sidebar-logo-icone {
-  font-size: 28px;
-}
-
-.sidebar-logo-texte {
-  font-size: 22px;
-  font-weight: 800;
-  letter-spacing: 1px;
-  color: var(--couleur-accent);
+.sidebar-logo-img {
+  max-width: 120px;
+  height: auto;
 }
 
 .sidebar-nav {
@@ -144,7 +137,7 @@ function seDeconnecter() {
   gap: 12px;
   padding: 12px 16px;
   border-radius: 10px;
-  color: rgba(255, 255, 255, 0.7);
+  color: #666;
   text-decoration: none;
   font-size: 14px;
   font-weight: 500;
@@ -152,13 +145,13 @@ function seDeconnecter() {
 }
 
 .sidebar-lien:hover {
-  background-color: rgba(255, 255, 255, 0.08);
-  color: white;
+  background-color: #f0f0f0;
+  color: #333;
 }
 
 /* Appliqué automatiquement par RouterLink quand l'URL correspond */
 .sidebar-lien--actif {
-  background-color: var(--couleur-accent);
+  background-color: #0E1B47;
   color: white;
   font-weight: 600;
 }
@@ -171,7 +164,7 @@ function seDeconnecter() {
 
 .sidebar-bas {
   padding: 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid #e0e0e0;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -205,7 +198,7 @@ function seDeconnecter() {
 .sidebar-utilisateur-nom {
   font-size: 13px;
   font-weight: 600;
-  color: white;
+  color: #333;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis; /* Ajoute "..." si le nom est trop long */
@@ -213,15 +206,15 @@ function seDeconnecter() {
 
 .sidebar-utilisateur-role {
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.5);
+  color: #999;
 }
 
 .sidebar-btn-deconnexion {
   width: 100%;
   padding: 10px;
-  background-color: rgba(239, 68, 68, 0.15);
-  color: rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  background-color: #ffe0e0;
+  color: #dc3545;
+  border: 1px solid #ffcccc;
   border-radius: 8px;
   cursor: pointer;
   font-size: 13px;
@@ -229,7 +222,7 @@ function seDeconnecter() {
 }
 
 .sidebar-btn-deconnexion:hover {
-  background-color: rgba(239, 68, 68, 0.3);
-  color: white;
+  background-color: #ffc9c9;
+  color: #c82333;
 }
 </style>

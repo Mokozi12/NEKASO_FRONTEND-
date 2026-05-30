@@ -29,11 +29,16 @@ export const useVisitesStore = defineStore('visites', () => {
     }
   }
 
-  async function approuver(id) {
-    // TODO : await visitesService.approuver(id)
+  async function confirmer(id) {
+    // TODO : await visitesService.confirmer(id)
     visites.value = visites.value.map(v =>
       v.id === id ? { ...v, statut: 'CONFIRMEE' } : v
     )
+  }
+
+  async function approuver(id) {
+    // Alias pour confirmer
+    return confirmer(id)
   }
 
   async function refuser(id) {
@@ -43,5 +48,5 @@ export const useVisitesStore = defineStore('visites', () => {
     )
   }
 
-  return { visites, chargement, erreur, enAttente, confirmees, refusees, charger, approuver, refuser }
+  return { visites, chargement, erreur, enAttente, confirmees, refusees, charger, confirmer, refuser }
 })
