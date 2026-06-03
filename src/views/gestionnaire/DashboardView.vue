@@ -8,6 +8,11 @@
     <div class="dashboard__toolbar">
       <p class="dashboard__intro">Vue d'ensemble de votre activité locative</p>
       <div class="dashboard__actions">
+        <button type="button" class="btn-outline btn-outline--badge" @click="$router.push({ name: 'demandes-location' })">
+          <AppIcon name="inbox" :size="16" />
+          Demandes de location
+          <span class="btn-badge">1</span>
+        </button>
         <button type="button" class="btn-outline">
           <AppIcon name="plus" :size="16" />
           Bien
@@ -311,6 +316,25 @@ const donutOptions = computed(() => ({
 
 .btn-outline:hover {
   background: var(--fond-general);
+}
+
+.btn-outline--badge {
+  position: relative;
+}
+
+.btn-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: var(--couleur-danger);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  margin-left: 2px;
 }
 
 .btn-primary-dash {
