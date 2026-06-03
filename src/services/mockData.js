@@ -55,10 +55,19 @@ export const mockVisites = [
 
 export const mockDemandesLocation = [
   {
-    id: 1, statut: 'EN_ATTENTE', dateDemande: '2024-05-16',
-    locataire: { id: 3, nom: 'Sow', prenom: 'Fatou', telephone: '771234567' },
-    bien: { id: 2, adresse: 'Avenue Cheikh Anta Diop', typeBien: 'STUDIO', loyer: 150000 },
-    demandeVisite: { id: 1, dateCreation: '2024-05-15' }
+    id: 1, statut: 'EN_ATTENTE', dateDemande: '2026-05-03', heure: '10:00',
+    locataire: { id: 1, nom: 'Sow', prenom: 'Moussa', telephone: '+221771234567' },
+    bien: { id: 1, adresse: 'Studio Plateau', typeBien: 'STUDIO', loyer: 150000 },
+  },
+  {
+    id: 2, statut: 'VALIDEE', dateDemande: '2026-05-05', heure: '15:30',
+    locataire: { id: 2, nom: 'Ndiaye', prenom: 'Fatou', telephone: '+221769876543' },
+    bien: { id: 2, adresse: 'Chambre Ouakam', typeBien: 'CHAMBRE', loyer: 80000 },
+  },
+  {
+    id: 3, statut: 'REFUSEE', dateDemande: '2026-04-28', heure: '11:00',
+    locataire: { id: 3, nom: 'Ba', prenom: 'Ibrahima', telephone: '+221782223344' },
+    bien: { id: 3, adresse: 'Studio Plateau', typeBien: 'STUDIO', loyer: 150000 },
   }
 ]
 

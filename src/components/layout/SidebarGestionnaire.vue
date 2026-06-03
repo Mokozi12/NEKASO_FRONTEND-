@@ -1,47 +1,176 @@
 <template>
   <aside class="sidebar">
-    <!-- Logo et nom de l'application -->
-    <div class="sidebar-logo">
-      <span class="sidebar-logo-icone">🏠</span>
-      <span class="sidebar-logo-texte">NEKASO</span>
+    <!-- En-tête de la sidebar avec le Logo -->
+    <div class="sidebar-header">
+      <div class="logo-container">
+        <img src="/logo.png" alt="Nekaso" class="logo-img" />
+      </div>
     </div>
 
-    <!-- Liens de navigation -->
+    <!-- Navigation principale -->
     <nav class="sidebar-nav">
-      <!--
-        RouterLink génère un <a> mais sans recharger la page.
-        active-class s'applique automatiquement quand l'URL correspond.
-        C'est ce qui colore le lien de la page active en orange.
-      -->
-      <RouterLink
-        v-for="item in menuItems"
-        :key="item.route"
-        :to="item.route"
-        class="sidebar-lien"
-        active-class="sidebar-lien--actif"
-      >
-        <span class="sidebar-lien-icone">{{ item.icone }}</span>
-        <span>{{ item.label }}</span>
-      </RouterLink>
-    </nav>
+      <!-- Section MENU -->
+      <div class="nav-section">
+        <h4 class="section-title">MENU</h4>
 
-    <!-- Informations de l'utilisateur et déconnexion -->
-    <div class="sidebar-bas">
-      <div class="sidebar-utilisateur">
-        <div class="sidebar-avatar">
-          <!-- Initiale du prénom de l'utilisateur -->
-          {{ authStore.user?.prenom?.charAt(0) || 'G' }}
-        </div>
-        <div class="sidebar-utilisateur-info">
-          <span class="sidebar-utilisateur-nom">
-            {{ authStore.nomComplet }}
-          </span>
-          <span class="sidebar-utilisateur-role">Gestionnaire</span>
-        </div>
+        <RouterLink to="/gestionnaire/dashboard" class="nav-item" active-class="nav-item-active">
+          <svg
+            class="nav-icon"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <rect x="3" y="3" width="7" height="7" rx="1"></rect>
+            <rect x="14" y="3" width="7" height="7" rx="1"></rect>
+            <rect x="14" y="14" width="7" height="7" rx="1"></rect>
+            <rect x="3" y="14" width="7" height="7" rx="1"></rect>
+          </svg>
+          Tableau de bord
+        </RouterLink>
+
+        <RouterLink to="/gestionnaire/biens" class="nav-item" active-class="nav-item-active">
+          <svg
+            class="nav-icon"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
+            <path d="M9 22v-4h6v4"></path>
+            <path d="M8 6h.01"></path>
+            <path d="M16 6h.01"></path>
+            <path d="M12 6h.01"></path>
+            <path d="M12 10h.01"></path>
+            <path d="M12 14h.01"></path>
+            <path d="M16 10h.01"></path>
+            <path d="M16 14h.01"></path>
+            <path d="M8 10h.01"></path>
+            <path d="M8 14h.01"></path>
+          </svg>
+          Biens
+        </RouterLink>
+
+        <RouterLink to="/gestionnaire/visites" class="nav-item" active-class="nav-item-active">
+          <svg
+            class="nav-icon"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+            <path d="M9 16l2 2 4-4"></path>
+          </svg>
+          Visites
+        </RouterLink>
       </div>
 
-      <button @click="seDeconnecter" class="sidebar-btn-deconnexion">🚪 Se déconnecter</button>
-    </div>
+      <!-- Section GESTION -->
+      <div class="nav-section">
+        <h4 class="section-title">GESTION</h4>
+
+        <RouterLink to="/gestionnaire/contrats" class="nav-item" active-class="nav-item-active">
+          <svg
+            class="nav-icon"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+          </svg>
+          Contrats
+        </RouterLink>
+
+        <RouterLink to="/gestionnaire/paiements" class="nav-item" active-class="nav-item-active">
+          <svg
+            class="nav-icon"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"></path>
+            <path d="M3 5v14a2 2 0 0 0 2 2h16v-5"></path>
+            <path d="M18 12a2 2 0 0 0 0 4h4v-4Z"></path>
+          </svg>
+          Paiements
+        </RouterLink>
+      </div>
+
+      <!-- Section OUTILS -->
+      <div class="nav-section">
+        <h4 class="section-title">OUTILS</h4>
+
+        <a href="#" class="nav-item" @click.prevent>
+          <svg
+            class="nav-icon"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="12" cy="12" r="3"></circle>
+            <path
+              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"
+            ></path>
+          </svg>
+          Paramètres
+        </a>
+
+        <button class="nav-item btn-logout" @click="seDeconnecter">
+          <svg
+            class="nav-icon"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+          Déconnexion
+        </button>
+      </div>
+    </nav>
   </aside>
 </template>
 
@@ -52,184 +181,118 @@ import { useAuthStore } from '@/stores/auth.store'
 const authStore = useAuthStore()
 const router = useRouter()
 
-/*
-  La liste des éléments du menu.
-  On utilise un tableau d'objets plutôt que de répéter le HTML
-  5 fois. C'est plus maintenable : pour ajouter une page,
-  tu n'ajoutes qu'un objet dans ce tableau.
-*/
-const menuItems = [
-  {
-    route: '/gestionnaire/dashboard',
-    label: 'Tableau de bord',
-    icone: '📊',
-  },
-  {
-    route: '/gestionnaire/biens',
-    label: 'Mes biens',
-    icone: '🏠',
-  },
-  {
-    route: '/gestionnaire/visites',
-    label: 'Visites',
-    icone: '📅',
-  },
-  {
-    route: '/gestionnaire/contrats',
-    label: 'Contrats',
-    icone: '📄',
-  },
-  {
-    route: '/gestionnaire/paiements',
-    label: 'Paiements',
-    icone: '💰',
-  },
-]
-
 function seDeconnecter() {
-  // Vider le store et localStorage
   authStore.logout()
-  // Rediriger vers la page de login
   router.push('/login')
 }
 </script>
 
 <style scoped>
+/* ── Container principal de la sidebar ───────────────── */
 .sidebar {
-  position: fixed; /* Reste en place quand on scroll */
+  position: fixed;
   top: 0;
   left: 0;
-  width: var(--sidebar-largeur); /* 260px */
+  width: var(--sidebar-largeur, 260px);
   height: 100vh;
-  background-color: var(--fond-sidebar);
-  color: white;
+  background-color: #ffffff;
+  border-right: 1px solid #f3f4f6; /* Ligne de séparation très discrète */
   display: flex;
   flex-direction: column;
-  /* Ombre sur le côté droit pour séparer du contenu */
-  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
-  z-index: 100; /* Au-dessus du contenu principal */
+  z-index: 100;
+  overflow-y: auto;
 }
 
-.sidebar-logo {
+/* ── Section Logo ────────────────────────────────────── */
+.sidebar-header {
+  padding: 32px 0 40px 0;
+  display: flex;
+  justify-content: center;
+}
+
+.logo-container {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 24px 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  justify-content: center;
 }
 
-.sidebar-logo-icone {
-  font-size: 28px;
+.logo-img {
+  width: 160px;
+  height: auto;
+  border-radius: 24px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
-.sidebar-logo-texte {
-  font-size: 22px;
-  font-weight: 800;
-  letter-spacing: 1px;
-  color: var(--couleur-accent);
-}
-
+/* ── Navigation ──────────────────────────────────────── */
 .sidebar-nav {
-  flex: 1;
-  padding: 16px 12px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  overflow-y: auto; /* Scroll si trop d'éléments */
+  gap: 24px;
+  padding: 0 20px 40px 20px;
 }
 
-.sidebar-lien {
+.nav-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.section-title {
+  margin: 0 0 8px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #9ca3af; /* Gris clair bleuté */
+  letter-spacing: 0.5px;
+}
+
+/* Liens du menu */
+.nav-item {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 12px 16px;
-  border-radius: 10px;
-  color: rgba(255, 255, 255, 0.7);
+  border-radius: 12px;
+  color: #4b5563; /* Gris ardoise (état inactif) */
   text-decoration: none;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
   transition: all 0.2s ease;
-}
-
-.sidebar-lien:hover {
-  background-color: rgba(255, 255, 255, 0.08);
-  color: white;
-}
-
-/* Appliqué automatiquement par RouterLink quand l'URL correspond */
-.sidebar-lien--actif {
-  background-color: var(--couleur-accent);
-  color: white;
-  font-weight: 600;
-}
-
-.sidebar-lien-icone {
-  font-size: 18px;
-  width: 24px;
-  text-align: center;
-}
-
-.sidebar-bas {
-  padding: 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.sidebar-utilisateur {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.sidebar-avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background-color: var(--couleur-accent);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 16px;
-  flex-shrink: 0;
-}
-
-.sidebar-utilisateur-info {
-  display: flex;
-  flex-direction: column;
-  overflow: hidden; /* Cache le texte trop long */
-}
-
-.sidebar-utilisateur-nom {
-  font-size: 13px;
-  font-weight: 600;
-  color: white;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis; /* Ajoute "..." si le nom est trop long */
-}
-
-.sidebar-utilisateur-role {
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.5);
-}
-
-.sidebar-btn-deconnexion {
-  width: 100%;
-  padding: 10px;
-  background-color: rgba(239, 68, 68, 0.15);
-  color: rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  border-radius: 8px;
+  background-color: transparent;
+  border: none;
   cursor: pointer;
-  font-size: 13px;
-  transition: all 0.2s;
+  width: 100%;
+  text-align: left;
 }
 
-.sidebar-btn-deconnexion:hover {
-  background-color: rgba(239, 68, 68, 0.3);
-  color: white;
+.nav-icon {
+  color: #6b7280; /* Légèrement plus clair que le texte */
+  transition: color 0.2s ease;
+}
+
+/* Survol (Hover) pour les éléments inactifs */
+.nav-item:hover:not(.nav-item-active) {
+  background-color: #f9fafb;
+  color: #111827;
+}
+
+.nav-item:hover:not(.nav-item-active) .nav-icon {
+  color: #4b5563;
+}
+
+/* État actif */
+.nav-item-active {
+  background-color: #1e293b; /* Bleu marine */
+  color: #ffffff;
+  font-weight: 500;
+  box-shadow: 0 4px 6px -1px rgba(30, 41, 59, 0.2);
+}
+
+.nav-item-active .nav-icon {
+  color: #ffffff;
+}
+
+/* Bouton déconnexion spécifique */
+.btn-logout {
+  font-family: inherit;
 }
 </style>
