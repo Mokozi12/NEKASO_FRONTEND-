@@ -1,14 +1,11 @@
 <template>
   <header class="header">
-    <!-- Titre de la page actuelle -->
-    <h1 class="page-title">{{ pageTitle }}</h1>
+    <h1 v-if="!route.meta.hidePageTitle" class="page-title">{{ pageTitle }}</h1>
+    <div v-else class="page-title-spacer" aria-hidden="true" />
 
-    <!-- Zone droite : notif + profil -->
     <div class="header-droite">
-
-      <!-- Icône cloche avec badge de notification rouge -->
       <div class="notif-wrapper">
-        <button class="notif-btn" aria-label="Notifications">
+        <button type="button" class="notif-btn" aria-label="Notifications">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
@@ -18,7 +15,6 @@
         <span class="notif-badge">2</span>
       </div>
 
-      <!-- Avatar + nom utilisateur -->
       <div class="user-profile">
         <div class="avatar">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
@@ -29,7 +25,6 @@
         </div>
         <span class="user-name">Awa Sarr</span>
       </div>
-
     </div>
   </header>
 </template>
@@ -40,19 +35,16 @@ import { useRoute } from 'vue-router'
 
 const route = useRoute()
 
-// Mapping précis des noms de routes vers les titres affichés
 const titresRoutes = {
-  'dashboard': 'Tableau de bord',
-  'biens': 'Mes biens',
-  'visites': 'Visites',
+  dashboard: 'Tableau de bord',
+  biens: 'Mes biens',
+  visites: 'Visites',
   'demandes-location': 'Demandes de location',
-  'contrats': 'Contrats',
-  'paiements': 'Paiements',
+  contrats: 'Contrats',
+  paiements: 'Paiements',
 }
 
-const pageTitle = computed(() => {
-  return titresRoutes[route.name] ?? 'Tableau de bord'
-})
+const pageTitle = computed(() => titresRoutes[route.name] ?? 'Tableau de bord')
 </script>
 
 <style scoped>
@@ -77,14 +69,16 @@ const pageTitle = computed(() => {
   letter-spacing: -0.3px;
 }
 
-/* ─── Droite ──────────────────────────────────── */
+.page-title-spacer {
+  flex: 1;
+}
+
 .header-droite {
   display: flex;
   align-items: center;
   gap: 20px;
 }
 
-/* ─── Notif ───────────────────────────────────── */
 .notif-wrapper {
   position: relative;
   display: flex;
@@ -126,7 +120,6 @@ const pageTitle = computed(() => {
   border: 2px solid white;
 }
 
-/* ─── Profil ──────────────────────────────────── */
 .user-profile {
   display: flex;
   align-items: center;

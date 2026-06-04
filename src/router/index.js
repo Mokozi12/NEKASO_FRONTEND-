@@ -40,7 +40,7 @@ const router = createRouter({
           path: 'visites',
           name: 'visites',
           component: () => import('@/views/gestionnaire/VisitesView.vue'),
-          meta: { title: 'Visites' },
+          meta: { title: 'Visites', hidePageTitle: true },
         },
         {
           path: 'demandes-location',
