@@ -64,12 +64,36 @@ export const mockDemandesLocation = [
 
 export const mockContrats = [
   {
-    id: 1, dateSignature: '2024-02-01', dateDebut: '2024-02-01', dateFin: '2025-01-31',
-    montantLoyer: 350000, montantCaution: 700000,
+    id: 1, dateSignature: '2025-09-01', dateDebut: '2025-09-01', dateFin: '2026-08-31',
+    montantLoyer: 450000, montantCaution: 900000,
     conditions: 'Pas d\'animaux. Paiement avant le 5 de chaque mois.',
     statut: 'EN_COURS', cheminPDF: '/contrats/contrat_1.pdf', demandeLocationId: 1,
-    locataire: { id: 6, nom: 'Ba', prenom: 'Oumar', telephone: '776543210' },
-    bien: { id: 1, adresse: 'Rue 10, Mermoz, Dakar', typeBien: 'APPARTEMENT', loyer: 350000 }
+    locataire: { id: 3, nom: 'Diop', prenom: 'Aminata', telephone: '771234567' },
+    bien: { id: 4, adresse: 'Almadies, Dakar', typeBien: 'APPARTEMENT', loyer: 450000 }
+  },
+  {
+    id: 2, dateSignature: '2025-06-15', dateDebut: '2025-06-15', dateFin: '2027-06-14',
+    montantLoyer: 350000, montantCaution: 700000,
+    conditions: 'Entretien des espaces communs à la charge du locataire.',
+    statut: 'EN_COURS', cheminPDF: '/contrats/contrat_2.pdf', demandeLocationId: 2,
+    locataire: { id: 7, nom: 'SARL Teranga Tech', prenom: '', telephone: '338001234' },
+    bien: { id: 1, adresse: 'Rue 10, Mermoz, Dakar', typeBien: 'BUREAU', loyer: 350000 }
+  }
+]
+
+/* Candidats disponibles = visites confirmées, pour le wizard de création de contrat */
+export const mockCandidats = [
+  {
+    id: 1,
+    locataire: { id: 3, nom: 'Ndiaye', prenom: 'Fatou', telephone: '771234567' },
+    bien: { id: 3, adresse: 'Cité Asecna, Ouakam', typeBien: 'CHAMBRE', loyer: 90000 },
+    dateVisite: '2026-05-20', statut: 'CONFIRMEE'
+  },
+  {
+    id: 2,
+    locataire: { id: 4, nom: 'Fall', prenom: 'Aminata', telephone: '776543210' },
+    bien: { id: 4, adresse: 'Almadies, Dakar', typeBien: 'APPARTEMENT', loyer: 450000 },
+    dateVisite: '2026-05-22', statut: 'CONFIRMEE'
   }
 ]
 

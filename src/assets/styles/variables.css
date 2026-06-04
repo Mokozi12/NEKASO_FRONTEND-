@@ -6,9 +6,9 @@
 */
 :root {
 	/* Couleurs principales de NEKASO */
-	--couleur-primaire: #1a2e4a;    /* Bleu foncé : sidebar, titres importants */
-	--couleur-accent: #e8a020;      /* Orange : boutons d'action, liens actifs */
-	--couleur-succes: #22c55e;      /* Vert : statut disponible, succès */
+	--couleur-primaire: #212d4d;    /* Bleu très sombre : boutons, sidebar, titres importants */
+	--couleur-accent: #212d4d;      /* Même couleur que primaire pour les actions principales */
+	--couleur-succes: #00d15a;      /* Vert vif NEKASO : confirmation, succès */
 	--couleur-danger: #ef4444;      /* Rouge : erreurs, retards de paiement */
 	--couleur-warning: #f59e0b;     /* Jaune : statut réservé, avertissements */
 
