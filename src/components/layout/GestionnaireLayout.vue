@@ -54,5 +54,20 @@ import HeaderGestionnaire from './HeaderGestionnaire.vue'
   flex: 1; /* Prend tout l'espace restant après le header */
   padding: 24px;
   background-color: var(--fond-general);
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .layout {
+    flex-direction: column;
+  }
+  .layout-contenu {
+    margin-left: 0;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .layout-main {
+    padding: 16px;
+  }
 }
 </style>
