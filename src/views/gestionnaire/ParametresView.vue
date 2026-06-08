@@ -1,136 +1,75 @@
 <template>
   <div class="parametres-page">
-    <!-- Le Header est géré par HeaderGestionnaire, mais le titre reste ici ou dans le layout.
-         Ici, nous avons juste le titre principal et les onglets. -->
+    <!-- Header -->
     <div class="page-header">
-      <h1 class="page-title">Paramètres & utilisateurs</h1>
-    </div>
-
-    <!-- Actions Row: Tabs & Add Button -->
-    <div class="actions-row">
-      <!-- Tabs -->
-      <div class="tabs-wrapper">
-        <div class="tabs-container">
-          <button
-            :class="['tab', { active: activeTab === 'utilisateurs' }]"
-            @click="activeTab = 'utilisateurs'"
-          >
-            Utilisateurs / Équipes
-          </button>
-          <button
-            :class="['tab', { active: activeTab === 'systeme' }]"
-            @click="activeTab = 'systeme'"
-          >
-            Paramètres système
-          </button>
-        </div>
-      </div>
-
-      <!-- Action button (only shown for utilisateurs) -->
-      <button
-        v-if="activeTab === 'utilisateurs'"
-        class="btn-ajouter"
-        @click="showAddUserModal = true"
-      >
-        <svg
-          width="14"
-          height="14"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <line x1="12" y1="5" x2="12" y2="19"></line>
-          <line x1="5" y1="12" x2="19" y2="12"></line>
+      <h1 class="page-titre">Paramètres</h1>
+      <button class="btn-ajouter" @click="showAddUserModal = true">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
         </svg>
         Ajouter un utilisateur
       </button>
     </div>
 
-    <!-- ────────────────────────────────────────────────────────
-         TAB 1 : UTILISATEURS / ÉQUIPES
-    ───────────────────────────────────────────────────────── -->
-    <div v-if="activeTab === 'utilisateurs'" class="panel">
-      <div class="table-scroll">
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Nom</th>
-              <th>Email</th>
-              <th>Rôle</th>
-              <th>Statut</th>
-              <th class="th-actions">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(user, index) in users" :key="index">
-              <td class="font-medium text-dark">{{ user.nom }}</td>
-              <td class="text-gray">{{ user.email }}</td>
-              <td class="text-dark">{{ user.role }}</td>
-              <td>
-                <span :class="['badge', user.statut === 'Actif' ? 'badge-actif' : 'badge-inactif']">
-                  {{ user.statut }}
-                </span>
-              </td>
-              <td class="td-actions">
-                <div class="action-buttons">
-                  <button class="btn-action">
-                    <svg
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    >
-                      <path
-                        d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"
-                      ></path>
-                    </svg>
-                    Réinitialiser
-                  </button>
-                  <button class="btn-action" @click="openConfirmModal(user)">
-                    <svg
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    >
-                      <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
-                      <line x1="12" y1="2" x2="12" y2="12"></line>
-                    </svg>
-                    {{ user.statut === 'Actif' ? 'Désactiver' : 'Activer' }}
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+    <!-- Section 1: Utilisateurs -->
+    <div class="section">
+      <h2 class="section-titre">Utilisateurs & Équipes</h2>
+      <div class="panel">
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Nom</th>
+                <th>Email</th>
+                <th>Rôle</th>
+                <th>Statut</th>
+                <th style="text-align:right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="user in users" :key="user.email">
+                <td class="td-nom">{{ user.nom }}</td>
+                <td class="td-email">{{ user.email }}</td>
+                <td class="td-role">{{ user.role }}</td>
+                <td>
+                  <span :class="['badge', user.statut === 'Actif' ? 'badge--actif' : 'badge--inactif']">
+                    {{ user.statut }}
+                  </span>
+                </td>
+                <td>
+                  <div class="actions">
+                    <button class="btn-action" @click="resetPassword(user)">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 11-7.778 7.778 5.5 5.5 0 017.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
+                      </svg>
+                      Réinitialiser
+                    </button>
+                    <button class="btn-action" @click="openConfirmModal(user)">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+                      </svg>
+                      {{ user.statut === 'Actif' ? 'Désactiver' : 'Activer' }}
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 
-    <!-- ────────────────────────────────────────────────────────
-         TAB 2 : PARAMÈTRES SYSTÈME
-    ───────────────────────────────────────────────────────── -->
-    <div v-if="activeTab === 'systeme'" class="system-settings">
-      <!-- Panel 1: Informations entreprise -->
-      <div class="panel form-panel">
-        <h2 class="panel-title">Informations entreprise</h2>
+    <!-- Section 2: Informations entreprise -->
+    <div class="section">
+      <h2 class="section-titre">Informations entreprise</h2>
+      <div class="panel">
         <div class="form-grid">
           <div class="form-group">
-            <label>Nom *</label>
+            <label>Nom de l'entreprise *</label>
             <input type="text" v-model="systeme.entreprise.nom" class="form-input" />
           </div>
           <div class="form-group">
-            <label>Email *</label>
+            <label>Email de contact *</label>
             <input type="email" v-model="systeme.entreprise.email" class="form-input" />
           </div>
           <div class="form-group">
@@ -139,77 +78,13 @@
           </div>
         </div>
       </div>
-
-      <!-- Panel 2: Notifications -->
-      <div class="panel form-panel">
-        <h2 class="panel-title">Notifications</h2>
-        <div class="toggles-list">
-          <div class="toggle-item">
-            <span class="toggle-label">Notifications WhatsApp</span>
-            <label class="toggle-switch">
-              <input type="checkbox" v-model="systeme.notifications.whatsapp" />
-              <span class="slider"></span>
-            </label>
-          </div>
-          <div class="toggle-item">
-            <span class="toggle-label">Notifications Email</span>
-            <label class="toggle-switch">
-              <input type="checkbox" v-model="systeme.notifications.email" />
-              <span class="slider"></span>
-            </label>
-          </div>
-          <div class="toggle-item">
-            <span class="toggle-label">Notifications SMS</span>
-            <label class="toggle-switch">
-              <input type="checkbox" v-model="systeme.notifications.sms" />
-              <span class="slider"></span>
-            </label>
-          </div>
-        </div>
-      </div>
-
-      <!-- Panel 3: Intégrations API -->
-      <div class="panel form-panel">
-        <h2 class="panel-title">Intégrations API</h2>
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Clé Twilio (WhatsApp)</label>
-            <input
-              type="password"
-              v-model="systeme.api.twilio"
-              placeholder="YOUR_TWILIO_API_KEY"
-              class="form-input"
-            />
-          </div>
-          <div class="form-group">
-            <label>Clé Orange Money</label>
-            <input
-              type="password"
-              v-model="systeme.api.orangeMoney"
-              placeholder="YOUR_OM_API_KEY"
-              class="form-input"
-            />
-          </div>
-          <div class="form-group">
-            <label>Clé Wave</label>
-            <input
-              type="password"
-              v-model="systeme.api.wave"
-              placeholder="YOUR_WAVE_API_KEY"
-              class="form-input"
-            />
-          </div>
-        </div>
-      </div>
-
-      <!-- Save Button -->
-      <div class="save-actions">
-        <button class="btn-save">Enregistrer les modifications</button>
-      </div>
     </div>
-    <!-- ────────────────────────────────────────────────────────
-         MODALS
-    ───────────────────────────────────────────────────────── -->
+
+    <!-- Bouton Enregistrer global -->
+    <div class="save-zone">
+      <button class="btn-save" @click="saveAll">Enregistrer les modifications</button>
+    </div>
+
     <!-- Modal Ajout Utilisateur -->
     <div v-if="showAddUserModal" class="modal-overlay" @click.self="showAddUserModal = false">
       <div class="modal-card">
@@ -219,51 +94,51 @@
         </div>
         <div class="modal-body">
           <div class="form-group">
-            <label>Nom *</label>
-            <input type="text" v-model="newUser.nom" class="form-input" />
+            <label>Nom complet *</label>
+            <input type="text" v-model="newUser.nom" class="form-input" placeholder="Ex: Awa Sarr" />
           </div>
           <div class="form-group">
             <label>Email *</label>
-            <input type="email" v-model="newUser.email" class="form-input" />
+            <input type="email" v-model="newUser.email" class="form-input" placeholder="awa@nekaso.sn" />
           </div>
           <div class="form-group">
             <label>Rôle</label>
-            <input
-              type="text"
-              v-model="newUser.role"
-              class="form-input"
-              placeholder="Gestionnaire"
-              disabled
-            />
+            <select v-model="newUser.role" class="form-input">
+              <option value="Gestionnaire">Gestionnaire</option>
+              <option value="Admin">Admin</option>
+            </select>
           </div>
           <div class="form-group">
-            <label>Mot de passe (8+ chars, 1 chiffre) *</label>
-            <input type="password" v-model="newUser.password" class="form-input" />
+            <label>Mot de passe *</label>
+            <input
+              type="password"
+              v-model="newUser.password"
+              class="form-input"
+              placeholder="8+ caractères"
+            />
           </div>
         </div>
-        <div class="modal-footer justify-end">
-          <button class="btn-save" @click="addUser">Créer le compte</button>
+        <div class="modal-footer">
+          <button class="btn-outline" @click="showAddUserModal = false">Annuler</button>
+          <button class="btn-primary" @click="addUser">Créer le compte</button>
         </div>
       </div>
     </div>
 
     <!-- Modal Confirmation Statut -->
     <div v-if="showConfirmModal" class="modal-overlay" @click.self="showConfirmModal = false">
-      <div class="modal-card modal-card-sm">
-        <div class="modal-body confirm-body">
-          <h3 class="confirm-title">Confirmer le changement de statut</h3>
+      <div class="modal-card modal-sm">
+        <div class="modal-body">
+          <h3 class="confirm-titre">Confirmer le changement de statut</h3>
           <p class="confirm-text">
-            L'utilisateur
-            {{
-              selectedUser?.statut === 'Actif'
-                ? "ne pourra plus se connecter s'il est désactivé"
-                : "pourra se connecter s'il est activé"
-            }}.
+            {{ selectedUser?.statut === 'Actif'
+              ? "L'utilisateur ne pourra plus se connecter."
+              : "L'utilisateur pourra de nouveau se connecter." }}
           </p>
         </div>
-        <div class="modal-footer justify-end">
+        <div class="modal-footer">
           <button class="btn-outline" @click="showConfirmModal = false">Annuler</button>
-          <button class="btn-save" @click="confirmStatusChange">Confirmer</button>
+          <button class="btn-primary" @click="confirmStatusChange">Confirmer</button>
         </div>
       </div>
     </div>
@@ -272,32 +147,44 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useNotification } from '@/composables/useNotification'
 
-const activeTab = ref('utilisateurs')
+const { succes, erreur } = useNotification()
 
-// --- Etat Modals ---
 const showAddUserModal = ref(false)
 const showConfirmModal = ref(false)
 const selectedUser = ref(null)
 
-const newUser = ref({
-  nom: '',
-  email: '',
-  role: 'Gestionnaire',
-  password: '',
+const newUser = ref({ nom: '', email: '', role: 'Gestionnaire', password: '' })
+
+const users = ref([
+  { nom: 'Awa Sarr', email: 'awa@nekaso.sn', role: 'Gestionnaire', statut: 'Actif' },
+  { nom: 'Cheikh Diallo', email: 'cheikh@nekaso.sn', role: 'Gestionnaire', statut: 'Actif' },
+  { nom: 'Mariama Fall', email: 'mariama@nekaso.sn', role: 'Admin', statut: 'Inactif' },
+])
+
+const systeme = ref({
+  entreprise: {
+    nom: 'NEKASO Immobilier',
+    email: 'contact@nekaso.sn',
+    telephone: '+221 33 800 00 00',
+  },
 })
 
 function addUser() {
-  if (newUser.value.nom && newUser.value.email && newUser.value.password) {
-    users.value.push({
-      nom: newUser.value.nom,
-      email: newUser.value.email,
-      role: newUser.value.role,
-      statut: 'Actif',
-    })
-    showAddUserModal.value = false
-    newUser.value = { nom: '', email: '', role: 'Gestionnaire', password: '' }
+  if (!newUser.value.nom || !newUser.value.email || !newUser.value.password) {
+    erreur('Veuillez remplir tous les champs obligatoires')
+    return
   }
+  users.value.push({
+    nom: newUser.value.nom,
+    email: newUser.value.email,
+    role: newUser.value.role,
+    statut: 'Actif',
+  })
+  succes('Utilisateur créé avec succès')
+  showAddUserModal.value = false
+  newUser.value = { nom: '', email: '', role: 'Gestionnaire', password: '' }
 }
 
 function openConfirmModal(user) {
@@ -308,267 +195,139 @@ function openConfirmModal(user) {
 function confirmStatusChange() {
   if (selectedUser.value) {
     selectedUser.value.statut = selectedUser.value.statut === 'Actif' ? 'Inactif' : 'Actif'
+    succes(`Statut modifié : ${selectedUser.value.statut}`)
   }
   showConfirmModal.value = false
 }
 
-// Données fictives Utilisateurs
-const users = ref([
-  { nom: 'Awa Sarr', email: 'awa@nekaso.sn', role: 'Gestionnaire', statut: 'Actif' },
-  { nom: 'Cheikh Diallo', email: 'cheikh@nekaso.sn', role: 'Gestionnaire', statut: 'Actif' },
-  { nom: 'Mariama Fall', email: 'mariama@nekaso.sn', role: 'Gestionnaire', statut: 'Inactif' },
-])
+function resetPassword(user) {
+  succes(`Email de réinitialisation envoyé à ${user.email}`)
+}
 
-// Données fictives Paramètres Système
-const systeme = ref({
-  entreprise: {
-    nom: 'NEKASO Immobilier',
-    email: 'contact@nekaso.sn',
-    telephone: '+221 33 800 00 00',
-  },
-  notifications: {
-    whatsapp: true,
-    email: true,
-    sms: false,
-  },
-  api: {
-    twilio: '',
-    orangeMoney: '',
-    wave: '',
-  },
-})
+function saveAll() {
+  succes('Paramètres enregistrés avec succès')
+}
 </script>
 
 <style scoped>
-.parametres-page {
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
+.parametres-page { padding: 0; }
 
+/* Header */
 .page-header {
-  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
 }
-
-.page-title {
-  font-size: 20px;
+.page-titre {
+  font-size: 22px;
   font-weight: 700;
-  color: #1e293b;
+  color: #0f172a;
   margin: 0;
 }
-
-/* Actions Row */
-.actions-row {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  min-height: 40px; /* Evite le saut de hauteur quand le bouton disparait */
-}
-
-@media (min-width: 640px) {
-  .actions-row {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: flex-end;
-  }
-}
-
-/* Tabs */
-.tabs-wrapper {
-  display: inline-flex;
-}
-
-.tabs-container {
-  display: flex;
-  background-color: #f1f5f9;
-  border-radius: 8px;
-  padding: 4px;
-  gap: 4px;
-}
-
-.tab {
-  background: transparent;
-  border: none;
-  padding: 8px 16px;
-  font-size: 13.5px;
-  font-weight: 500;
-  color: #64748b;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.tab:hover {
-  color: #334155;
-}
-
-.tab.active {
-  background-color: #ffffff;
-  color: #0f172a;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  font-weight: 600;
-}
-
-/* Buttons */
 .btn-ajouter {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  background-color: #1e293b;
-  color: #ffffff;
+  gap: 7px;
+  background: #0f172a;
+  color: white;
   border: none;
   padding: 10px 16px;
-  border-radius: 6px;
-  font-size: 13.5px;
-  font-weight: 500;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s;
-  white-space: nowrap;
+  transition: background 0.2s;
 }
-.btn-ajouter:hover {
-  background-color: #0f172a;
-}
+.btn-ajouter:hover { background: #1e293b; }
 
-.btn-save {
-  background-color: #1e293b;
-  color: #ffffff;
-  border: none;
-  padding: 12px 20px;
-  border-radius: 6px;
-  font-size: 13.5px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-.btn-save:hover {
-  background-color: #0f172a;
-}
-
-/* Panels */
-.panel {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 16px 24px;
-}
-
-.form-panel {
-  padding: 24px;
-  margin-bottom: 24px;
-}
-
-.panel-title {
-  font-size: 15px;
+/* Sections */
+.section { margin-bottom: 28px; }
+.section-titre {
+  font-size: 16px;
   font-weight: 700;
   color: #0f172a;
-  margin: 0 0 20px 0;
+  margin: 0 0 14px;
+}
+
+.panel {
+  background: white;
+  border: 1px solid #e8edf2;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.04);
 }
 
 /* Table */
-.table-scroll {
-  overflow-x: auto;
-  margin: 0 -12px;
-  padding: 0 12px;
-}
-
-.table {
+.table-wrapper { overflow-x: auto; }
+table {
   width: 100%;
   border-collapse: collapse;
+}
+th {
+  padding: 12px 14px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #64748b;
   text-align: left;
-}
-
-.table th {
-  padding: 16px 8px;
-  font-size: 13.5px;
-  font-weight: 500;
-  color: #1e293b;
   border-bottom: 1px solid #f1f5f9;
 }
-
-.table td {
-  padding: 16px 8px;
+td {
+  padding: 14px;
   font-size: 13.5px;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid #f8fafc;
   vertical-align: middle;
 }
-.table tbody tr:last-child td {
-  border-bottom: none;
-}
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover { background: #fafbfc; }
 
-.font-medium {
-  font-weight: 500;
-}
-.text-dark {
-  color: #0f172a;
-}
-.text-gray {
-  color: #64748b;
-}
+.td-nom { font-weight: 600; color: #0f172a; }
+.td-email { color: #64748b; }
+.td-role { color: #334155; }
 
 .badge {
   display: inline-block;
   padding: 4px 12px;
   border-radius: 20px;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
 }
-.badge-actif {
-  background-color: #dcfce7;
-  color: #16a34a;
-}
-.badge-inactif {
-  background-color: #f1f5f9;
-  color: #64748b;
-}
+.badge--actif { background: #dcfce7; color: #16a34a; }
+.badge--inactif { background: #f1f5f9; color: #64748b; }
 
-.th-actions,
-.td-actions {
-  text-align: right;
-}
-.action-buttons {
-  display: inline-flex;
-  gap: 16px;
+.actions {
+  display: flex;
   justify-content: flex-end;
+  gap: 14px;
 }
 .btn-action {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   background: transparent;
   border: none;
   color: #334155;
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  padding: 4px 0;
   transition: color 0.2s;
 }
-.btn-action:hover {
-  color: #0f172a;
-}
+.btn-action:hover { color: #0f172a; }
 
-/* System Settings Layout */
-.system-settings {
-  display: flex;
-  flex-direction: column;
-}
-
+/* Forms */
 .form-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 16px 24px;
+  gap: 18px 24px;
 }
-@media (min-width: 768px) {
-  .form-grid {
-    grid-template-columns: 1fr 1fr;
-  }
+@media (min-width: 640px) {
+  .form-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 7px;
 }
 .form-group label {
   font-size: 13px;
@@ -576,189 +335,127 @@ const systeme = ref({
   font-weight: 500;
 }
 .form-input {
-  padding: 10px 14px;
+  padding: 10px 13px;
   border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  font-size: 14px;
+  border-radius: 7px;
+  font-size: 13.5px;
   color: #334155;
-  background-color: #f8fafc;
+  background: #f8fafc;
   outline: none;
   transition: border-color 0.2s;
 }
-.form-input:focus {
-  border-color: #94a3b8;
-}
-.form-input::placeholder {
-  color: #94a3b8;
-}
+.form-input:focus { border-color: #94a3b8; background: white; }
+.form-input::placeholder { color: #94a3b8; }
 
-/* Toggles List */
-.toggles-list {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.toggle-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  max-width: 400px;
-}
-
-.toggle-label {
-  font-size: 13.5px;
-  color: #334155;
-  font-weight: 500;
-}
-
-/* Custom Toggle Switch */
-.toggle-switch {
-  position: relative;
-  display: inline-block;
-  width: 44px;
-  height: 24px;
-}
-.toggle-switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #cbd5e1;
-  transition: 0.3s;
-  border-radius: 24px;
-}
-.slider:before {
-  position: absolute;
-  content: '';
-  height: 18px;
-  width: 18px;
-  left: 3px;
-  bottom: 3px;
-  background-color: white;
-  transition: 0.3s;
-  border-radius: 50%;
-}
-input:checked + .slider {
-  background-color: #0f172a;
-}
-input:checked + .slider:before {
-  transform: translateX(20px);
-}
-
-.save-actions {
+/* Save zone */
+.save-zone {
   display: flex;
   justify-content: flex-end;
-  margin-top: 8px;
+  margin-top: 12px;
 }
+.btn-save {
+  background: #0f172a;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-save:hover { background: #1e293b; }
 
 /* Modals */
 .modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.4);
+  inset: 0;
+  background: rgba(0,0,0,.4);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
 }
-
 .modal-card {
-  background-color: #ffffff;
-  border-radius: 8px;
-  width: 100%;
-  max-width: 500px;
-  box-shadow:
-    0 4px 6px -1px rgba(0, 0, 0, 0.1),
-    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  background: white;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 480px;
+  box-shadow: 0 20px 50px rgba(0,0,0,.15);
 }
-
-.modal-card-sm {
-  max-width: 400px;
-}
+.modal-sm { max-width: 400px; }
 
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 24px;
+  padding: 18px 24px;
   border-bottom: 1px solid #f1f5f9;
 }
-
 .modal-header h3 {
-  margin: 0;
   font-size: 16px;
   font-weight: 700;
   color: #0f172a;
+  margin: 0;
 }
-
 .btn-close {
   background: transparent;
   border: none;
-  font-size: 20px;
-  color: #64748b;
+  font-size: 24px;
+  color: #94a3b8;
   cursor: pointer;
+  line-height: 1;
 }
 
-.modal-body {
-  padding: 24px;
-}
+.modal-body { padding: 24px; }
 
-.confirm-body {
-  text-align: left;
-}
-
-.confirm-title {
+.confirm-titre {
   font-size: 16px;
   font-weight: 700;
   color: #0f172a;
-  margin-top: 0;
-  margin-bottom: 8px;
+  margin: 0 0 10px;
 }
-
 .confirm-text {
   font-size: 14px;
   color: #64748b;
   margin: 0;
+  line-height: 1.5;
 }
 
 .modal-footer {
   display: flex;
-  padding: 16px 24px;
-  background-color: #f8fafc;
-  border-top: 1px solid #f1f5f9;
-  border-bottom-left-radius: 8px;
-  border-bottom-right-radius: 8px;
-  gap: 12px;
-}
-
-.justify-end {
   justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 24px;
+  background: #f8fafc;
+  border-top: 1px solid #f1f5f9;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
 }
 
 .btn-outline {
-  background-color: #ffffff;
+  background: white;
   color: #334155;
   border: 1px solid #cbd5e1;
-  padding: 10px 16px;
-  border-radius: 6px;
-  font-size: 13.5px;
+  padding: 9px 16px;
+  border-radius: 7px;
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background 0.2s;
 }
+.btn-outline:hover { background: #f1f5f9; }
 
-.btn-outline:hover {
-  background-color: #f1f5f9;
+.btn-primary {
+  background: #0f172a;
+  color: white;
+  border: none;
+  padding: 9px 16px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
 }
+.btn-primary:hover { background: #1e293b; }
 </style>
