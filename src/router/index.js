@@ -63,7 +63,7 @@ const router = createRouter({
         {
           path: 'parametres',
           name: 'parametres',
-          component: () => import('@/views/gestionnaire/PlaceholderView.vue'),
+          component: () => import('@/views/gestionnaire/ParametresView.vue'),
           meta: { title: 'Paramètres' },
         },
       ],

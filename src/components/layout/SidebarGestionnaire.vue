@@ -226,8 +226,8 @@ function seDeconnecter() {
   left: 0;
   width: var(--sidebar-largeur, 260px);
   height: 100vh;
-  background-color: #ffffff; /* Fond blanc */
-  border-right: 1px solid var(--bordure, #e5e7eb); /* Séparateur droit */
+  background-color: #ffffff;
+  border-right: 1px solid var(--bordure, #e5e7eb);
   display: flex;
   flex-direction: column;
   z-index: 100;
@@ -243,8 +243,8 @@ function seDeconnecter() {
 .logo-box {
   width: 140px;
   height: 140px;
-  background-color: #27344f; /* Bleu nuit du logo */
-  border-radius: 24px; /* Coins très arrondis */
+  background-color: #27344f;
+  border-radius: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -279,24 +279,20 @@ function seDeconnecter() {
   padding: 0 20px 24px 20px;
   display: flex;
   flex-direction: column;
-  gap: 28px; /* Espacement entre les sections */
+  gap: 28px;
   overflow-y: auto;
 }
 
 .nav-section {
   display: flex;
   flex-direction: column;
-  gap: 6px; /* Espacement entre les liens de la même section */
+  gap: 6px;
 }
-
-/* Pour pousser la section "OUTILS" vers le bas si besoin, mais le screenshot ne le montre pas explicitement, il semble y avoir juste un espace régulier. 
-On garde un gap normal, et on enlève le mt-auto si on veut qu'il suive GESTION directement */
-/* .mt-auto { margin-top: auto; } */
 
 .section-titre {
   font-size: 12px;
   font-weight: 600;
-  color: #94a3b8; /* Gris très clair/bleuté */
+  color: #94a3b8;
   letter-spacing: 0.8px;
   padding-left: 12px;
   margin-bottom: 8px;
@@ -308,7 +304,7 @@ On garde un gap normal, et on enlève le mt-auto si on veut qu'il suive GESTION 
   gap: 14px;
   padding: 12px 14px;
   border-radius: 12px;
-  color: #475569; /* Gris foncé / bleu */
+  color: #475569;
   text-decoration: none;
   font-size: 14.5px;
   font-weight: 500;

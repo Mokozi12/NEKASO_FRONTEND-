@@ -42,6 +42,7 @@ const titresRoutes = {
   'demandes-location': 'Demandes de location',
   contrats: 'Contrats',
   paiements: 'Paiements',
+  parametres: 'Paramètres',
 }
 
 const pageTitle = computed(() => titresRoutes[route.name] ?? 'Tableau de bord')
