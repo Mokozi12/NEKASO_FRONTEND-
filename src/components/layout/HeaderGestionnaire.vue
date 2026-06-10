@@ -5,22 +5,46 @@
 
     <div class="header-droite">
       <div class="notif-wrapper">
-        <button type="button" class="notif-btn" aria-label="Notifications">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+        <button type="button" class="notif-btn" aria-label="Notifications" @click="open = !open">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
           </svg>
         </button>
-        <span class="notif-badge">2</span>
+        <span v-if="compteur > 0" class="notif-badge">{{ compteur }}</span>
+
+        <div v-if="open" class="notif-dropdown" role="menu">
+          <ul>
+            <li v-for="n in notifications" :key="n.id">
+              <strong>{{ n.titre }}</strong>
+            </li>
+          </ul>
+        </div>
       </div>
 
       <div class="user-profile">
         <div class="avatar">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-            <circle cx="12" cy="7" r="4"/>
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
           </svg>
         </div>
         <span class="user-name">Awa Sarr</span>
@@ -30,10 +54,15 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
+import { useNotificationsStore } from '@/stores/notifications.store'
 
 const route = useRoute()
+const open = ref(false)
+const notificationsStore = useNotificationsStore()
+const notifications = computed(() => notificationsStore.notifications)
+const compteur = computed(() => notificationsStore.compteur)
 
 const titresRoutes = {
   dashboard: 'Tableau de bord',
