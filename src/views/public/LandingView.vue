@@ -181,7 +181,7 @@ import { useAuthStore } from '@/stores/auth.store'
 import HeaderPublic from '@/components/layout/HeaderPublic.vue'
 import HeaderLocataire from '@/components/layout/HeaderLocataire.vue'
 import CarteBienPublic from '@/components/locataire/CarteBienPublic.vue'
-import ChargementSpinner from '@/components/common/ChargementSpinner.vue'
+import ChargementSpinner from '@/components/biens/common/ChargementSpinner.vue'
 
 const router = useRouter()
 const biensStore = useBiensPublicsStore()

@@ -13,7 +13,9 @@
         <div class="section-header">
           <h3 class="section-title">
             En attente
-            <span v-if="visitesEnAttente.length > 0" class="badge-count">{{ visitesEnAttente.length }}</span>
+            <span v-if="visitesEnAttente.length > 0" class="badge-count">{{
+              visitesEnAttente.length
+            }}</span>
           </h3>
         </div>
         <div v-if="visitesEnAttente.length > 0" class="tableau-wrapper">
@@ -30,21 +32,50 @@
             </thead>
             <tbody>
               <tr v-for="visite in visitesAttentesPaginees" :key="visite.id">
-                <td><strong>{{ visite.candidat?.nom || '—' }}</strong></td>
+                <td>
+                  <strong>{{ visite.candidat?.nom || '—' }}</strong>
+                </td>
                 <td>{{ visite.candidat?.telephone || '—' }}</td>
                 <td>{{ visite.bien?.adresse || '—' }}</td>
                 <td>{{ visite.dateVisite || '—' }}</td>
                 <td>{{ visite.heureVisite || '—' }}</td>
                 <td class="cellule-actions">
-                  <button type="button" class="btn-action btn-action--confirmer" @click="confirmer(visite.id)">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <button
+                    type="button"
+                    class="btn-action btn-action--confirmer"
+                    @click="confirmer(visite.id)"
+                  >
+                    <svg
+                      width="13"
+                      height="13"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
                       <polyline points="20 6 9 17 4 12" />
                     </svg>
                     Confirmer
                   </button>
-                  <button type="button" class="btn-action btn-action--refuser" @click="refuser(visite.id)">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                  <button
+                    type="button"
+                    class="btn-action btn-action--refuser"
+                    @click="refuser(visite.id)"
+                  >
+                    <svg
+                      width="13"
+                      height="13"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <line x1="18" y1="6" x2="6" y2="18" />
+                      <line x1="6" y1="6" x2="18" y2="18" />
                     </svg>
                     Refuser
                   </button>
@@ -54,15 +85,25 @@
           </table>
           <!-- Pagination En attente -->
           <div v-if="totalPagesAttentes > 1" class="pagination-bar">
-            <button class="pagination-btn" :disabled="pageAttentes === 1" @click="pageAttentes--">Précédent</button>
+            <button class="pagination-btn" :disabled="pageAttentes === 1" @click="pageAttentes--">
+              Précédent
+            </button>
             <button
               v-for="p in totalPagesAttentes"
               :key="p"
               class="pagination-btn"
               :class="{ 'pagination-btn--active': p === pageAttentes }"
               @click="pageAttentes = p"
-            >{{ p }}</button>
-            <button class="pagination-btn" :disabled="pageAttentes === totalPagesAttentes" @click="pageAttentes++">Suivant</button>
+            >
+              {{ p }}
+            </button>
+            <button
+              class="pagination-btn"
+              :disabled="pageAttentes === totalPagesAttentes"
+              @click="pageAttentes++"
+            >
+              Suivant
+            </button>
           </div>
         </div>
         <MessageVide v-else icone="📅" texte="Aucune demande en attente" class="visites-vide" />
@@ -73,12 +114,25 @@
         <div class="section-header">
           <h3 class="section-title">
             Visites confirmées
-            <span v-if="visitesTraitees.length > 0" class="badge-count badge-count--green">{{ visitesTraitees.length }}</span>
+            <span v-if="visitesTraitees.length > 0" class="badge-count badge-count--green">{{
+              visitesTraitees.length
+            }}</span>
           </h3>
           <button type="button" class="btn-export" @click="exporterCalendrier">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" />
-              <line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect x="3" y="4" width="18" height="18" rx="2" />
+              <line x1="16" y1="2" x2="16" y2="6" />
+              <line x1="8" y1="2" x2="8" y2="6" />
+              <line x1="3" y1="10" x2="21" y2="10" />
             </svg>
             Exporter
           </button>
@@ -98,7 +152,9 @@
               </thead>
               <tbody>
                 <tr v-for="visite in visitesPaginees" :key="visite.id">
-                  <td><strong>{{ visite.candidat?.nom || '—' }}</strong></td>
+                  <td>
+                    <strong>{{ visite.candidat?.nom || '—' }}</strong>
+                  </td>
                   <td>{{ visite.candidat?.telephone || '—' }}</td>
                   <td>{{ visite.bien?.adresse || '—' }}</td>
                   <td>{{ visite.dateVisite || '—' }}</td>
@@ -109,29 +165,47 @@
           </div>
           <!-- Pagination -->
           <div class="pagination-bar">
-            <button class="pagination-btn" :disabled="pageConfirmees === 1" @click="pageConfirmees--">Précédent</button>
+            <button
+              class="pagination-btn"
+              :disabled="pageConfirmees === 1"
+              @click="pageConfirmees--"
+            >
+              Précédent
+            </button>
             <button
               v-for="p in totalPagesConfirmees"
               :key="p"
               class="pagination-btn"
               :class="{ 'pagination-btn--active': p === pageConfirmees }"
               @click="pageConfirmees = p"
-            >{{ p }}</button>
-            <button class="pagination-btn" :disabled="pageConfirmees === totalPagesConfirmees" @click="pageConfirmees++">Suivant</button>
+            >
+              {{ p }}
+            </button>
+            <button
+              class="pagination-btn"
+              :disabled="pageConfirmees === totalPagesConfirmees"
+              @click="pageConfirmees++"
+            >
+              Suivant
+            </button>
           </div>
         </template>
-        <MessageVide v-else icone="✅" texte="Aucune visite confirmée pour l'instant" class="visites-vide" />
+        <MessageVide
+          v-else
+          icone="✅"
+          texte="Aucune visite confirmée pour l'instant"
+          class="visites-vide"
+        />
       </div>
     </template>
-
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useVisitesStore } from '@/stores/visites.store'
-import ChargementSpinner from '@/components/common/ChargementSpinner.vue'
-import MessageVide from '@/components/common/MessageVide.vue'
+import ChargementSpinner from '@/components/biens/common/ChargementSpinner.vue'
+import MessageVide from '@/components/biens/common/MessageVide.vue'
 
 const visitesStore = useVisitesStore()
 
@@ -266,7 +340,9 @@ onMounted(() => visitesStore.charger())
   overflow-x: auto;
 }
 
-.th-actions { text-align: right; }
+.th-actions {
+  text-align: right;
+}
 
 .cellule-actions {
   display: flex;
@@ -296,14 +372,19 @@ onMounted(() => visitesStore.charger())
   border: none;
 }
 .btn-action--confirmer:hover,
-.btn-action--attribuer:hover { opacity: 0.9; }
+.btn-action--attribuer:hover {
+  opacity: 0.9;
+}
 
 .btn-action--refuser {
   background-color: white;
   color: var(--texte-principal);
   border: 1px solid var(--bordure);
 }
-.btn-action--refuser:hover { color: var(--couleur-danger); border-color: #fecaca; }
+.btn-action--refuser:hover {
+  color: var(--couleur-danger);
+  border-color: #fecaca;
+}
 
 .btn-action--texte {
   background: transparent;
@@ -312,7 +393,9 @@ onMounted(() => visitesStore.charger())
   padding: 6px 8px;
   font-weight: 500;
 }
-.btn-action--texte:hover { color: var(--couleur-primaire); }
+.btn-action--texte:hover {
+  color: var(--couleur-primaire);
+}
 
 /* Bouton export */
 .btn-export {
@@ -328,9 +411,13 @@ onMounted(() => visitesStore.charger())
   cursor: pointer;
   transition: background 0.15s;
 }
-.btn-export:hover { background: var(--fond-general); }
+.btn-export:hover {
+  background: var(--fond-general);
+}
 
-.visites-vide { padding: 40px 20px; }
+.visites-vide {
+  padding: 40px 20px;
+}
 
 /* Pagination */
 .pagination-bar {
@@ -351,12 +438,28 @@ onMounted(() => visitesStore.charger())
   cursor: pointer;
   transition: all 0.15s;
 }
-.pagination-btn:hover:not(:disabled) { background: #f8fafc; color: #1e293b; }
-.pagination-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-.pagination-btn--active { font-weight: 700; color: #1e293b; border-color: #cbd5e1; }
+.pagination-btn:hover:not(:disabled) {
+  background: #f8fafc;
+  color: #1e293b;
+}
+.pagination-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.pagination-btn--active {
+  font-weight: 700;
+  color: #1e293b;
+  border-color: #cbd5e1;
+}
 
 @media (max-width: 768px) {
-  .visites-header { flex-direction: column; gap: 12px; }
-  .cellule-actions { flex-wrap: wrap; justify-content: flex-start; }
+  .visites-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+  .cellule-actions {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
 }
 </style>

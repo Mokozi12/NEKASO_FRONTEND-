@@ -253,7 +253,7 @@ import { useRoute } from 'vue-router'
 import { useContratsLocataireStore } from '@/stores/contratsLocataire.store'
 import { usePaiementsLocataireStore } from '@/stores/paiementsLocataire.store'
 import { useToast } from 'vue-toastification'
-import ChargementSpinner from '@/components/common/ChargementSpinner.vue'
+import ChargementSpinner from '@/components/biens/common/ChargementSpinner.vue'
 
 const route = useRoute()
 const contratsStore = useContratsLocataireStore()

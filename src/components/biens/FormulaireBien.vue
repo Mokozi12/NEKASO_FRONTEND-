@@ -12,7 +12,14 @@
             <img :src="photo.url" :alt="'Photo ' + (index + 1)" />
             <span v-if="index === 0" class="photo-badge">Principale</span>
             <button class="photo-remove" @click="removePhoto(index)">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
                 <line x1="18" y1="6" x2="6" y2="18"></line>
                 <line x1="6" y1="6" x2="18" y2="18"></line>
               </svg>
@@ -20,7 +27,14 @@
           </div>
           <!-- Bouton ajouter -->
           <button class="photo-add" @click="triggerFileInput">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1.5">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#9ca3af"
+              stroke-width="1.5"
+            >
               <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
               <circle cx="8.5" cy="8.5" r="1.5"></circle>
               <polyline points="21 15 16 10 5 21"></polyline>
@@ -44,13 +58,23 @@
         <!-- Nom du bien -->
         <div class="form-group full-width">
           <label class="form-label">Nom du bien *</label>
-          <input type="text" class="form-input" v-model="formData.intitule" placeholder="Ex: Appartement Almadies" />
+          <input
+            type="text"
+            class="form-input"
+            v-model="formData.intitule"
+            placeholder="Ex: Appartement Almadies"
+          />
         </div>
 
         <!-- Adresse -->
         <div class="form-group full-width">
           <label class="form-label">Adresse *</label>
-          <input type="text" class="form-input" v-model="formData.adresse" placeholder="Ex: Rue 12, Almadies, Dakar" />
+          <input
+            type="text"
+            class="form-input"
+            v-model="formData.adresse"
+            placeholder="Ex: Rue 12, Almadies, Dakar"
+          />
         </div>
 
         <!-- Non-edit form fields -->
@@ -65,34 +89,79 @@
                 <option value="CHAMBRE">Chambre</option>
                 <option value="LOCAL">Local</option>
               </select>
-              <svg class="select-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <svg
+                class="select-icon"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
                 <polyline points="6 9 12 15 18 9"></polyline>
               </svg>
             </div>
           </div>
           <div class="form-group">
             <label class="form-label">Surface (m²)</label>
-            <input type="number" class="form-input" v-model="formData.surface" placeholder="Ex: 85" />
+            <input
+              type="number"
+              class="form-input"
+              v-model="formData.surface"
+              placeholder="Ex: 85"
+            />
           </div>
 
           <!-- Pièces & Loyer -->
           <div class="form-group">
             <label class="form-label">Pièces</label>
             <div class="number-input-wrapper">
-              <input type="number" class="form-input" v-model.number="formData.nombrePieces" min="1" />
+              <input
+                type="number"
+                class="form-input"
+                v-model.number="formData.nombrePieces"
+                min="1"
+              />
               <div class="number-controls">
                 <button class="number-btn" type="button" @click="formData.nombrePieces++">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"></polyline></svg>
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <polyline points="18 15 12 9 6 15"></polyline>
+                  </svg>
                 </button>
-                <button class="number-btn" type="button" @click="formData.nombrePieces > 1 && formData.nombrePieces--">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                <button
+                  class="number-btn"
+                  type="button"
+                  @click="formData.nombrePieces > 1 && formData.nombrePieces--"
+                >
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
                 </button>
               </div>
             </div>
           </div>
           <div class="form-group">
             <label class="form-label">Loyer (FCFA) *</label>
-            <input type="number" class="form-input" v-model="formData.loyer" placeholder="Ex: 450000" />
+            <input
+              type="number"
+              class="form-input"
+              v-model="formData.loyer"
+              placeholder="Ex: 450000"
+            />
           </div>
         </template>
 
@@ -112,7 +181,12 @@
         <!-- Description -->
         <div class="form-group full-width">
           <label class="form-label">Description</label>
-          <textarea class="form-input textarea-input" rows="3" v-model="formData.description" placeholder="Décrivez le bien..."></textarea>
+          <textarea
+            class="form-input textarea-input"
+            rows="3"
+            v-model="formData.description"
+            placeholder="Décrivez le bien..."
+          ></textarea>
         </div>
       </div>
 
@@ -127,21 +201,21 @@
 
 <script setup>
 import { ref, watch } from 'vue'
-import ModalBase from '../common/ModalBase.vue'
+import ModalBase from './common/ModalBase.vue'
 
 const props = defineProps({
   show: {
     type: Boolean,
-    required: true
+    required: true,
   },
   isEdit: {
     type: Boolean,
-    default: false
+    default: false,
   },
   initialData: {
     type: Object,
-    default: () => ({})
-  }
+    default: () => ({}),
+  },
 })
 
 const emit = defineEmits(['cancel', 'save'])
@@ -156,34 +230,37 @@ const defaultData = {
   nombrePieces: 1,
   loyer: '',
   charges: '',
-  description: ''
+  description: '',
 }
 
 const formData = ref({ ...defaultData })
 const photos = ref([])
 
-watch(() => props.show, (newVal) => {
-  if (newVal) {
-    if (props.isEdit && props.initialData) {
-      formData.value = {
-        ...defaultData,
-        intitule: props.initialData.intitule || '',
-        adresse: props.initialData.adresse || props.initialData.localisation || '',
-        typeBien: props.initialData.typeBien || 'APPARTEMENT',
-        surface: props.initialData.surface || '',
-        nombrePieces: props.initialData.nombrePieces || 1,
-        loyer: props.initialData.loyer || '',
-        charges: props.initialData.charges || '',
-        description: props.initialData.description || ''
+watch(
+  () => props.show,
+  (newVal) => {
+    if (newVal) {
+      if (props.isEdit && props.initialData) {
+        formData.value = {
+          ...defaultData,
+          intitule: props.initialData.intitule || '',
+          adresse: props.initialData.adresse || props.initialData.localisation || '',
+          typeBien: props.initialData.typeBien || 'APPARTEMENT',
+          surface: props.initialData.surface || '',
+          nombrePieces: props.initialData.nombrePieces || 1,
+          loyer: props.initialData.loyer || '',
+          charges: props.initialData.charges || '',
+          description: props.initialData.description || '',
+        }
+        const existing = props.initialData.photos || []
+        photos.value = existing.map((p) => ({ url: typeof p === 'string' ? p : p.url, file: null }))
+      } else {
+        formData.value = { ...defaultData }
+        photos.value = []
       }
-      const existing = props.initialData.photos || []
-      photos.value = existing.map((p) => ({ url: typeof p === 'string' ? p : p.url, file: null }))
-    } else {
-      formData.value = { ...defaultData }
-      photos.value = []
     }
-  }
-})
+  },
+)
 
 function triggerFileInput() {
   fileInputRef.value?.click()
@@ -226,14 +303,14 @@ function buildFormData() {
 
   // Ajouter les champs texte
   const fields = formData.value
-  if (fields.intitule)     fd.append('intitule', fields.intitule)
-  if (fields.adresse)      fd.append('adresse', fields.adresse)
-  if (fields.typeBien)     fd.append('typeBien', fields.typeBien)
-  if (fields.surface)      fd.append('surface', fields.surface)
+  if (fields.intitule) fd.append('intitule', fields.intitule)
+  if (fields.adresse) fd.append('adresse', fields.adresse)
+  if (fields.typeBien) fd.append('typeBien', fields.typeBien)
+  if (fields.surface) fd.append('surface', fields.surface)
   if (fields.nombrePieces) fd.append('nombrePieces', fields.nombrePieces)
-  if (fields.loyer)        fd.append('loyer', fields.loyer)
-  if (fields.charges)      fd.append('charges', fields.charges)
-  if (fields.description)  fd.append('description', fields.description)
+  if (fields.loyer) fd.append('loyer', fields.loyer)
+  if (fields.charges) fd.append('charges', fields.charges)
+  if (fields.description) fd.append('description', fields.description)
 
   return fd
 }
@@ -457,7 +534,8 @@ function handleSave() {
   gap: 12px;
 }
 
-.btn-cancel, .btn-save {
+.btn-cancel,
+.btn-save {
   padding: 10px 24px;
   border-radius: 8px;
   font-size: 14px;
