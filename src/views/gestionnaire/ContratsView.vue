@@ -31,20 +31,27 @@
 
     <!-- Mode liste : tableau des contrats -->
     <template v-else-if="!modeWizard">
-      <ListeContrats
-        :contrats="contratsPagines"
-        @telecharger-pdf="contratsStore.telechargerPDF"
-      />
+      <ListeContrats :contrats="contratsPagines" @telecharger-pdf="contratsStore.telechargerPDF" />
       <div v-if="totalPagesContrats > 1" class="pagination-bar">
-        <button class="pagination-btn" :disabled="pageCourante === 1" @click="pageCourante--">Précédent</button>
+        <button class="pagination-btn" :disabled="pageCourante === 1" @click="pageCourante--">
+          Précédent
+        </button>
         <button
           v-for="p in totalPagesContrats"
           :key="p"
           class="pagination-btn"
           :class="{ 'pagination-btn--active': p === pageCourante }"
           @click="pageCourante = p"
-        >{{ p }}</button>
-        <button class="pagination-btn" :disabled="pageCourante === totalPagesContrats" @click="pageCourante++">Suivant</button>
+        >
+          {{ p }}
+        </button>
+        <button
+          class="pagination-btn"
+          :disabled="pageCourante === totalPagesContrats"
+          @click="pageCourante++"
+        >
+          Suivant
+        </button>
       </div>
     </template>
 
@@ -63,8 +70,8 @@ import { ref, computed, onMounted } from 'vue'
 import { useContratsStore } from '@/stores/contrats.store'
 import { useBiensStore } from '@/stores/biens.store'
 import { useNotification } from '@/composables/useNotification'
-import ChargementSpinner from '@/components/common/ChargementSpinner.vue'
-import MessageVide from '@/components/common/MessageVide.vue'
+import ChargementSpinner from '@/components/biens/common/ChargementSpinner.vue'
+import MessageVide from '@/components/biens/common/MessageVide.vue'
 import ListeContrats from '@/components/contrats/ListeContrats.vue'
 import WizardContrat from '@/components/contrats/WizardContrat.vue'
 
@@ -77,7 +84,7 @@ const modeWizard = ref(false)
 const pageCourante = ref(1)
 const parPageContrats = 6
 const totalPagesContrats = computed(() =>
-  Math.max(1, Math.ceil(contratsStore.contrats.length / parPageContrats))
+  Math.max(1, Math.ceil(contratsStore.contrats.length / parPageContrats)),
 )
 const contratsPagines = computed(() => {
   const debut = (pageCourante.value - 1) * parPageContrats
@@ -144,7 +151,17 @@ onMounted(() => contratsStore.charger())
   cursor: pointer;
   transition: all 0.15s;
 }
-.pagination-btn:hover:not(:disabled) { background: #f8fafc; color: #1e293b; }
-.pagination-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-.pagination-btn--active { font-weight: 700; color: #1e293b; border-color: #cbd5e1; }
+.pagination-btn:hover:not(:disabled) {
+  background: #f8fafc;
+  color: #1e293b;
+}
+.pagination-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.pagination-btn--active {
+  font-weight: 700;
+  color: #1e293b;
+  border-color: #cbd5e1;
+}
 </style>

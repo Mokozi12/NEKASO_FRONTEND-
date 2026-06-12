@@ -24,7 +24,7 @@
                   <input type="text" id="nom" v-model="form.nom" required />
                 </div>
               </div>
-              
+
               <div class="form-row">
                 <div class="form-group">
                   <label for="telephone">Téléphone</label>
@@ -39,7 +39,9 @@
               <div class="form-group">
                 <label for="whatsapp">Numéro WhatsApp</label>
                 <input type="tel" id="whatsapp" v-model="form.whatsapp" required />
-                <span class="help-text">Ce numéro est utilisé pour communiquer avec les gestionnaires.</span>
+                <span class="help-text"
+                  >Ce numéro est utilisé pour communiquer avec les gestionnaires.</span
+                >
               </div>
 
               <div class="form-actions">
@@ -60,7 +62,12 @@
             <form @submit.prevent="changerMotDePasse" class="profil-form">
               <div class="form-group">
                 <label for="currentPassword">Mot de passe actuel</label>
-                <input type="password" id="currentPassword" v-model="passwordForm.current" required />
+                <input
+                  type="password"
+                  id="currentPassword"
+                  v-model="passwordForm.current"
+                  required
+                />
               </div>
               <div class="form-row">
                 <div class="form-group">
@@ -69,7 +76,12 @@
                 </div>
                 <div class="form-group">
                   <label for="confirmPassword">Confirmer le mot de passe</label>
-                  <input type="password" id="confirmPassword" v-model="passwordForm.confirm" required />
+                  <input
+                    type="password"
+                    id="confirmPassword"
+                    v-model="passwordForm.confirm"
+                    required
+                  />
                 </div>
               </div>
 
@@ -93,7 +105,7 @@ import { ref, onMounted } from 'vue'
 import { useToast } from 'vue-toastification'
 import { useProfilLocataireStore } from '@/stores/profilLocataire.store'
 import LocataireLayout from '@/components/layout/LocataireLayout.vue'
-import ChargementSpinner from '@/components/common/ChargementSpinner.vue'
+import ChargementSpinner from '@/components/biens/common/ChargementSpinner.vue'
 
 const toast = useToast()
 const profilStore = useProfilLocataireStore()
@@ -105,7 +117,7 @@ const form = ref(null)
 const passwordForm = ref({
   current: '',
   new: '',
-  confirm: ''
+  confirm: '',
 })
 
 onMounted(async () => {
@@ -282,7 +294,7 @@ input:focus {
   .profil-view {
     padding: 20px;
   }
-  
+
   .form-row {
     flex-direction: column;
     gap: 20px;

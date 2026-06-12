@@ -5,18 +5,30 @@
 
     <div class="catalogue-content">
       <div class="container">
-
         <!-- STATS CARDS (locataire connecté uniquement) -->
         <template v-if="authStore.isAuthenticated && authStore.user?.role === 'LOCATAIRE'">
           <div class="bienvenue">
             <h2 class="bienvenue-titre">Bonjour, trouvez votre prochain logement à Dakar</h2>
-            <p class="bienvenue-sous">Parcourez nos biens disponibles et faites une demande en quelques clics.</p>
+            <p class="bienvenue-sous">
+              Parcourez nos biens disponibles et faites une demande en quelques clics.
+            </p>
           </div>
           <div class="stats-grid">
             <div class="stat-card">
               <div class="stat-icon-wrapper orange">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#d97706"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <polyline points="12 6 12 12 16 14" />
                 </svg>
               </div>
               <div class="stat-info">
@@ -26,10 +38,21 @@
             </div>
             <div class="stat-card">
               <div class="stat-icon-wrapper blue">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                  <polyline points="14 2 14 8 20 8"/>
-                  <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#2563eb"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                  <line x1="16" y1="13" x2="8" y2="13" />
+                  <line x1="16" y1="17" x2="8" y2="17" />
                 </svg>
               </div>
               <div class="stat-info">
@@ -39,9 +62,19 @@
             </div>
             <div class="stat-card">
               <div class="stat-icon-wrapper green">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                  <polyline points="9 22 9 12 15 12 15 22"/>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#16a34a"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                  <polyline points="9 22 9 12 15 12 15 22" />
                 </svg>
               </div>
               <div class="stat-info">
@@ -82,11 +115,9 @@
 
         <!-- PAGINATION -->
         <div v-if="totalPages > 1" class="pagination">
-          <button
-            class="page-btn"
-            :disabled="pageActuelle === 1"
-            @click="pageActuelle--"
-          >Précédent</button>
+          <button class="page-btn" :disabled="pageActuelle === 1" @click="pageActuelle--">
+            Précédent
+          </button>
 
           <button
             v-for="p in totalPages"
@@ -94,15 +125,14 @@
             class="page-btn"
             :class="{ 'page-btn--active': p === pageActuelle }"
             @click="pageActuelle = p"
-          >{{ p }}</button>
+          >
+            {{ p }}
+          </button>
 
-          <button
-            class="page-btn"
-            :disabled="pageActuelle === totalPages"
-            @click="pageActuelle++"
-          >Suivant</button>
+          <button class="page-btn" :disabled="pageActuelle === totalPages" @click="pageActuelle++">
+            Suivant
+          </button>
         </div>
-
       </div>
     </div>
   </div>
@@ -117,8 +147,8 @@ import HeaderPublic from '@/components/layout/HeaderPublic.vue'
 import HeaderLocataire from '@/components/layout/HeaderLocataire.vue'
 import CarteBienPublic from '@/components/locataire/CarteBienPublic.vue'
 import FiltreCatalogue from '@/components/locataire/FiltreCatalogue.vue'
-import MessageVide from '@/components/common/MessageVide.vue'
-import ChargementSpinner from '@/components/common/ChargementSpinner.vue'
+import MessageVide from '@/components/biens/common/MessageVide.vue'
+import ChargementSpinner from '@/components/biens/common/ChargementSpinner.vue'
 
 const route = useRoute()
 const biensStore = useBiensPublicsStore()
@@ -161,7 +191,9 @@ const biensPagines = computed(() => {
 })
 
 // Revenir à la page 1 quand les filtres changent
-watch([searchQuery, selectedType], () => { pageActuelle.value = 1 })
+watch([searchQuery, selectedType], () => {
+  pageActuelle.value = 1
+})
 </script>
 
 <style scoped>
@@ -213,7 +245,7 @@ watch([searchQuery, selectedType], () => { pageActuelle.value = 1 })
   display: flex;
   align-items: center;
   gap: 16px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .stat-icon-wrapper {
@@ -226,18 +258,37 @@ watch([searchQuery, selectedType], () => { pageActuelle.value = 1 })
   flex-shrink: 0;
 }
 
-.stat-icon-wrapper.orange { background-color: #fef3c7; }
-.stat-icon-wrapper.blue   { background-color: #e0f2fe; }
-.stat-icon-wrapper.green  { background-color: #dcfce7; }
+.stat-icon-wrapper.orange {
+  background-color: #fef3c7;
+}
+.stat-icon-wrapper.blue {
+  background-color: #e0f2fe;
+}
+.stat-icon-wrapper.green {
+  background-color: #dcfce7;
+}
 
-.stat-info { display: flex; flex-direction: column; }
+.stat-info {
+  display: flex;
+  flex-direction: column;
+}
 
-.stat-label { font-size: 13px; color: #64748b; margin-bottom: 4px; }
+.stat-label {
+  font-size: 13px;
+  color: #64748b;
+  margin-bottom: 4px;
+}
 
-.stat-value { font-size: 20px; font-weight: 700; color: #0f172a; }
+.stat-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f172a;
+}
 
 /* ── HEADER ── */
-.catalogue-header { margin-bottom: 24px; }
+.catalogue-header {
+  margin-bottom: 24px;
+}
 
 .page-title {
   font-size: 24px;
@@ -247,7 +298,10 @@ watch([searchQuery, selectedType], () => { pageActuelle.value = 1 })
   letter-spacing: -0.3px;
 }
 
-.page-subtitle { font-size: 14px; color: #6b7280; }
+.page-subtitle {
+  font-size: 14px;
+  color: #6b7280;
+}
 
 /* ── GRILLE ── */
 .biens-grid {
@@ -257,7 +311,10 @@ watch([searchQuery, selectedType], () => { pageActuelle.value = 1 })
   margin-top: 24px;
 }
 
-.empty-state { padding: 80px 20px; text-align: center; }
+.empty-state {
+  padding: 80px 20px;
+  text-align: center;
+}
 
 /* ── PAGINATION ── */
 .pagination {
@@ -281,8 +338,14 @@ watch([searchQuery, selectedType], () => { pageActuelle.value = 1 })
   font-weight: 500;
 }
 
-.page-btn:hover:not(:disabled) { background: #f8fafc; color: #1e293b; }
-.page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.page-btn:hover:not(:disabled) {
+  background: #f8fafc;
+  color: #1e293b;
+}
+.page-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
 
 .page-btn--active {
   background: #1e293b;
@@ -292,13 +355,23 @@ watch([searchQuery, selectedType], () => { pageActuelle.value = 1 })
 }
 
 @media (max-width: 1024px) {
-  .biens-grid { grid-template-columns: repeat(2, 1fr); }
-  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .biens-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (max-width: 640px) {
-  .page-title { font-size: 20px; }
-  .biens-grid { grid-template-columns: 1fr; }
-  .stats-grid { grid-template-columns: 1fr; }
+  .page-title {
+    font-size: 20px;
+  }
+  .biens-grid {
+    grid-template-columns: 1fr;
+  }
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

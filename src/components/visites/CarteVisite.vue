@@ -19,26 +19,28 @@
 
     <!-- En bas : boutons (seulement si EN_ATTENTE) -->
     <div v-if="visite.statut === 'EN_ATTENTE'" class="visite-actions">
-      <button class="btn-secondaire" @click="$emit('refuser', visite.id)"> Refuser </button>
-      <button class="btn-primaire" @click="$emit('approuver', visite.id)"> Approuver </button>
+      <button class="btn-secondaire" @click="$emit('refuser', visite.id)">Refuser</button>
+      <button class="btn-primaire" @click="$emit('approuver', visite.id)">Approuver</button>
     </div>
 
     <!-- Si déjà traitée -->
     <div v-else class="visite-statut-final">
-      <span v-if="visite.statut === 'CONFIRMEE'" style="color:var(--couleur-succes);"> Confirmée </span>
-      <span v-else style="color:var(--couleur-danger);font-weight:600">Refusée</span>
+      <span v-if="visite.statut === 'CONFIRMEE'" style="color: var(--couleur-succes)">
+        Confirmée
+      </span>
+      <span v-else style="color: var(--couleur-danger); font-weight: 600">Refusée</span>
     </div>
   </div>
 </template>
 
 <script setup>
-import BadgeStatut from '@/components/common/BadgeStatut.vue'
+import BadgeStatut from '@/components/biens/common/BadgeStatut.vue'
 import { useFormat } from '@/composables/useFormat'
 
 const { formatMontant, formatDate } = useFormat()
 
 defineProps({
-  visite: { type: Object, required: true }
+  visite: { type: Object, required: true },
 })
 
 defineEmits(['approuver', 'refuser'])
@@ -48,7 +50,7 @@ function typeLibelle(type) {
     APPARTEMENT: 'Appartement',
     STUDIO: 'Studio',
     CHAMBRE: 'Chambre',
-    LOCAL: 'Local commercial'
+    LOCAL: 'Local commercial',
   }
   return types[type] || type
 }
