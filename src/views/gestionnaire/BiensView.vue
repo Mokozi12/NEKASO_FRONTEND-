@@ -90,8 +90,19 @@
         </div>
       </div>
 
+      <!-- Chargement -->
+      <div v-if="biensStore.chargement" class="loading-state">
+        Chargement des biens...
+      </div>
+
+      <!-- Erreur -->
+      <div v-else-if="biensStore.erreur" class="error-state">
+        {{ biensStore.erreur }}
+        <button @click="biensStore.charger()" class="btn-retry">Réessayer</button>
+      </div>
+
       <!-- Table -->
-      <div class="table-responsive">
+      <div v-else class="table-responsive">
         <table class="biens-table">
           <thead>
             <tr>
@@ -254,7 +265,7 @@ const { formatMontant } = useFormat()
 
 // Charger les biens au montage
 onMounted(() => {
-  biensStore.charger()
+  biensStore.charger({ page: 1, size: 10 })
 })
 
 // Filtres
@@ -398,6 +409,34 @@ const viewDetails = (id) => {
 </script>
 
 <style scoped>
+.loading-state {
+  text-align: center;
+  padding: 48px 0;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.error-state {
+  text-align: center;
+  padding: 32px 0;
+  color: #dc2626;
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-retry {
+  padding: 8px 16px;
+  background-color: #1e293b;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
 .biens-view {
   padding: 0 16px;
   background-color: transparent;

@@ -35,46 +35,7 @@ export const authService = {
       return Promise.reject(new Error('Le téléphone et le mot de passe sont obligatoires'))
     }
 
-    // --- MOCK CONNEXION POUR LE DÉVELOPPEMENT ---
-    if (telephone === '771234567') {
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          resolve({
-            token: 'fake-jwt-token-gestionnaire',
-            user: {
-              id: 1,
-              nom: 'Sarr',
-              prenom: 'Awa',
-              role: 'GESTIONNAIRE',
-              telephone: '771234567',
-              statut: 'ACTIF',
-            }
-          })
-        }, 1000)
-      })
-    }
-    
-    // Mock pour LOCATAIRE
-    if (telephone === '770000000') {
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          resolve({
-            token: 'fake-jwt-token-locataire',
-            user: {
-              id: 2,
-              nom: 'Diop',
-              prenom: 'Moussa',
-              role: 'LOCATAIRE',
-              telephone: '770000000',
-              statut: 'ACTIF',
-            }
-          })
-        }, 1000)
-      })
-    }
-    // --------------------------------------------
-
-    // Appel API au backend (si ce n'est pas le compte de test)
+    // Appel API au backend
     return api
       .post('/auth/login', {
         telephone,
