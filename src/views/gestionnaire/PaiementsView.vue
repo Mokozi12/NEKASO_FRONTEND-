@@ -68,7 +68,7 @@
           <tbody>
             <tr v-for="p in payesPagines" :key="p.id">
               <td class="td--bien">
-                <span class="cell-intitule">{{ p.bien?.intitule || p.bien?.adresse || '—' }}</span>
+                <span class="cell-intitule">{{ p.bien?.libelle || p.bien?.intitule || p.bien?.adresse || '—' }}</span>
                 <span class="cell-adresse">{{ p.bien?.adresse || '' }}</span>
               </td>
               <td class="td--locataire">
@@ -135,7 +135,7 @@
               :class="{ 'tr--retard': p.statut === 'EN_RETARD' }"
             >
               <td class="td--bien">
-                <span class="cell-intitule">{{ p.bien?.intitule || p.bien?.adresse || '—' }}</span>
+                <span class="cell-intitule">{{ p.bien?.libelle || p.bien?.intitule || p.bien?.adresse || '—' }}</span>
                 <span class="cell-adresse">{{ p.bien?.adresse || '' }}</span>
               </td>
               <td class="td--locataire">

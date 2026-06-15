@@ -6,12 +6,13 @@ export const useVisitesLocataireStore = defineStore('visitesLocataire', () => {
   const visites = ref([])
   const chargement = ref(false)
 
-  async function chargerVisites(params = {}) {
+  async function chargerVisites(idLocataire, params = {}) {
     chargement.value = true
     try {
-      visites.value = await visitesLocataireService.getVisites(params)
+      const data = await visitesLocataireService.getVisites(idLocataire, params)
+      visites.value = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : [])
     } catch (e) {
-      console.error(e)
+      console.error('Erreur chargement visites locataire:', e)
     } finally {
       chargement.value = false
     }

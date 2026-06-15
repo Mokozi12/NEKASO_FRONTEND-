@@ -28,11 +28,11 @@
           </div>
 
           <div class="bien-preview" v-if="bien">
-            <img :src="bien.photos?.[0]" :alt="bien.titre" class="bien-image" />
+            <img :src="bien.photos?.[0]?.urlPhoto || bien.photos?.[0] || 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=300&h=200&fit=crop'" :alt="bien.libelle || bien.titre" class="bien-image" />
             <div>
-              <h3 class="bien-titre">{{ bien.titre }}</h3>
+              <h3 class="bien-titre">{{ bien.libelle || bien.titre }}</h3>
               <div class="bien-location">
-                {{ bien.adresse?.quartier }}, {{ bien.adresse?.ville }}
+                {{ typeof bien.adresse === 'string' ? bien.adresse : (bien.adresse?.quartier ? `${bien.adresse.quartier}, ${bien.adresse.ville || 'Dakar'}` : 'Dakar') }}
               </div>
             </div>
           </div>
@@ -113,23 +113,15 @@ const form = reactive({
 const authStore = useAuthStore()
 
 onMounted(async () => {
-  await biensStore.chargerBiens({ page: 1, size: 20 })
-  bien.value = biensStore.biens.find((b) => b.id === route.params.id)
+  await biensStore.chargerBiens({ page: 0, size: 20 })
+  bien.value = biensStore.biens.find((b) => String(b.id) === String(route.params.id)) || null
 })
 
 const submitDemande = async () => {
   isSubmitting.value = true
-
   try {
-    if (authStore.isAuthenticated) {
-      // Envoi minimal selon contrat: { idBien, idLocataire }
-      const idLocataire = authStore.user?.id ?? authStore.utilisateurCourant?.id
-      await visitesLocataireService.demander({ idBien: Number(bien.value.id), idLocataire })
-    } else {
-      // Ancien comportement pour utilisateur non-authentifié (mock)
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-    }
-
+    const idLocataire = authStore.user?.id ?? Number(import.meta.env.VITE_DEV_LOCATAIRE_ID) || 3
+    await visitesLocataireService.demander(idLocataire, Number(bien.value.id))
     toast.success('Demande de visite envoyée')
     router.push({ name: 'succes-visite', params: { bienId: bien.value.id } })
   } catch (error) {

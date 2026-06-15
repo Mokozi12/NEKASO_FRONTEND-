@@ -3,10 +3,10 @@
 // mockBiens → await biensService.getMesBiens()
 
 export const mockUser = {
-  id: 1,
+  id: 3,
   nom: 'Sarr',
   prenom: 'Awa',
-  role: 'GESTIONNAIRE',
+  role: 'LOCATAIRE',
   telephone: '771234567',
   statut: 'ACTIF',
 }

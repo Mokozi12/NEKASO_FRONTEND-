@@ -46,10 +46,10 @@
           </thead>
           <tbody>
             <tr v-for="demande in demandesAttentesPaginees" :key="demande.id" class="row">
-              <td class="td-candidat">{{ demande.locataire.prenom }} {{ demande.locataire.nom }}</td>
-              <td class="td-contact">{{ demande.locataire.telephone }}</td>
-              <td>{{ demande.bien.adresse }}</td>
-              <td>{{ demande.dateDemande }}</td>
+              <td class="td-candidat">{{ demande.locataire ? `${demande.locataire.prenom || ''} ${demande.locataire.nom || ''}`.trim() : `Locataire #${demande.locataireId}` }}</td>
+              <td class="td-contact">{{ demande.locataire?.telephone || '—' }}</td>
+              <td>{{ demande.bien?.adresse || demande.bien?.libelle || (demande.bienId ? `Bien #${demande.bienId}` : '—') }}</td>
+              <td>{{ demande.dateDemande || '—' }}</td>
               <td class="td-actions">
                 <button class="btn-act btn-confirmer" @click="demandesStore.valider(demande.id)">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -106,10 +106,10 @@
           </thead>
           <tbody>
             <tr v-for="demande in demandesValideesPaginees" :key="demande.id" class="row row--confirmed">
-              <td class="td-candidat">{{ demande.locataire.prenom }} {{ demande.locataire.nom }}</td>
-              <td class="td-contact">{{ demande.locataire.telephone }}</td>
-              <td>{{ demande.bien.adresse }}</td>
-              <td>{{ demande.dateDemande }}</td>
+              <td class="td-candidat">{{ demande.locataire ? `${demande.locataire.prenom || ''} ${demande.locataire.nom || ''}`.trim() : `Locataire #${demande.locataireId}` }}</td>
+              <td class="td-contact">{{ demande.locataire?.telephone || '—' }}</td>
+              <td>{{ demande.bien?.adresse || demande.bien?.libelle || (demande.bienId ? `Bien #${demande.bienId}` : '—') }}</td>
+              <td>{{ demande.dateDemande || '—' }}</td>
               <td class="td-actions">
                 <button class="btn-act btn-contrat" @click="$router.push('/gestionnaire/contrats')">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -155,14 +155,9 @@ const modaleOuverte = ref(false)
 
 onMounted(() => demandesStore.charger())
 
-// Sections
-const demandesEnAttente = computed(() =>
-  demandesStore.demandes.filter((d) => d.statut === 'EN_ATTENTE'),
-)
-
-const demandesValidees = computed(() =>
-  demandesStore.demandes.filter((d) => d.statut === 'VALIDEE'),
-)
+// Sections — utilise les computed du store (gèrent VALIDEE + ACCEPTEE, REFUSEE + REFUSE)
+const demandesEnAttente = computed(() => demandesStore.enAttente)
+const demandesValidees = computed(() => demandesStore.validees)
 
 // Pagination En attente
 const pageAttentes = ref(1)

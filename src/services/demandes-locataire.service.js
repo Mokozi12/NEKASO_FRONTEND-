@@ -1,12 +1,15 @@
 import api from './api'
 
 export const demandesLocataireService = {
-  async getDemandes(params) {
-    try {
-      const res = await api.get('/demandes-location/mes-demandes', { params })
-      return res.data
-    } catch (e) {
-      throw e
-    }
+  // GET /api/demandes/locataire/{id}?statut=EN_ATTENTE
+  async getDemandes(idLocataire, params) {
+    const res = await api.get(`/demandes/locataire/${idLocataire}`, { params })
+    return res.data
+  },
+
+  // POST /api/demandes/locataire/{idLocataire}/bien/{idBien}
+  async creer(idLocataire, idBien) {
+    const res = await api.post(`/demandes/locataire/${idLocataire}/bien/${idBien}`)
+    return res.data
   },
 }

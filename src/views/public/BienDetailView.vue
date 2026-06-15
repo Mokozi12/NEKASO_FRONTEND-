@@ -32,20 +32,20 @@
                 <img
                   :src="
                     selectedImage ||
-                    bien.photos?.[0] ||
+                    bien.photos?.[0]?.urlPhoto || bien.photos?.[0] ||
                     'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&h=500&fit=crop'
                   "
-                  :alt="bien.titre"
+                  :alt="bien.libelle || bien.titre"
                 />
               </div>
               <div class="thumbnails" v-if="bien.photos && bien.photos.length > 1">
                 <img
                   v-for="(photo, index) in bien.photos.slice(0, 4)"
                   :key="index"
-                  :src="photo"
-                  :alt="`${bien.titre} ${index + 1}`"
-                  @click="selectedImage = photo"
-                  :class="{ active: selectedImage === photo }"
+                  :src="photo?.urlPhoto || photo"
+                  :alt="`${bien.libelle || bien.titre} ${index + 1}`"
+                  @click="selectedImage = photo?.urlPhoto || photo"
+                  :class="{ active: selectedImage === (photo?.urlPhoto || photo) }"
                 />
               </div>
             </div>
@@ -53,8 +53,8 @@
             <!-- HEADER / TITLE -->
             <div class="bien-header">
               <div class="title-row">
-                <h1 class="bien-titre">{{ bien.titre }}</h1>
-                <BadgeStatut :statut="bien.statut || 'disponible'" />
+                <h1 class="bien-titre">{{ bien.libelle || bien.titre }}</h1>
+                <BadgeStatut :statut="bien.statutBien || bien.statut || 'DISPONIBLE'" />
               </div>
               <div class="bien-localisation">
                 <svg
@@ -71,13 +71,13 @@
                   <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path>
                   <circle cx="12" cy="10" r="3"></circle>
                 </svg>
-                {{ bien.adresse?.quartier || 'Les Almadies' }}, {{ bien.adresse?.ville || 'Dakar' }}
+                {{ typeof bien.adresse === 'string' ? bien.adresse : (bien.adresse?.quartier ? `${bien.adresse.quartier}, ${bien.adresse.ville || 'Dakar'}` : (bien.adresse || 'Dakar')) }}
               </div>
             </div>
 
             <!-- SPECS GRID -->
             <div class="specs-list">
-              <div class="spec-item" v-if="bien.caracteristiques?.nombreChambres">
+              <div class="spec-item" v-if="bien.nombrePieces || bien.caracteristiques?.nombreChambres">
                 <div class="spec-icon">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -96,37 +96,12 @@
                   </svg>
                 </div>
                 <div class="spec-info">
-                  <span class="spec-value">{{ bien.caracteristiques.nombreChambres }}</span>
-                  <span class="spec-label">Chambres</span>
+                  <span class="spec-value">{{ bien.nombrePieces || bien.caracteristiques?.nombreChambres }}</span>
+                  <span class="spec-label">Pièces</span>
                 </div>
               </div>
 
-              <div class="spec-item" v-if="bien.caracteristiques?.nombreSallesDeBain">
-                <div class="spec-icon">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  >
-                    <path
-                      d="M9 6 6.5 3.5a1.5 1.5 0 0 0-1-.5C4.683 3 4 3.683 4 4.5V17a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5"
-                    ></path>
-                    <line x1="2" x2="22" y1="12" y2="12"></line>
-                  </svg>
-                </div>
-                <div class="spec-info">
-                  <span class="spec-value">{{ bien.caracteristiques.nombreSallesDeBain }}</span>
-                  <span class="spec-label">Salles de bain</span>
-                </div>
-              </div>
-
-              <div class="spec-item" v-if="bien.caracteristiques?.surface">
+              <div class="spec-item" v-if="bien.surface || bien.caracteristiques?.surface">
                 <div class="spec-icon">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -145,7 +120,7 @@
                   </svg>
                 </div>
                 <div class="spec-info">
-                  <span class="spec-value">{{ bien.caracteristiques.surface }}</span>
+                  <span class="spec-value">{{ bien.surface || bien.caracteristiques?.surface }}</span>
                   <span class="spec-label">m²</span>
                 </div>
               </div>
@@ -216,6 +191,7 @@
                   </svg>
                   Demander une visite
                 </button>
+                <p v-if="erreurVisite" style="color:#dc2626;font-size:13px;margin:6px 0 0;">{{ erreurVisite }}</p>
 
                 <button class="btn-location" @click="demanderLocation">
                   <svg
@@ -237,6 +213,7 @@
                   </svg>
                   Demander une location
                 </button>
+                <p v-if="erreurLocation" style="color:#dc2626;font-size:13px;margin:6px 0 0;">{{ erreurLocation }}</p>
 
                 <button class="btn-whatsapp" @click="contacterWhatsApp">
                   <svg
@@ -465,17 +442,17 @@ const bien = ref(null)
 const selectedImage = ref(null)
 const showModalVisite = ref(false)
 const showModalLocation = ref(false)
+const erreurVisite = ref('')
+const erreurLocation = ref('')
 
 const equipements = computed(() => {
   return ['Climatisation', 'Wifi', 'Parking', 'Cuisine équipée', 'Gardien 24/7', 'Balcon']
 })
 
 onMounted(async () => {
-  await biensStore.chargerBiens({ page: 1, size: 20 })
-  bien.value = biensStore.biens.find((b) => b.id === route.params.id)
+  bien.value = biensStore.biens.find((b) => String(b.id) === String(route.params.id)) || biensStore.bienCourant
 
   if (!bien.value) {
-    // Si bien non trouvé dans le mock public (cas où on navigue direct), créer un faux bien pour l'aperçu
     bien.value = {
       id: route.params.id,
       titre: 'Appartement moderne - Vue sur mer',
@@ -493,7 +470,8 @@ onMounted(async () => {
   }
 
   if (bien.value && bien.value.photos?.length) {
-    selectedImage.value = bien.value.photos[0]
+    const p = bien.value.photos[0]
+    selectedImage.value = p?.urlPhoto || p
   }
 
   // Vérifier s'il y a une action en attente (après authentification)
@@ -520,45 +498,52 @@ const formatMontant = (montant) => {
 }
 
 const demanderVisite = () => {
-  if (!authStore.isAuthenticated) {
-    authStore.setPendingAction({ type: 'visite', bienId: bien.value.id })
-    router.push('/login')
-  } else {
-    showModalVisite.value = true
-  }
+  showModalVisite.value = true
 }
 
 const confirmerVisite = async () => {
   showModalVisite.value = false
-
+  erreurVisite.value = ''
   try {
-    const idLocataire = authStore.user?.id ?? authStore.utilisateurCourant?.id
-    await visitesLocataireService.demander({ idBien: Number(bien.value.id), idLocataire })
+    const res = await visitesLocataireService.demander(1, Number(bien.value.id))
+    const message = res?.message || ''
+    router.push({ path: `/locataire/succes-visite/${bien.value.id}`, query: message ? { message } : {} })
   } catch (err) {
-    console.warn('API visite indisponible, navigation locale', err)
+    const status = err?.response?.status
+    if (status === 409) {
+      erreurVisite.value = 'Vous avez déjà une demande de visite pour ce bien.'
+    } else if (status === 400) {
+      erreurVisite.value = 'Ce bien n\'est pas disponible pour les visites.'
+    } else if (status === 404) {
+      erreurVisite.value = 'Ce bien n\'existe pas.'
+    } else {
+      erreurVisite.value = 'Une erreur est survenue. Réessayez.'
+    }
   }
-  router.push(`/locataire/succes-visite/${bien.value.id}`)
 }
 
 const demanderLocation = () => {
-  if (!authStore.isAuthenticated) {
-    authStore.setPendingAction({ type: 'location', bienId: bien.value.id })
-    router.push('/login')
-  } else {
-    showModalLocation.value = true
-  }
+  showModalLocation.value = true
 }
 
 const confirmerLocation = async () => {
   showModalLocation.value = false
-
+  erreurLocation.value = ''
   try {
-    const idLocataire = authStore.user?.id ?? authStore.utilisateurCourant?.id
-    await demandesLocationService.creer({ idBien: Number(bien.value.id), idLocataire })
+    await demandesLocationService.creer(1, Number(bien.value.id))
+    router.push(`/locataire/succes-location/${bien.value.id}`)
   } catch (err) {
-    console.warn('API location indisponible, navigation locale', err)
+    const status = err?.response?.status
+    if (status === 409) {
+      erreurLocation.value = 'Vous avez déjà une demande de location pour ce bien.'
+    } else if (status === 400) {
+      erreurLocation.value = 'Ce bien n\'est pas disponible pour les locations.'
+    } else if (status === 404) {
+      erreurLocation.value = 'Ce bien n\'existe pas.'
+    } else {
+      erreurLocation.value = 'Une erreur est survenue. Réessayez.'
+    }
   }
-  router.push(`/locataire/succes-location/${bien.value.id}`)
 }
 
 const contacterWhatsApp = () => {

@@ -1,27 +1,21 @@
 import api from './api'
 
 export const visitesLocataireService = {
-  async getVisites(params) {
-    try {
-      const res = await api.get('/visites/mes-demandes', { params })
-      return res.data
-    } catch (e) {
-      throw e
-    }
+  // GET /api/visites/mes_demandes/{idLocataire}
+  async getVisites(idLocataire, params) {
+    const res = await api.get(`/visites/mes_demandes/${idLocataire}`, { params })
+    return res.data
   },
 
-  // Créer une demande de visite (locataire)
-  // On n'envoie que les champs autorisés par le contrat : { idBien, idLocataire }
-  demander: async (data) => {
-    const payload = {
-      idBien: Number(data.idBien),
-      idLocataire: Number(data.idLocataire),
-    }
-    try {
-      const res = await api.post('/visites/demander', payload)
-      return res.data
-    } catch (e) {
-      throw e
-    }
+  // GET /api/biens/locataire/biens_disponibles
+  async getBiensDisponibles(params) {
+    const res = await api.get('/biens/locataire/biens_disponibles', { params })
+    return res.data
+  },
+
+  // POST /api/visites/locataire/{idLocataire}/bien/{idBien}
+  async demander(idLocataire, idBien) {
+    const res = await api.post(`/visites/locataire/${idLocataire}/bien/${idBien}`)
+    return res.data
   },
 }

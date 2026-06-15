@@ -64,27 +64,53 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, onMounted } from 'vue'
+import { useDemandesLocataireStore } from '@/stores/demandesLocataire.store'
+import { demandesLocationService } from '@/services/demandes-location.service'
 
+const store = useDemandesLocataireStore()
 const etapesLabels = ['En attente', 'Étude dossier', 'Acceptée']
 
-const demandes = ref([
-  {
-    id: 1,
-    titre: 'Appartement moderne - Vue sur mer',
-    photo: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=300&h=300&fit=crop',
-    lieu: 'Almadies',
-    dateEntree: '2026-07-01',
-    duree: '6 mois',
-    dateEnvoi: '01/06/2026',
-    statut: 'En attente',
-    couleur: 'attente',
-    etapeActuelle: 0,
-  },
-])
+// TODO: remplacer 1 par l'id du locataire connecté quand l'auth sera prête
+onMounted(() => store.chargerDemandes(1))
 
-function annuler(id) {
-  demandes.value = demandes.value.filter((d) => d.id !== id)
+const demandes = computed(() =>
+  store.demandes.map((d) => ({
+    id: d.id,
+    titre: `Bien #${d.bienId}`,
+    photo: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=300&h=300&fit=crop',
+    lieu: '-',
+    dateEntree: '-',
+    duree: '-',
+    dateEnvoi: d.dateDemande?.split(' ')[0] || '-',
+    statut: formatStatut(d.statut),
+    couleur: getCouleur(d.statut),
+    etapeActuelle: getEtape(d.statut),
+  }))
+)
+
+function formatStatut(statut) {
+  const map = { EN_ATTENTE: 'En attente', VALIDEE: 'Acceptée', REFUSEE: 'Refusée' }
+  return map[statut] || statut
+}
+
+function getCouleur(statut) {
+  const map = { EN_ATTENTE: 'attente', VALIDEE: 'acceptee', REFUSEE: 'refusee' }
+  return map[statut] || 'attente'
+}
+
+function getEtape(statut) {
+  const map = { EN_ATTENTE: 0, VALIDEE: 2, REFUSEE: 1 }
+  return map[statut] ?? 0
+}
+
+async function annuler(id) {
+  try {
+    await demandesLocationService.annuler(id)
+  } catch (e) {
+    console.warn('Erreur annulation:', e)
+  }
+  store.demandes = store.demandes.filter((d) => d.id !== id)
 }
 </script>
 

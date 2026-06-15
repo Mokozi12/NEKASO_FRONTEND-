@@ -22,23 +22,21 @@
           <table class="tableau">
             <thead>
               <tr>
-                <th>Candidat</th>
-                <th>Contact</th>
+                <th>Locataire</th>
                 <th>Bien</th>
-                <th>Date</th>
-                <th>Heure</th>
+                <th>Date demande</th>
+                <th>Statut</th>
                 <th class="th-actions">Actions</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="visite in visitesAttentesPaginees" :key="visite.id">
                 <td>
-                  <strong>{{ visite.candidat?.nom || '—' }}</strong>
+                  <strong>Locataire #{{ visite.id_Locataire }}</strong>
                 </td>
-                <td>{{ visite.candidat?.telephone || '—' }}</td>
-                <td>{{ visite.bien?.adresse || '—' }}</td>
-                <td>{{ visite.dateVisite || '—' }}</td>
-                <td>{{ visite.heureVisite || '—' }}</td>
+                <td>{{ visite.bien?.libelle || visite.bien?.adresse || '—' }}</td>
+                <td>{{ visite.dateCreation ? new Date(visite.dateCreation).toLocaleDateString('fr-FR') : '—' }}</td>
+                <td>{{ visite.statut || '—' }}</td>
                 <td class="cellule-actions">
                   <button
                     type="button"
@@ -143,22 +141,20 @@
             <table class="tableau">
               <thead>
                 <tr>
-                  <th>Candidat</th>
-                  <th>Contact</th>
+                  <th>Locataire</th>
                   <th>Bien</th>
-                  <th>Date</th>
-                  <th>Heure</th>
+                  <th>Date demande</th>
+                  <th>Statut</th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="visite in visitesPaginees" :key="visite.id">
                   <td>
-                    <strong>{{ visite.candidat?.nom || '—' }}</strong>
+                    <strong>Locataire #{{ visite.id_Locataire }}</strong>
                   </td>
-                  <td>{{ visite.candidat?.telephone || '—' }}</td>
-                  <td>{{ visite.bien?.adresse || '—' }}</td>
-                  <td>{{ visite.dateVisite || '—' }}</td>
-                  <td>{{ visite.heureVisite || '—' }}</td>
+                  <td>{{ visite.bien?.libelle || visite.bien?.adresse || '—' }}</td>
+                  <td>{{ visite.dateCreation ? new Date(visite.dateCreation).toLocaleDateString('fr-FR') : '—' }}</td>
+                  <td>{{ visite.statut || '—' }}</td>
                 </tr>
               </tbody>
             </table>
@@ -251,14 +247,13 @@ function refuser(id) {
 
 function exporterCalendrier() {
   const evenements = visitesTraitees.value.map((v) => {
-    const date = (v.dateVisite || '').replace(/-/g, '')
-    const heure = (v.heureVisite || '09:00').replace(':', '') + '00'
+    const date = (v.dateCreation || '').split('T')[0].replace(/-/g, '') || new Date().toISOString().split('T')[0].replace(/-/g, '')
     return [
       'BEGIN:VEVENT',
       `UID:visite-${v.id}@nekaso`,
-      `DTSTART:${date}T${heure}`,
-      `SUMMARY:Visite - ${v.candidat?.nom || 'Candidat'}`,
-      `DESCRIPTION:${v.bien?.adresse || ''}`,
+      `DTSTART:${date}T090000`,
+      `SUMMARY:Visite - Locataire #${v.id_Locataire}`,
+      `DESCRIPTION:${v.bien?.libelle || v.bien?.adresse || ''}`,
       'END:VEVENT',
     ].join('\r\n')
   })

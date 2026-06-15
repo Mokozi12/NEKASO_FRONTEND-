@@ -153,12 +153,14 @@
           <router-link to="/catalogue" class="link-voir-tout"> Voir tout → </router-link>
         </div>
 
-        <div class="properties-grid" v-if="featuredBiens.length > 0">
-          <CarteBienPublic v-for="bien in featuredBiens" :key="bien.id" :bien="bien" />
-        </div>
-
-        <div v-else class="empty-state">
+        <div v-if="biensStore.chargement" class="empty-state">
           <ChargementSpinner message="Chargement des biens..." />
+        </div>
+        <div v-else-if="biensStore.biensEnVedette.length > 0" class="properties-grid">
+          <CarteBienPublic v-for="bien in biensStore.biensEnVedette" :key="bien.id" :bien="bien" />
+        </div>
+        <div v-else class="empty-state">
+          <p style="color:#9ca3af;font-size:14px">Aucun bien disponible pour le moment.</p>
         </div>
       </div>
     </section>
@@ -189,11 +191,8 @@ const authStore = useAuthStore()
 
 const searchQuery = ref('')
 const quartiers = ['Plateau', 'Almadies', 'Mermoz', 'Ngor', 'Yoff', 'Sacré-Cœur']
-const featuredBiens = ref([])
-
 onMounted(async () => {
-  await biensStore.chargerBiens({ page: 1, size: 20 })
-  featuredBiens.value = biensStore.biens.filter((b) => b.statut === 'disponible').slice(0, 3)
+  await biensStore.chargerBiens({ page: 0, size: 20 })
 })
 
 const handleSearch = () => {

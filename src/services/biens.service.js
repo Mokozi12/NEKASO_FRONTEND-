@@ -12,10 +12,7 @@ export const biensService = {
    * Crée un nouveau bien avec photos (multipart/form-data).
    * @param {FormData} formData - Les données du bien + photos[]
    */
-  creer: (formData) =>
-    api.post('/biens', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    }),
+  creer: (formData) => api.post('/biens/create', formData),
 
   /**
    * PUT /api/biens/{id}
@@ -23,10 +20,18 @@ export const biensService = {
    * @param {number} id - Identifiant du bien
    * @param {FormData} formData - Champs à modifier + nouvelles photos
    */
-  modifier: (id, formData) =>
-    api.put(`/biens/${id}`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    }),
+  modifier: (id, formData) => {
+    // Le backend n'accepte pas multipart pour PUT → on convertit en JSON
+    const json = {}
+    if (formData instanceof FormData) {
+      formData.forEach((value, key) => {
+        if (!(value instanceof File)) json[key] = value
+      })
+    } else {
+      Object.assign(json, formData)
+    }
+    return api.put(`/biens/${id}`, json)
+  },
 
   /**
    * PATCH /api/biens/{id}/archiver

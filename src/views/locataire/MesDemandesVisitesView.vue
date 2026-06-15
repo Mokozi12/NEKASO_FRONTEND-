@@ -54,35 +54,49 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, onMounted } from 'vue'
+import { useVisitesLocataireStore } from '@/stores/visitesLocataire.store'
 
-const demandes = ref([
-  {
-    id: 1,
-    titre: 'Studio meublé centre-ville',
-    photo: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=300&h=300&fit=crop',
-    lieu: 'Plateau',
-    date: '2026-04-25',
-    creneau: 'Matin',
-    progression: 33,
-    etapes: [true, true, false, false],
-    statut: 'Vue',
-  },
-  {
-    id: 2,
-    titre: 'Appartement 2 pièces',
-    photo: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=300&h=300&fit=crop',
-    lieu: 'Yoff',
-    date: '2026-04-28',
-    creneau: 'Soir',
-    progression: 66,
-    etapes: [true, true, true, false],
-    statut: 'Confirmée',
-  },
-])
+const store = useVisitesLocataireStore()
+
+// TODO: remplacer 1 par l'id du locataire connecté quand l'auth sera prête
+onMounted(() => store.chargerVisites(1))
+
+const demandes = computed(() =>
+  store.visites.map((v) => ({
+    id: v.id,
+    titre: v.bien?.typeBien ? `${v.bien.typeBien} - ${v.bien.adresse}` : v.bien?.adresse,
+    photo: v.bien?.photos?.[0]?.urlPhoto || 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=300&h=300&fit=crop',
+    lieu: v.bien?.adresse || '-',
+    date: v.dateCreation?.split(' ')[0] || '-',
+    creneau: '-',
+    statut: formatStatut(v.statut),
+    progression: getProgression(v.statut),
+    etapes: getEtapes(v.statut),
+  }))
+)
+
+function formatStatut(statut) {
+  const map = { EN_ATTENTE: 'En attente', CONFIRMEE: 'Confirmée', REFUSEE: 'Refusée' }
+  return map[statut] || statut
+}
+
+function getProgression(statut) {
+  const map = { EN_ATTENTE: 33, CONFIRMEE: 100, REFUSEE: 100 }
+  return map[statut] || 0
+}
+
+function getEtapes(statut) {
+  const map = {
+    EN_ATTENTE: [true, false, false],
+    CONFIRMEE: [true, true, true],
+    REFUSEE: [true, true, false],
+  }
+  return map[statut] || [false, false, false]
+}
 
 function annuler(id) {
-  demandes.value = demandes.value.filter((d) => d.id !== id)
+  store.visites = store.visites.filter((v) => v.id !== id)
 }
 </script>
 

@@ -22,7 +22,7 @@
           </svg>
           Retour
         </button>
-        <h2 class="bien-nom">{{ bien.intitule }}</h2>
+        <h2 class="bien-nom">{{ bien.libelle || bien.intitule }}</h2>
         <span :class="['status-badge', getStatutClass(bien.statutBien)]">
           {{ formatStatut(bien.statutBien) }}
         </span>
@@ -66,7 +66,7 @@
       <div class="detail-main">
         <!-- Main Photo -->
         <div class="main-photo-container">
-          <img :src="getPhoto(bien)" :alt="bien.intitule" />
+          <img :src="getPhoto(bien)" :alt="bien.libelle || bien.intitule" />
         </div>
 
         <!-- Informations principales -->
@@ -225,7 +225,7 @@ const bien = computed(() => {
   return (
     biensStore.biens.find((b) => b.id === id) || {
       id: 1,
-      intitule: 'Appartement Almadies',
+      libelle: 'Appartement Almadies',
       adresse: 'Rue 12, Almadies, Dakar',
       typeBien: 'APPARTEMENT',
       surface: 85,

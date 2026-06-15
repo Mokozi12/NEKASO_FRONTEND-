@@ -1,46 +1,33 @@
-/**
- * Store Pinia pour la gestion des visites.
- *
- * Responsabilités :
- * - Charger la liste des visites (mock → API)
- * - Filtrer par statut (en attente, confirmées, refusées)
- * - Actions : confirmer, refuser, reprogrammer, créer
- */
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { visitesService } from '@/services/visites.service'
-import { mockVisites } from '@/services/mockData'
 
 export const useVisitesStore = defineStore('visites', () => {
   const visites = ref([])
   const chargement = ref(false)
   const erreur = ref(null)
 
-  /* ───── Computed : filtres par statut ───── */
   const enAttente = computed(() => visites.value.filter((v) => v.statut === 'EN_ATTENTE'))
   const confirmees = computed(() => visites.value.filter((v) => v.statut === 'CONFIRMEE'))
   const refusees = computed(() => visites.value.filter((v) => v.statut === 'REFUSEE'))
 
-  /* ───── Chargement des visites ───── */
+  // GET /api/visites/gestionnaire/demande
   async function charger() {
     chargement.value = true
     erreur.value = null
     try {
       const res = await visitesService.getListe()
-      visites.value = res.data
+      const data = res.data
+      visites.value = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : [])
     } catch (e) {
-      console.warn('Erreur chargement visites, utilisation des données mock', e)
-      // Fallback sur les données mock pour permettre le fonctionnement hors-backend
-      await new Promise((r) => setTimeout(r, 400))
-      visites.value = mockVisites
-      erreur.value =
-        'Impossible de charger les visites depuis le serveur. Données locales affichées.'
+      erreur.value = 'Impossible de charger les visites.'
+      console.error('Erreur chargement visites:', e.response?.status, e.response?.data)
     } finally {
       chargement.value = false
     }
   }
 
-  /* ───── Confirmer une visite (EN_ATTENTE → CONFIRMEE) ───── */
+  // PATCH /api/visites/gestionnaire/demande/{id}/statut/CONFIRMEE
   async function confirmer(id) {
     try {
       await visitesService.approuver(id)
@@ -50,7 +37,7 @@ export const useVisitesStore = defineStore('visites', () => {
     visites.value = visites.value.map((v) => (v.id === id ? { ...v, statut: 'CONFIRMEE' } : v))
   }
 
-  /* ───── Refuser une visite (EN_ATTENTE → REFUSEE) ───── */
+  // PATCH /api/visites/gestionnaire/demande/{id}/statut/REFUSEE
   async function refuser(id) {
     try {
       await visitesService.refuser(id)
@@ -60,40 +47,18 @@ export const useVisitesStore = defineStore('visites', () => {
     visites.value = visites.value.map((v) => (v.id === id ? { ...v, statut: 'REFUSEE' } : v))
   }
 
-  /* ───── Reprogrammer une visite (met à jour date + heure) ───── */
   async function reprogrammer(id, nouvelleDate, nouvelleHeure) {
-    // TODO : await visitesService.reprogrammer(id, { date, heure })
     visites.value = visites.value.map((v) =>
       v.id === id
-        ? { ...v, dateVisite: nouvelleDate, heureVisite: nouvelleHeure, statut: 'EN_ATTENTE' }
+        ? { ...v, dateCreation: nouvelleDate, heureVisite: nouvelleHeure, statut: 'EN_ATTENTE' }
         : v,
     )
   }
 
-  /* ───── Créer une nouvelle visite ───── */
   async function creer(nouvelleVisite) {
-    // TODO : await visitesService.creer(nouvelleVisite)
     const id = visites.value.length > 0 ? Math.max(...visites.value.map((v) => v.id)) + 1 : 1
-
-    visites.value.push({
-      id,
-      statut: 'EN_ATTENTE',
-      dateCreation: new Date().toISOString().split('T')[0],
-      ...nouvelleVisite,
-    })
+    visites.value.push({ id, statut: 'EN_ATTENTE', dateCreation: new Date().toISOString().split('T')[0], ...nouvelleVisite })
   }
 
-  return {
-    visites,
-    chargement,
-    erreur,
-    enAttente,
-    confirmees,
-    refusees,
-    charger,
-    confirmer,
-    refuser,
-    reprogrammer,
-    creer,
-  }
+  return { visites, chargement, erreur, enAttente, confirmees, refusees, charger, confirmer, refuser, reprogrammer, creer }
 })

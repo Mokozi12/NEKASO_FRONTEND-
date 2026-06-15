@@ -41,8 +41,13 @@ const api = axios.create({
 */
 api.interceptors.request.use(
   (config) => {
-    // Lecture centralisée du token (sessionStorage par défaut)
-    const token = getToken()
+    // Laisse le navigateur définir Content-Type + boundary pour les FormData
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type']
+    }
+
+    // Lecture centralisée du token (sessionStorage > localStorage > env dev)
+    const token = getToken() || import.meta.env.VITE_DEV_TOKEN
 
     if (token) {
       // Si le token est expiré, on force la déconnexion et on empêche la requête

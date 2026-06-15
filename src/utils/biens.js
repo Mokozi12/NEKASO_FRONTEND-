@@ -11,7 +11,7 @@ export function libelleBien(bien) {
     CHAMBRE: 'Chambre'
   }
   const type = types[bien.typeBien] || bien.typeBien
-  const lieu = bien.intitule || bien.adresse?.split(',')[0]?.trim() || bien.adresse || ''
+  const lieu = bien.libelle || bien.intitule || bien.adresse?.split(',')[0]?.trim() || bien.adresse || ''
 
   return lieu ? `${type} ${lieu}` : type
 }

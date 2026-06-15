@@ -265,7 +265,7 @@ const { formatMontant } = useFormat()
 
 // Charger les biens au montage
 onMounted(() => {
-  biensStore.charger({ page: 1, size: 10 })
+  biensStore.charger({ page: 0, size: 100 })
 })
 
 // Filtres
@@ -292,7 +292,7 @@ const biensAffiches = computed(() => {
     const q = searchQuery.value.toLowerCase()
     result = result.filter(
       (b) =>
-        (b.intitule && b.intitule.toLowerCase().includes(q)) || b.adresse.toLowerCase().includes(q),
+        ((b.libelle || b.intitule || '')?.toLowerCase().includes(q)) || (b.adresse || '')?.toLowerCase().includes(q),
     )
   }
 
@@ -321,7 +321,7 @@ const biensPagines = computed(() => {
 
 // Helpers d'affichage
 function getIntitule(bien) {
-  return bien.intitule || `${formatTypeBien(bien.typeBien)} - ${bien.adresse}`
+  return bien.libelle || bien.intitule || `${formatTypeBien(bien.typeBien)} - ${bien.adresse}`
 }
 
 function getPhoto(bien) {

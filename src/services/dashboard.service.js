@@ -61,7 +61,7 @@ export const dashboardService = {
       const [statsRes, paiementsRes, visitesRes, biensRes] = await Promise.all([
         api.get('/dashboard/stats'),
         api.get('/paiements/gestionnaire'),
-        api.get('/visites/gestionnaire'),
+        api.get('/visites/gestionnaire/demande'),
         api.get('/biens/gestionnaire'),
       ])
 

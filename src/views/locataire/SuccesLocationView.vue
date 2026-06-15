@@ -165,27 +165,15 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { useBiensPublicsStore } from '@/stores/biensPublics.store'
 
 const route = useRoute()
-const biensStore = useBiensPublicsStore()
 
 const bien = ref(null)
 const gestionnaire = ref({
   nom: 'Mme Diop',
   telephone: '+221 77 123 45 67',
-})
-
-onMounted(async () => {
-  await biensStore.chargerBiens({ page: 1, size: 20 })
-  if (route.params.bienId) {
-    bien.value = biensStore.biens.find((b) => b.id === route.params.bienId)
-    if (bien.value?.gestionnaire) {
-      gestionnaire.value = bien.value.gestionnaire
-    }
-  }
 })
 
 const contacterWhatsApp = () => {

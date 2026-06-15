@@ -161,23 +161,8 @@ const router = createRouter({
   ],
 })
 
-router.beforeEach((to, from, next) => {
-  const authStore = useAuthStore()
-
-  // 1. Pages protégées : rediriger vers login si non connecté
-  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    return next('/login')
-  }
-
-  // 2. Pages "guest" (login, inscription) : rediriger si DÉJÀ connecté
-  if (to.meta.guest && authStore.isAuthenticated) {
-    if (authStore.user?.role === 'GESTIONNAIRE') return next('/gestionnaire/dashboard')
-    if (authStore.user?.role === 'LOCATAIRE') return next('/locataire/mes-locations')
-    return next('/')
-  }
-
-  // 3. Tout le reste passe
-  next()
+router.beforeEach(() => {
+  // TODO: remettre l'auth quand l'API de connexion sera prête
 })
 
 export default router

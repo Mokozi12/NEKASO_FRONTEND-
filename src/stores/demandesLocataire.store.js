@@ -6,12 +6,13 @@ export const useDemandesLocataireStore = defineStore('demandesLocataire', () => 
   const demandes = ref([])
   const chargement = ref(false)
 
-  async function chargerDemandes(params = {}) {
+  async function chargerDemandes(idLocataire, params = {}) {
     chargement.value = true
     try {
-      demandes.value = await demandesLocataireService.getDemandes(params)
+      const data = await demandesLocataireService.getDemandes(idLocataire, params)
+      demandes.value = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : [])
     } catch (e) {
-      console.error(e)
+      console.error('Erreur chargement demandes locataire:', e)
     } finally {
       chargement.value = false
     }

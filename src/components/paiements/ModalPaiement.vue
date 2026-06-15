@@ -96,7 +96,7 @@
                 <select id="champ-contrat" v-model="form.contratId">
                   <option :value="null" disabled>Sélectionner un contrat</option>
                   <option v-for="c in contrats" :key="c.id" :value="c.id">
-                    {{ c.locataire?.prenom }} {{ c.locataire?.nom }} — {{ c.bien?.adresse || c.bien?.titre }}
+                    {{ c.locataire?.prenom }} {{ c.locataire?.nom }} — {{ c.bien?.libelle || c.bien?.adresse || c.bien?.titre }}
                   </option>
                 </select>
                 <svg class="champ__chevron" width="12" height="12" viewBox="0 0 12 12" fill="none">

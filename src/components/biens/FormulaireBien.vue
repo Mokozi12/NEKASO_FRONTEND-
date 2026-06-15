@@ -61,7 +61,7 @@
           <input
             type="text"
             class="form-input"
-            v-model="formData.intitule"
+            v-model="formData.libelle"
             placeholder="Ex: Appartement Almadies"
           />
         </div>
@@ -223,7 +223,7 @@ const emit = defineEmits(['cancel', 'save'])
 const fileInputRef = ref(null)
 
 const defaultData = {
-  intitule: '',
+  libelle: '',
   adresse: '',
   typeBien: 'APPARTEMENT',
   surface: '',
@@ -243,7 +243,7 @@ watch(
       if (props.isEdit && props.initialData) {
         formData.value = {
           ...defaultData,
-          intitule: props.initialData.intitule || '',
+          libelle: props.initialData.libelle || props.initialData.intitule || '',
           adresse: props.initialData.adresse || props.initialData.localisation || '',
           typeBien: props.initialData.typeBien || 'APPARTEMENT',
           surface: props.initialData.surface || '',
@@ -253,7 +253,7 @@ watch(
           description: props.initialData.description || '',
         }
         const existing = props.initialData.photos || []
-        photos.value = existing.map((p) => ({ url: typeof p === 'string' ? p : p.url, file: null }))
+        photos.value = existing.map((p) => ({ url: typeof p === 'string' ? p : (p.urlPhoto || p.url), file: null }))
       } else {
         formData.value = { ...defaultData }
         photos.value = []
@@ -296,21 +296,20 @@ function buildFormData() {
   for (const photo of photos.value) {
     if (photo.file) {
       fd.append('photos', photo.file, photo.file.name)
-    } else {
-      fd.append('photosExistantes', photo.url)
     }
   }
 
   // Ajouter les champs texte
   const fields = formData.value
-  if (fields.intitule) fd.append('intitule', fields.intitule)
+  if (fields.libelle) fd.append('libelle', fields.libelle)
   if (fields.adresse) fd.append('adresse', fields.adresse)
   if (fields.typeBien) fd.append('typeBien', fields.typeBien)
-  if (fields.surface) fd.append('surface', fields.surface)
-  if (fields.nombrePieces) fd.append('nombrePieces', fields.nombrePieces)
-  if (fields.loyer) fd.append('loyer', fields.loyer)
-  if (fields.charges) fd.append('charges', fields.charges)
+  if (fields.surface) fd.append('surface', String(fields.surface))
+  if (fields.nombrePieces) fd.append('nombrePieces', String(fields.nombrePieces))
+  if (fields.loyer) fd.append('loyer', String(fields.loyer))
+  if (fields.charges) fd.append('charges', String(fields.charges))
   if (fields.description) fd.append('description', fields.description)
+  if (!props.isEdit) fd.append('statutBien', 'DISPONIBLE')
 
   return fd
 }

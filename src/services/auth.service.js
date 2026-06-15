@@ -35,6 +35,8 @@ export const authService = {
       return Promise.reject(new Error('Le téléphone et le mot de passe sont obligatoires'))
     }
 
+    
+ 
     // Appel API au backend
     return api
       .post('/auth/login', {

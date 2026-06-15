@@ -11,8 +11,9 @@ export const biensPublicsService = {
    */
   async getAll(params = {}) {
     try {
-      const res = await api.get('/biens/publics', { params })
-      return res.data
+      const res = await api.get('/biens/locataire/biens_disponibles', { params })
+      const data = res.data
+      return Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : [])
     } catch (e) {
       throw e
     }

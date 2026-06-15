@@ -160,7 +160,7 @@ const pageActuelle = ref(1)
 const parPage = 9
 
 onMounted(async () => {
-  await biensStore.chargerBiens({ page: 1, size: 100 })
+  await biensStore.chargerBiens({ page: 0, size: 10 })
   if (route.query.q) searchQuery.value = route.query.q
   if (route.query.quartier) searchQuery.value = route.query.quartier
 })
@@ -168,15 +168,16 @@ onMounted(async () => {
 const filteredBiens = computed(() => {
   let result = [...biensStore.biens]
   if (selectedType.value) {
-    result = result.filter((b) => b.type?.toLowerCase() === selectedType.value.toLowerCase())
+    result = result.filter((b) => (b.typeBien || b.type)?.toLowerCase() === selectedType.value.toLowerCase())
   }
   if (searchQuery.value.trim()) {
     const query = searchQuery.value.toLowerCase()
     result = result.filter(
       (b) =>
         b.titre?.toLowerCase().includes(query) ||
-        b.adresse?.quartier?.toLowerCase().includes(query) ||
-        b.adresse?.ville?.toLowerCase().includes(query) ||
+        (typeof b.adresse === 'string' ? b.adresse.toLowerCase().includes(query) : (b.adresse?.quartier?.toLowerCase().includes(query) || b.adresse?.ville?.toLowerCase().includes(query))) ||
+        b.libelle?.toLowerCase().includes(query) ||
+        b.typeBien?.toLowerCase().includes(query) ||
         b.type?.toLowerCase().includes(query),
     )
   }

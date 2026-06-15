@@ -1,7 +1,9 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { demandesLocationService } from '@/services/demandes-location.service'
-import { mockDemandesLocation } from '@/services/mockData'
+
+// GET /api/demandes/gestionnaire n'existe pas côté backend.
+// La liste gestionnaire sera vide jusqu'à l'implémentation de cet endpoint.
 
 export const useDemandesLocationStore = defineStore('demandesLocation', () => {
   const demandes = ref([])
@@ -9,36 +11,25 @@ export const useDemandesLocationStore = defineStore('demandesLocation', () => {
   const erreur = ref(null)
 
   const enAttente = computed(() => demandes.value.filter((d) => d.statut === 'EN_ATTENTE'))
-  const validees = computed(() => demandes.value.filter((d) => d.statut === 'VALIDEE'))
-  const refusees = computed(() => demandes.value.filter((d) => d.statut === 'REFUSEE'))
+  const validees = computed(() => demandes.value.filter((d) => ['VALIDEE', 'ACCEPTEE'].includes(d.statut)))
+  const refusees = computed(() => demandes.value.filter((d) => ['REFUSEE', 'REFUSE'].includes(d.statut)))
 
   async function charger() {
-    chargement.value = true
-    erreur.value = null
-    try {
-      const res = await demandesLocationService.getListe()
-      demandes.value = res.data
-    } catch (e) {
-      console.warn('Erreur chargement demandes-location, utilisation des mocks', e)
-      // Fallback mock
-      await new Promise((r) => setTimeout(r, 400))
-      demandes.value = mockDemandesLocation
-      erreur.value =
-        'Impossible de charger les demandes de location depuis le serveur. Données locales affichées.'
-    } finally {
-      chargement.value = false
-    }
+    // Pas d'endpoint GET /demandes/gestionnaire — liste vide en attendant
+    demandes.value = []
   }
 
-  async function valider(id, data) {
+  // PATCH /api/demandes/demande/{id}/accepter
+  async function valider(id) {
     try {
-      await demandesLocationService.valider(id, data || {})
+      await demandesLocationService.valider(id)
     } catch (e) {
       console.warn('Erreur API valider demande, mise à jour locale', e)
     }
-    demandes.value = demandes.value.map((d) => (d.id === id ? { ...d, statut: 'VALIDEE' } : d))
+    demandes.value = demandes.value.map((d) => (d.id === id ? { ...d, statut: 'ACCEPTEE' } : d))
   }
 
+  // PATCH /api/demandes/demande/{id}/refuser
   async function refuser(id) {
     try {
       await demandesLocationService.refuser(id)
