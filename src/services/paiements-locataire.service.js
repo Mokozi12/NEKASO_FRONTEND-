@@ -1,14 +1,10 @@
 import api from './api'
 
+/*
+  paiement-controller (consultation locataire)
+  - GET  /api/paiements/historiques-paiements/contrat/{contratId}   (page, size)
+*/
 export const paiementsLocataireService = {
-  async getHistorique(params) {
-    try {
-      const res = await api.get('/paiements/mes-paiements', { params })
-      return res.data
-    } catch (e) {
-      throw e
-    }
-  },
-
-  telechargerQuittance: (id) => api.get(`/paiements/${id}/quittance`, { responseType: 'blob' }),
+  getHistorique: (contratId, params) =>
+    api.get(`/paiements/historiques-paiements/contrat/${contratId}`, { params }),
 }

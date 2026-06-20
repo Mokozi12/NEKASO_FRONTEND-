@@ -120,8 +120,7 @@ onMounted(async () => {
 const submitDemande = async () => {
   isSubmitting.value = true
   try {
-    const idLocataire = authStore.user?.id ?? Number(import.meta.env.VITE_DEV_LOCATAIRE_ID) || 3
-    await visitesLocataireService.demander(idLocataire, Number(bien.value.id))
+    await visitesLocataireService.demander(Number(bien.value.id))
     toast.success('Demande de visite envoyée')
     router.push({ name: 'succes-visite', params: { bienId: bien.value.id } })
   } catch (error) {

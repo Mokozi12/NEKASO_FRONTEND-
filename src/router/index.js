@@ -1,8 +1,8 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth.store'
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHashHistory(),
   routes: [
     {
       path: '/',
@@ -76,10 +76,22 @@ const router = createRouter({
           meta: { title: 'Visites', hidePageTitle: true },
         },
         {
+          path: 'agents',
+          name: 'agents',
+          component: () => import('@/views/gestionnaire/AgentsView.vue'),
+          meta: { title: 'Agents de visite' },
+        },
+        {
           path: 'demandes-location',
           name: 'demandes-location',
           component: () => import('@/views/gestionnaire/DemandesLocationView.vue'),
           meta: { title: 'Demandes de location' },
+        },
+        {
+          path: 'demandes-location/bien/:bienId',
+          name: 'demandes-location-bien',
+          component: () => import('@/views/gestionnaire/DemandesBienDetailView.vue'),
+          meta: { title: 'Demandes du bien' },
         },
         {
           path: 'contrats',
@@ -88,10 +100,22 @@ const router = createRouter({
           meta: { title: 'Contrats' },
         },
         {
+          path: 'contrats/:id',
+          name: 'contrat-detail',
+          component: () => import('@/views/gestionnaire/ContratDetailView.vue'),
+          meta: { title: 'Contrat' },
+        },
+        {
           path: 'paiements',
           name: 'paiements',
           component: () => import('@/views/gestionnaire/PaiementsView.vue'),
           meta: { title: 'Paiements' },
+        },
+        {
+          path: 'alertes',
+          name: 'alertes',
+          component: () => import('@/views/gestionnaire/AlertesView.vue'),
+          meta: { title: 'Alertes & réparations' },
         },
         {
           path: 'parametres',
@@ -115,20 +139,46 @@ const router = createRouter({
       meta: { title: 'NEKASO', requiresAuth: true },
       children: [
         {
+          path: '',
+          redirect: { name: 'accueil-locataire' },
+        },
+        {
+          path: 'accueil',
+          name: 'accueil-locataire',
+          component: () => import('@/views/locataire/AccueilLocataireView.vue'),
+          meta: { title: 'Accueil' },
+        },
+        {
+          path: 'biens',
+          name: 'biens-locataire',
+          component: () => import('@/views/public/CatalogueView.vue'),
+          meta: { title: 'Biens à louer', sansEntete: true },
+        },
+        {
+          path: 'biens/:id',
+          name: 'bien-detail-locataire',
+          component: () => import('@/views/public/BienDetailView.vue'),
+          meta: { title: 'Détail du bien', sansEntete: true },
+        },
+        {
           path: 'mes-locations',
           name: 'mes-locations',
           component: () => import('@/views/locataire/MesLocationsView.vue'),
           meta: { title: 'Mes locations' },
         },
         {
-          path: 'contrat/:id?',
+          path: 'contrat/:id',
           name: 'contrat-locataire',
-          component: () => import('@/views/locataire/ContratPaiementsView.vue'),
-          meta: { title: 'Contrat & Paiements' },
+          component: () => import('@/views/locataire/MonContratView.vue'),
+          meta: { title: 'Contrat & paiements' },
+        },
+        {
+          path: 'mon-contrat',
+          redirect: { name: 'mes-locations' },
         },
         {
           path: 'contrat-paiements',
-          redirect: { name: 'contrat-locataire' }
+          redirect: { name: 'mes-locations' },
         },
         {
           path: 'profil',
@@ -167,8 +217,28 @@ const router = createRouter({
   ],
 })
 
-router.beforeEach(() => {
-  // TODO: remettre l'auth quand l'API de connexion sera prête
+router.beforeEach((to) => {
+  const auth = useAuthStore()
+  
+  // Interdire l'accès aux pages protégées si on n'est pas connecté
+  if (to.meta.requiresAuth && !auth.isAuthenticated) {
+    return { name: 'login' }
+  }
+
+  // Interdire l'accès aux pages de login/inscription si on est déjà connecté
+  if (to.meta.guest && auth.isAuthenticated) {
+    return { name: auth.user?.role === 'GESTIONNAIRE' ? 'dashboard' : 'accueil-locataire' }
+  }
+
+  // Navigation d'accueil cohérente : un locataire connecté n'a pas besoin de la
+  // landing publique. On le renvoie systématiquement vers son tableau de bord.
+  if (
+    (to.name === 'landing' || to.path === '/locataire' || to.path === '/locataire/') &&
+    auth.isAuthenticated &&
+    auth.user?.role === 'LOCATAIRE'
+  ) {
+    return { name: 'accueil-locataire' }
+  }
 })
 
 export default router

@@ -5,7 +5,7 @@
 
       <!-- Photos section -->
       <div class="form-section">
-        <label class="form-label">Photos du bien</label>
+        <label class="form-label">Photos du bien <span class="form-hint">(5 images maximum)</span></label>
         <div class="photos-container">
           <!-- Photos existantes -->
           <div v-for="(photo, index) in photos" :key="index" class="photo-item">
@@ -25,8 +25,8 @@
               </svg>
             </button>
           </div>
-          <!-- Bouton ajouter -->
-          <button class="photo-add" @click="triggerFileInput">
+          <!-- Bouton ajouter (masqué à 5 images) -->
+          <button v-if="photos.length < MAX_PHOTOS" class="photo-add" @click="triggerFileInput">
             <svg
               width="24"
               height="24"
@@ -201,7 +201,11 @@
 
 <script setup>
 import { ref, watch } from 'vue'
+import { useToast } from 'vue-toastification'
 import ModalBase from './common/ModalBase.vue'
+
+const toast = useToast()
+const MAX_PHOTOS = 5
 
 const props = defineProps({
   show: {
@@ -269,15 +273,24 @@ function triggerFileInput() {
 function handleFileSelect(event) {
   const files = event.target.files
   if (files && files.length > 0) {
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg']
+    let limiteAtteinte = false
     for (const file of files) {
+      // Limite à 5 images maximum
+      if (photos.value.length >= MAX_PHOTOS) {
+        limiteAtteinte = true
+        break
+      }
       // Vérifier que c'est bien une image JPEG/PNG/JPG
-      const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg']
       if (!allowedTypes.includes(file.type)) {
         console.warn(`Type de fichier non supporté : ${file.type}`)
         continue
       }
       const url = URL.createObjectURL(file)
       photos.value.push({ url, file })
+    }
+    if (limiteAtteinte) {
+      toast.warning(`Vous pouvez ajouter au maximum ${MAX_PHOTOS} images.`)
     }
   }
   // Reset pour permettre re-sélection des mêmes fichiers
@@ -342,6 +355,12 @@ function handleSave() {
   font-weight: 500;
   color: #374151;
   margin-bottom: 8px;
+}
+
+.form-hint {
+  font-weight: 400;
+  font-size: 12px;
+  color: #9ca3af;
 }
 
 /* Photos section */

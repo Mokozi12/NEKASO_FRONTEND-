@@ -55,7 +55,19 @@ export function useFormat() {
     return `${nomsDesMois[parseInt(mois) - 1]} ${annee}`
   }
 
+  /*
+    Formater un horodatage ISO en date + heure françaises.
+    "2026-06-12T10:00:00" → "12/06/2026 à 10:00"
+  */
+  function formatDateHeure(iso) {
+    if (!iso) return '-'
+    const d = new Date(iso)
+    const date = d.toLocaleDateString('fr-FR')
+    const heure = d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+    return `${date} à ${heure}`
+  }
+
   // On retourne les fonctions pour qu'elles soient utilisables
   // dans les composants qui importent ce composable
-  return { formatMontant, formatDate, formatMois }
+  return { formatMontant, formatDate, formatMois, formatDateHeure }
 }

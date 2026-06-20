@@ -92,6 +92,30 @@
         </RouterLink>
 
         <RouterLink
+          to="/gestionnaire/agents"
+          class="sidebar-lien"
+          active-class="sidebar-lien--actif"
+        >
+          <svg
+            class="icone"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+          <span>Agents</span>
+        </RouterLink>
+
+        <RouterLink
           to="/gestionnaire/demandes-location"
           class="sidebar-lien"
           active-class="sidebar-lien--actif"
@@ -166,6 +190,29 @@
             <path d="M18 12a2 2 0 0 0-2 2c0 1.1.9 2 2 2h4v-4h-4z"></path>
           </svg>
           <span>Paiements</span>
+        </RouterLink>
+
+        <RouterLink
+          to="/gestionnaire/alertes"
+          class="sidebar-lien"
+          active-class="sidebar-lien--actif"
+        >
+          <svg
+            class="icone"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+            <line x1="12" y1="9" x2="12" y2="13"></line>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+          <span>Alertes</span>
         </RouterLink>
       </div>
 

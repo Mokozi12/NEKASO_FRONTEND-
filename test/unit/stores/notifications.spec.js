@@ -1,38 +1,59 @@
+/**
+ * Tests unitaires — notifications.store.js (ciblage gestionnaire / client)
+ */
 import { describe, it, expect, beforeEach } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
 import { useNotificationsStore } from '@/stores/notifications.store'
+import { reinitialiserDb, db, SESSION } from '@/mocks/db'
 
-describe('notifications.store', () => {
-  beforeEach(() => {
-    setActivePinia(createPinia())
+beforeEach(() => {
+  setActivePinia(createPinia())
+  reinitialiserDb()
+  SESSION.clientId = 1
+})
+
+describe('notifications.store — ciblage', () => {
+  it('pourGestionnaire ne contient que les notifications GESTIONNAIRE', () => {
+    const store = useNotificationsStore()
+    expect(store.pourGestionnaire.every((n) => n.destinataire === 'GESTIONNAIRE')).toBe(true)
   })
 
-  it('compteur reflète les notifications non lues', () => {
+  it('pourClient ne contient que les notifications du client connecté', () => {
     const store = useNotificationsStore()
-    store.notifications = [
-      { id: 1, titre: 'A', lue: false },
-      { id: 2, titre: 'B', lue: true },
-      { id: 3, titre: 'C', lue: false },
-    ]
-    expect(store.compteur).toBe(2)
+    expect(
+      store.pourClient.every((n) => n.destinataire === 'CLIENT' && n.clientId === 1),
+    ).toBe(true)
+  })
+})
+
+describe('notifications.store — ajout', () => {
+  it('notifierGestionnaire ajoute une notification non lue', () => {
+    const store = useNotificationsStore()
+    const avant = store.compteurGestionnaire
+    store.notifierGestionnaire('TEST', 'Message test')
+    expect(store.compteurGestionnaire).toBe(avant + 1)
   })
 
-  it('marquerLue marque une notification comme lue', async () => {
+  it('notifierClient ajoute une notification pour un client', () => {
     const store = useNotificationsStore()
-    store.notifications = [{ id: 10, titre: 'X', lue: false }]
-    await store.marquerLue(10)
-    expect(store.notifications[0].lue).toBe(true)
-    expect(store.compteur).toBe(0)
+    const avant = db.notifications.length
+    store.notifierClient(1, 'TEST', 'Bonjour client')
+    expect(db.notifications.length).toBe(avant + 1)
+    expect(store.pourClient[0].message).toBe('Bonjour client')
+  })
+})
+
+describe('notifications.store — lecture', () => {
+  it('marquerLue marque une notification comme lue', () => {
+    const store = useNotificationsStore()
+    const cible = store.pourGestionnaire[0]
+    store.marquerLue(cible.id)
+    expect(db.notifications.find((n) => n.id === cible.id).lue).toBe(true)
   })
 
-  it('toutLire marque toutes les notifications comme lues', async () => {
+  it('toutLireGestionnaire met le compteur à zéro', () => {
     const store = useNotificationsStore()
-    store.notifications = [
-      { id: 1, titre: 'A', lue: false },
-      { id: 2, titre: 'B', lue: false },
-    ]
-    await store.toutLire()
-    expect(store.compteur).toBe(0)
-    expect(store.notifications.every((n) => n.lue)).toBe(true)
+    store.toutLireGestionnaire()
+    expect(store.compteurGestionnaire).toBe(0)
   })
 })

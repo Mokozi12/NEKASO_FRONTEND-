@@ -1,303 +1,327 @@
+<!--
+  ProfilView (locataire) — design PDF « Mon profil ».
+  Lecture des informations puis édition (Enregistrer / Annuler) + déconnexion.
+  Les données proviennent du client de session de la base mock.
+-->
 <template>
-  <LocataireLayout>
-    <div class="profil-view">
+  <div class="page">
+    <div class="container">
       <div class="page-header">
         <h1 class="page-title">Mon profil</h1>
-        <p class="page-subtitle">Gérez vos informations personnelles et préférences</p>
+        <p class="page-subtitle">Gérez vos informations personnelles</p>
       </div>
 
-      <div class="profil-content" v-if="!chargement && form">
-        <!-- Informations personnelles -->
-        <div class="card-section">
-          <div class="section-header">
-            <h2 class="section-title">Informations personnelles</h2>
-          </div>
-          <div class="section-body">
-            <form @submit.prevent="sauvegarderProfil" class="profil-form">
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="prenom">Prénom</label>
-                  <input type="text" id="prenom" v-model="form.prenom" required />
-                </div>
-                <div class="form-group">
-                  <label for="nom">Nom</label>
-                  <input type="text" id="nom" v-model="form.nom" required />
-                </div>
-              </div>
-
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="telephone">Téléphone</label>
-                  <input type="tel" id="telephone" v-model="form.telephone" required />
-                </div>
-                <div class="form-group">
-                  <label for="email">Email (Optionnel)</label>
-                  <input type="email" id="email" v-model="form.email" />
-                </div>
-              </div>
-
-              <div class="form-group">
-                <label for="whatsapp">Numéro WhatsApp</label>
-                <input type="tel" id="whatsapp" v-model="form.whatsapp" required />
-                <span class="help-text"
-                  >Ce numéro est utilisé pour communiquer avec les gestionnaires.</span
-                >
-              </div>
-
-              <div class="form-actions">
-                <button type="submit" class="btn-primary" :disabled="chargementSauvegarde">
-                  {{ chargementSauvegarde ? 'Sauvegarde...' : 'Enregistrer les modifications' }}
-                </button>
-              </div>
-            </form>
+      <div class="carte">
+        <!-- En-tête identité -->
+        <div class="identite">
+          <div class="avatar">{{ initiales }}</div>
+          <div>
+            <h2 class="nom">{{ form.prenom }} {{ form.nom }}</h2>
+            <p class="profession">{{ form.profession || 'Locataire' }}</p>
+            <p class="ville">{{ form.ville }}</p>
           </div>
         </div>
 
-        <!-- Mot de passe -->
-        <div class="card-section">
-          <div class="section-header">
-            <h2 class="section-title">Sécurité</h2>
+        <div class="champs">
+          <div class="champ">
+            <label>Nom complet</label>
+            <div class="input-ic">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></svg>
+              <input v-model="nomComplet" :readonly="!edition" :class="{ ro: !edition }" />
+            </div>
           </div>
-          <div class="section-body">
-            <form @submit.prevent="changerMotDePasse" class="profil-form">
-              <div class="form-group">
-                <label for="currentPassword">Mot de passe actuel</label>
-                <input
-                  type="password"
-                  id="currentPassword"
-                  v-model="passwordForm.current"
-                  required
-                />
-              </div>
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="newPassword">Nouveau mot de passe</label>
-                  <input type="password" id="newPassword" v-model="passwordForm.new" required />
-                </div>
-                <div class="form-group">
-                  <label for="confirmPassword">Confirmer le mot de passe</label>
-                  <input
-                    type="password"
-                    id="confirmPassword"
-                    v-model="passwordForm.confirm"
-                    required
-                  />
-                </div>
-              </div>
 
-              <div class="form-actions">
-                <button type="submit" class="btn-secondary">Changer le mot de passe</button>
-              </div>
-            </form>
+          <div class="champ">
+            <label>Téléphone WhatsApp</label>
+            <div class="input-ic">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
+              <input v-model="form.telephone" :readonly="!edition" :class="{ ro: !edition }" />
+            </div>
           </div>
+
+          <div class="champ">
+            <label>Email</label>
+            <div class="input-ic">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2" /><polyline points="3 7 12 13 21 7" /></svg>
+              <input v-model="form.email" :readonly="!edition" :class="{ ro: !edition }" />
+            </div>
+          </div>
+
+          <div class="champ">
+            <label>Profession</label>
+            <div class="input-ic">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" /><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" /></svg>
+              <input v-model="form.profession" :readonly="!edition" :class="{ ro: !edition }" placeholder="—" />
+            </div>
+          </div>
+
+          <div class="champ">
+            <label>Ville</label>
+            <div class="input-ic">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" /><circle cx="12" cy="10" r="3" /></svg>
+              <input v-model="form.ville" :readonly="!edition" :class="{ ro: !edition }" />
+            </div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <template v-if="!edition">
+            <button class="btn-foncé" @click="edition = true">Modifier mes informations</button>
+          </template>
+          <template v-else>
+            <button class="btn-vert" @click="enregistrer">Enregistrer</button>
+            <button class="btn-secondaire" @click="annuler">Annuler</button>
+          </template>
         </div>
       </div>
 
-      <div v-else-if="chargement" class="loading-state">
-        <ChargementSpinner message="Chargement du profil..." />
-      </div>
+      <button class="btn-deconnexion" @click="logout">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
+        Se déconnecter
+      </button>
     </div>
-  </LocataireLayout>
+  </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useToast } from 'vue-toastification'
-import { useProfilLocataireStore } from '@/stores/profilLocataire.store'
-import LocataireLayout from '@/components/layout/LocataireLayout.vue'
-import ChargementSpinner from '@/components/biens/common/ChargementSpinner.vue'
+import { ref, reactive, computed } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth.store'
+import { useNotification } from '@/composables/useNotification'
+import { getClient, SESSION } from '@/mocks/db'
 
-const toast = useToast()
-const profilStore = useProfilLocataireStore()
+const router = useRouter()
+const authStore = useAuthStore()
+const { succes } = useNotification()
 
-const chargement = ref(true)
-const chargementSauvegarde = ref(false)
-
-const form = ref(null)
-const passwordForm = ref({
-  current: '',
-  new: '',
-  confirm: '',
+const client = getClient(SESSION.clientId)
+const form = reactive({
+  prenom: client?.prenom || '',
+  nom: client?.nom || '',
+  telephone: client?.telephone || '',
+  email: client?.email || '',
+  profession: client?.profession || '',
+  ville: client?.ville || 'Dakar',
 })
 
-onMounted(async () => {
-  await profilStore.chargerProfil()
-  if (profilStore.profil) {
-    form.value = { ...profilStore.profil }
-  }
-  chargement.value = false
+const edition = ref(false)
+
+// Champ « Nom complet » manipulé en une seule ligne mais stocké en prénom + nom
+const nomComplet = computed({
+  get: () => `${form.prenom} ${form.nom}`.trim(),
+  set: (v) => {
+    const parts = v.trim().split(/\s+/)
+    form.prenom = parts.shift() || ''
+    form.nom = parts.join(' ')
+  },
 })
 
-const sauvegarderProfil = async () => {
-  chargementSauvegarde.value = true
-  try {
-    await profilStore.updateProfil(form.value)
-    toast.success('Profil mis à jour avec succès')
-  } catch (error) {
-    toast.error('Erreur lors de la mise à jour du profil')
-  } finally {
-    chargementSauvegarde.value = false
+const initiales = computed(() =>
+  `${form.prenom?.[0] || ''}${form.nom?.[0] || ''}`.toUpperCase() || 'NK',
+)
+
+function enregistrer() {
+  // Persiste dans la base mock réactive (le temps de la session)
+  if (client) {
+    client.prenom = form.prenom
+    client.nom = form.nom
+    client.telephone = form.telephone
+    client.email = form.email
+    client.profession = form.profession
+    client.ville = form.ville
   }
+  edition.value = false
+  succes('Informations enregistrées.')
 }
-
-const changerMotDePasse = async () => {
-  if (passwordForm.value.new !== passwordForm.value.confirm) {
-    toast.error('Les mots de passe ne correspondent pas')
-    return
-  }
-  // Simulation changement mot de passe
-  toast.success('Mot de passe modifié avec succès')
-  passwordForm.value = { current: '', new: '', confirm: '' }
+function annuler() {
+  form.prenom = client?.prenom || ''
+  form.nom = client?.nom || ''
+  form.telephone = client?.telephone || ''
+  form.email = client?.email || ''
+  form.profession = client?.profession || ''
+  form.ville = client?.ville || 'Dakar'
+  edition.value = false
+}
+function logout() {
+  authStore.logout()
+  router.push('/login')
 }
 </script>
 
 <style scoped>
-.profil-view {
-  padding: 32px;
-  max-width: 800px;
+.page {
+  padding: 40px 0 80px;
+  background: #f4f6fa;
+  min-height: calc(100vh - 70px);
 }
-
+.container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
 .page-header {
-  margin-bottom: 32px;
-}
-
-.page-title {
-  font-size: 28px;
-  font-weight: 700;
-  color: #111827;
-  margin-bottom: 4px;
-}
-
-.page-subtitle {
-  font-size: 14px;
-  color: #6b7280;
-}
-
-.card-section {
-  background-color: white;
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   margin-bottom: 24px;
-  overflow: hidden;
 }
-
-.section-header {
-  padding: 20px 24px;
-  border-bottom: 1px solid #e5e7eb;
+.page-title {
+  font-size: 30px;
+  font-weight: 700;
+  color: #1e293b;
 }
-
-.section-title {
-  font-size: 18px;
+.page-subtitle {
+  font-size: 15px;
+  color: #64748b;
+  margin-top: 4px;
+}
+.carte {
+  background: #fff;
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+}
+.identite {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid #f1f5f9;
+  margin-bottom: 22px;
+}
+.avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #1e293b;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
   font-weight: 600;
-  color: #111827;
+  flex-shrink: 0;
 }
-
-.section-body {
-  padding: 24px;
+.nom {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1e293b;
 }
-
-.profil-form {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.form-row {
-  display: flex;
-  gap: 20px;
-}
-
-.form-group {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-label {
+.profession {
   font-size: 14px;
+  color: #64748b;
+}
+.ville {
+  font-size: 13px;
+  color: #94a3b8;
+}
+.champs {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.champ label {
+  display: block;
+  font-size: 13px;
   font-weight: 500;
-  color: #374151;
+  color: #475569;
+  margin-bottom: 6px;
 }
-
-input {
-  padding: 10px 14px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 14px;
-  color: #111827;
-  outline: none;
-  transition: border-color 0.2s;
-  background-color: #f9fafb;
-}
-
-input:focus {
-  border-color: #3b82f6;
-  background-color: white;
-}
-
-.help-text {
-  font-size: 12px;
-  color: #6b7280;
-}
-
-.form-actions {
+.input-ic {
+  position: relative;
   display: flex;
-  justify-content: flex-end;
-  margin-top: 8px;
+  align-items: center;
 }
-
-.btn-primary {
-  background-color: #22c55e;
-  color: white;
+.input-ic svg {
+  position: absolute;
+  left: 12px;
+  width: 17px;
+  height: 17px;
+  color: #94a3b8;
+  pointer-events: none;
+}
+.input-ic input {
+  width: 100%;
+  padding: 11px 14px 11px 38px;
+  border: 1px solid #e2e8f0;
+  border-radius: 9px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #1e293b;
+  background: #fff;
+  outline: none;
+}
+.input-ic input:focus {
+  border-color: #1e293b;
+}
+.input-ic input.ro {
+  background: #f8fafc;
+  color: #334155;
+}
+.actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+.btn-foncé {
+  background: #1e293b;
+  color: #fff;
   border: none;
-  border-radius: 8px;
-  padding: 10px 20px;
+  border-radius: 9px;
+  padding: 11px 20px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s;
 }
-
-.btn-primary:hover:not(:disabled) {
-  background-color: #16a34a;
-}
-
-.btn-primary:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-.btn-secondary {
-  background-color: white;
-  color: #1f2937;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  padding: 10px 20px;
+.btn-vert {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: #22c55e;
+  color: #fff;
+  border: none;
+  border-radius: 9px;
+  padding: 11px 22px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
 }
-
-.btn-secondary:hover {
-  background-color: #f9fafb;
-  border-color: #9ca3af;
+.btn-secondaire {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+  border-radius: 9px;
+  padding: 11px 22px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
 }
-
-.loading-state {
-  padding: 80px 0;
-  text-align: center;
+.btn-deconnexion {
+  width: 100%;
+  margin-top: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  background: #fff;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  border-radius: 12px;
+  padding: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
 }
-
-@media (max-width: 640px) {
-  .profil-view {
-    padding: 20px;
-  }
-
-  .form-row {
+.btn-deconnexion svg {
+  width: 18px;
+  height: 18px;
+}
+.btn-deconnexion:hover {
+  background: #fef2f2;
+}
+@media (max-width: 520px) {
+  .actions {
     flex-direction: column;
-    gap: 20px;
+  }
+  .actions button {
+    width: 100%;
   }
 }
 </style>

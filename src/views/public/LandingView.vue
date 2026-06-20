@@ -40,30 +40,6 @@
             </div>
             <button class="btn-search" @click="handleSearch">Rechercher</button>
           </div>
-
-          <!-- QUARTIERS -->
-          <div class="popular-locations">
-            <button
-              v-for="quartier in quartiers"
-              :key="quartier"
-              class="location-tag"
-              @click="searchByQuartier(quartier)"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="13"
-                height="13"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path>
-                <circle cx="12" cy="10" r="3"></circle>
-              </svg>
-              {{ quartier }}
-            </button>
-          </div>
         </div>
       </div>
     </section>
@@ -165,6 +141,22 @@
       </div>
     </section>
 
+    <!-- ══════ CHAMBRES DISPONIBLES ══════ -->
+    <section v-if="chambres.length" class="featured-section chambres-section">
+      <div class="container">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">Chambres disponibles</h2>
+            <p class="section-subtitle">Idéal pour étudiants et jeunes actifs</p>
+          </div>
+          <router-link to="/catalogue" class="link-voir-tout"> Voir tout → </router-link>
+        </div>
+        <div class="properties-grid">
+          <CarteBienPublic v-for="bien in chambres" :key="bien.id" :bien="bien" />
+        </div>
+      </div>
+    </section>
+
     <!-- ══════ FOOTER ══════ -->
     <footer class="footer">
       <div class="container footer-inner">
@@ -176,7 +168,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useBiensPublicsStore } from '@/stores/biensPublics.store'
 import { useAuthStore } from '@/stores/auth.store'
@@ -190,7 +182,12 @@ const biensStore = useBiensPublicsStore()
 const authStore = useAuthStore()
 
 const searchQuery = ref('')
-const quartiers = ['Plateau', 'Almadies', 'Mermoz', 'Ngor', 'Yoff', 'Sacré-Cœur']
+// Section dédiée aux chambres (sinon elles n'apparaissent pas dans les 3 biens en vedette).
+const chambres = computed(() =>
+  biensStore.biensDisponibles.filter(
+    (b) => (b.typeBien || b.type || '').toUpperCase() === 'CHAMBRE',
+  ),
+)
 onMounted(async () => {
   await biensStore.chargerBiens({ page: 0, size: 20 })
 })
@@ -201,10 +198,6 @@ const handleSearch = () => {
   } else {
     router.push('/catalogue')
   }
-}
-
-const searchByQuartier = (quartier) => {
-  router.push({ path: '/catalogue', query: { quartier } })
 }
 </script>
 
@@ -504,12 +497,15 @@ const searchByQuartier = (quartier) => {
 
   .search-bar {
     flex-direction: column;
+    align-items: stretch;
     gap: 8px;
   }
 
   .btn-search {
-    width: 100%;
-    text-align: center;
+    width: auto;
+    align-self: flex-end;
+    padding: 9px 20px;
+    font-size: 13px;
   }
 
   .features-grid {

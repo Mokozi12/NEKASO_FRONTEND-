@@ -194,8 +194,7 @@ const formatMontant = (montant) => {
 const submitDemande = async () => {
   isSubmitting.value = true
   try {
-    const idLocataire = authStore.user?.id ?? Number(import.meta.env.VITE_DEV_LOCATAIRE_ID) || 3
-    await demandesLocationService.creer(idLocataire, Number(bien.value.id))
+    await demandesLocationService.creer(Number(bien.value.id))
     toast.success('Demande de location envoyée')
     router.push({ name: 'succes-location', params: { bienId: bien.value.id } })
   } catch (error) {

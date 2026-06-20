@@ -201,9 +201,6 @@
 
     <!-- Pagination -->
     <div class="biens-pagination">
-      <div class="pagination-info">
-        <span>Afficher 10 lignes</span>
-      </div>
       <div class="pagination-controls">
         <button class="pagination-btn" :disabled="pageActuelle === 1" @click="pageActuelle--">
           Précédent

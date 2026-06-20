@@ -1,7 +1,9 @@
 <template>
   <div class="catalogue">
-    <HeaderLocataire v-if="authStore.isAuthenticated && authStore.user?.role === 'LOCATAIRE'" />
-    <HeaderPublic v-else />
+    <template v-if="!$route.meta.sansEntete">
+      <HeaderLocataire v-if="authStore.isAuthenticated && authStore.user?.role === 'LOCATAIRE'" />
+      <HeaderPublic v-else />
+    </template>
 
     <div class="catalogue-content">
       <div class="container">
@@ -92,7 +94,13 @@
         </div>
 
         <!-- FILTRES -->
-        <FiltreCatalogue v-model:recherche="searchQuery" v-model:type-actif="selectedType" />
+        <FiltreCatalogue
+          v-model:recherche="searchQuery"
+          v-model:type-actif="selectedType"
+          v-model:loyer-min="loyerMin"
+          v-model:loyer-max="loyerMax"
+          v-model:pieces-min="piecesMin"
+        />
 
         <!-- GRILLE DE BIENS -->
         <div class="biens-grid" v-if="!biensStore.chargement && biensPagines.length > 0">
@@ -139,7 +147,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useBiensPublicsStore } from '@/stores/biensPublics.store'
 import { useAuthStore } from '@/stores/auth.store'
@@ -156,14 +164,25 @@ const authStore = useAuthStore()
 
 const searchQuery = ref('')
 const selectedType = ref(null)
+const loyerMin = ref(null)
+const loyerMax = ref(null)
+const piecesMin = ref(null)
 const pageActuelle = ref(1)
-const parPage = 9
+
+// Pagination responsive : 5 biens / page en mobile, 9 sur grand écran.
+const largeurEcran = ref(typeof window !== 'undefined' ? window.innerWidth : 1200)
+const parPage = computed(() => (largeurEcran.value <= 768 ? 5 : 9))
+function onResize() {
+  largeurEcran.value = window.innerWidth
+}
 
 onMounted(async () => {
+  window.addEventListener('resize', onResize)
   await biensStore.chargerBiens({ page: 0, size: 10 })
   if (route.query.q) searchQuery.value = route.query.q
   if (route.query.quartier) searchQuery.value = route.query.quartier
 })
+onUnmounted(() => window.removeEventListener('resize', onResize))
 
 const filteredBiens = computed(() => {
   let result = [...biensStore.biens]
@@ -181,18 +200,29 @@ const filteredBiens = computed(() => {
         b.type?.toLowerCase().includes(query),
     )
   }
+  if (loyerMin.value != null) {
+    result = result.filter((b) => Number(b.loyer) >= loyerMin.value)
+  }
+  if (loyerMax.value != null) {
+    result = result.filter((b) => Number(b.loyer) <= loyerMax.value)
+  }
+  if (piecesMin.value != null) {
+    result = result.filter(
+      (b) => Number(b.nombrePieces || b.caracteristiques?.nombreChambres || 0) >= piecesMin.value,
+    )
+  }
   return result
 })
 
-const totalPages = computed(() => Math.max(1, Math.ceil(filteredBiens.value.length / parPage)))
+const totalPages = computed(() => Math.max(1, Math.ceil(filteredBiens.value.length / parPage.value)))
 
 const biensPagines = computed(() => {
-  const debut = (pageActuelle.value - 1) * parPage
-  return filteredBiens.value.slice(debut, debut + parPage)
+  const debut = (pageActuelle.value - 1) * parPage.value
+  return filteredBiens.value.slice(debut, debut + parPage.value)
 })
 
-// Revenir à la page 1 quand les filtres changent
-watch([searchQuery, selectedType], () => {
+// Revenir à la page 1 quand les filtres ou le format d'affichage changent
+watch([searchQuery, selectedType, loyerMin, loyerMax, piecesMin, parPage], () => {
   pageActuelle.value = 1
 })
 </script>

@@ -1,12 +1,10 @@
 import api from './api'
 
+/*
+  contrat-bail-controller (côté locataire) — OPTION A : sans id, le backend
+  identifie le locataire via le token JWT (sub).
+  - GET  /api/contrats/mes-contrats   (page, size, sort)
+*/
 export const contratsLocataireService = {
-  async getContratsActifs(params) {
-    try {
-      const res = await api.get('/contrats/mes-contrats', { params })
-      return res.data
-    } catch (e) {
-      throw e
-    }
-  },
+  getContrats: (params) => api.get('/contrats/mes-contrats', { params }),
 }

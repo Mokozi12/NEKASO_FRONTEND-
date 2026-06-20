@@ -1,31 +1,17 @@
 import api from './api'
 
+/*
+  contrat-bail-controller
+  - POST  /api/contrats/gestionnaire/creer            body: { preContratId }
+  - GET   /api/contrats/locataire/{locataireId}       (page, size, sort)
+  - GET   /api/contrats/gestionnaire/{gestionnaireId} (page, size, sort)
+*/
 export const contratsService = {
-  getListe: (params) => api.get('/contrats/gestionnaire', { params }),
+  // Édite le contrat de bail définitif à partir d'un pré-contrat validé.
+  creer: (preContratId) => api.post('/contrats/gestionnaire/creer', { preContratId }),
 
-  /*
-    Récupère la liste des candidats (visites confirmées)
-    pour le wizard de création de contrat.
-  */
-  getCandidats: (params) => api.get('/visites/confirmees', { params }),
-
-  /*
-    Crée un nouveau contrat de bail.
-    Le backend génère automatiquement le PDF.
-  */
-  creer: (data) => api.post('/contrats', data),
-
-  /*
-    Télécharger un contrat PDF.
-    
-    responseType: 'blob' est OBLIGATOIRE pour télécharger un fichier.
-    Sans ça, Axios essaierait d'interpréter le PDF comme du texte JSON,
-    et le fichier serait corrompu.
-    
-    'blob' signifie "Binary Large Object" : des données binaires brutes.
-  */
-  telechargerPDF: (id) =>
-    api.get(`/contrats/${id}/pdf`, {
-      responseType: 'blob',
-    }),
+  getParLocataire: (locataireId, params) =>
+    api.get(`/contrats/locataire/${locataireId}`, { params }),
+  getParGestionnaire: (gestionnaireId, params) =>
+    api.get(`/contrats/gestionnaire/${gestionnaireId}`, { params }),
 }

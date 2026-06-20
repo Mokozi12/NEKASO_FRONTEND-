@@ -1,67 +1,143 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { computed, ref } from 'vue'
+import {
+  db,
+  uid,
+  delai,
+  todayISO,
+  getClient,
+  STATUT_ECHEANCE,
+} from '@/mocks/db'
+import { useNotificationsStore } from '@/stores/notifications.store'
 import { paiementsService } from '@/services/paiements.service'
-import { mockPaiements } from '@/services/mockData'
+import { mapPaiements } from '@/services/mappers'
+import { pageMeta } from '@/utils/apiResponse'
 
+/*
+  Store des PAIEMENTS (§10, §11).
+
+  Les paiements sont structurés AUTOUR DES CONTRATS : on n'enregistre jamais un
+  paiement « isolé », toujours rattaché à un contrat et à une ÉCHÉANCE.
+
+  Lors de l'enregistrement, le système présélectionne automatiquement l'échéance
+  correspondante (la prochaine échéance à payer). Le gestionnaire n'a qu'à
+  valider → le client reçoit une notification.
+*/
 export const usePaiementsStore = defineStore('paiements', () => {
-  const paiements = ref([])
-  const chargement = ref(false)
-  const erreur = ref(null)
+  const paiements = computed(() => db.paiements)
 
-  const payes = computed(() => paiements.value.filter((p) => p.statut === 'PAYE'))
-  const enRetard = computed(() => paiements.value.filter((p) => p.statut === 'EN_RETARD'))
-  const totalMois = computed(() => payes.value.reduce((total, p) => total + p.montant, 0))
+  /* ───── Backend : historique réel des paiements d'un contrat ─────
+     GET /api/paiements/historiques-paiements/contrat/{contratId} */
+  const historique = ref([])
+  const paginationHistorique = ref({ page: 0, size: 5, totalElements: 0, totalPages: 1 })
+  const chargementHistorique = ref(false)
 
-  async function charger() {
-    chargement.value = true
-    erreur.value = null
+  async function chargerHistorique(contratId, params = { page: 0, size: 5 }) {
+    chargementHistorique.value = true
     try {
-      const res = await paiementsService.getListe()
-      // L'API retourne un tableau de paiements
-      paiements.value = res.data
+      const res = await paiementsService.getHistorique(contratId, params)
+      const meta = pageMeta(res)
+      historique.value = mapPaiements(meta.items)
+      paginationHistorique.value = {
+        page: meta.page,
+        size: meta.size,
+        totalElements: meta.totalElements,
+        totalPages: meta.totalPages,
+      }
     } catch (e) {
-      // Si le backend est indisponible, on bascule sur des données mock
-      console.warn('Erreur chargement paiements, utilisation des données mock', e)
-      paiements.value = mockPaiements
-      erreur.value =
-        'Impossible de charger les paiements depuis le serveur. Données locales affichées.'
+      if (e?.response?.status === 404) historique.value = []
+      else console.error('chargerHistorique:', e)
     } finally {
-      chargement.value = false
+      chargementHistorique.value = false
     }
   }
 
-  async function enregistrer(data) {
-    try {
-      const res = await paiementsService.enregistrer(data)
-      // Après enregistrement, on recharge la liste
-      await charger()
-      return res.data
-    } catch (e) {
-      // Propager l'erreur pour que le composant l'affiche
-      throw e
-    }
+  /* Enregistre un paiement réel : POST .../create/{idContrat}/{mois}/{methode} */
+  async function enregistrerPaiementBackend(contratId, mois, methodePaiement) {
+    await paiementsService.enregistrer(contratId, mois, methodePaiement)
+    await chargerHistorique(contratId)
   }
 
-  async function telechargerQuittance(id) {
-    const res = await paiementsService.telechargerQuittance(id)
-    const url = window.URL.createObjectURL(new Blob([res.data]))
-    const lien = document.createElement('a')
-    lien.href = url
-    lien.setAttribute('download', `quittance_${id}.pdf`)
-    document.body.appendChild(lien)
-    lien.click()
-    lien.remove()
+  function paiementsParContrat(contratId) {
+    return db.paiements
+      .filter((p) => p.contratId === contratId)
+      .slice()
+      .sort((a, b) => new Date(b.datePaiement) - new Date(a.datePaiement))
+  }
+
+  /* §11 : échéance à présélectionner = 1re échéance non payée (ordre chronologique). */
+  function echeanceCourante(contrat) {
+    if (!contrat?.echeances?.length) return null
+    const triees = contrat.echeances
+      .slice()
+      .sort((a, b) => new Date(a.dateEcheance) - new Date(b.dateEcheance))
+    return triees.find((e) => e.statut !== STATUT_ECHEANCE.PAYE) || null
+  }
+
+  function echeancesAPayer(contrat) {
+    if (!contrat?.echeances?.length) return []
+    return contrat.echeances.filter((e) => e.statut !== STATUT_ECHEANCE.PAYE)
+  }
+
+  /* Enregistre un paiement rattaché à une échéance puis notifie le client. */
+  async function enregistrerPaiement(
+    contratId,
+    echeanceId,
+    { montant, methodePaiement = 'ESPECES', reference = '', datePaiement } = {},
+  ) {
+    await delai()
+    const contrat = db.contrats.find((c) => c.id === contratId)
+    if (!contrat) return null
+    const echeance = contrat.echeances.find((e) => e.id === echeanceId)
+
+    const paiement = {
+      id: uid('paiements'),
+      contratId,
+      echeanceId,
+      montant: montant ?? echeance?.montant ?? contrat.montantLoyer,
+      datePaiement: datePaiement || todayISO(),
+      methodePaiement,
+      reference: reference || genererReference(methodePaiement),
+      statut: 'PAYE',
+    }
+    db.paiements.push(paiement)
+
+    // Marque l'échéance comme payée
+    if (echeance) echeance.statut = STATUT_ECHEANCE.PAYE
+
+    // Notifie le client
+    const client = getClient(contrat.clientId)
+    useNotificationsStore().notifierClient(
+      contrat.clientId,
+      'PAIEMENT',
+      `Votre paiement de ${formatMontant(paiement.montant)} FCFA (${echeance?.libelle || 'échéance'}) a été enregistré.`,
+    )
+    void client
+    return paiement
   }
 
   return {
     paiements,
-    chargement,
-    erreur,
-    payes,
-    enRetard,
-    totalMois,
-    charger,
-    enregistrer,
-    telechargerQuittance,
+    paiementsParContrat,
+    echeanceCourante,
+    echeancesAPayer,
+    enregistrerPaiement,
+    // Backend
+    historique,
+    paginationHistorique,
+    chargementHistorique,
+    chargerHistorique,
+    enregistrerPaiementBackend,
   }
 })
+
+function genererReference(methode) {
+  const prefix = { ORANGE_MONEY: 'OM', WAVE: 'WV', ESPECES: 'ESP', VIREMENT: 'VIR' }[methode] || 'PAY'
+  const d = new Date()
+  const stamp = `${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getFullYear()).slice(2)}`
+  return `${prefix}-${stamp}-${Math.floor(Math.random() * 900 + 100)}`
+}
+
+function formatMontant(m) {
+  return Number(m || 0).toLocaleString('fr-FR')
+}

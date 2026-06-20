@@ -203,17 +203,36 @@
                   <span v-else>2</span>
                 </span>
               </div>
-              <div class="step-line" :class="{ 'line-completed': currentStep > 2 }"></div>
-              <div class="step" :class="{ 'step-active': currentStep === 3 }">
-                <span class="step-circle">3</span>
-              </div>
             </div>
 
             <!-- Étape 1 : Identité -->
             <div v-if="currentStep === 1" class="step-content">
-              <h2 class="auth-title">Votre identité</h2>
+              <h2 class="auth-title">Créez votre compte</h2>
+              <p class="auth-subtitle">Rejoignez NEKASO en quelques secondes</p>
               <form @submit.prevent="submitStep1" class="auth-form">
                 <div class="form-row">
+                  <div class="form-group">
+                    <label>Prénom</label>
+                    <div class="input-wrapper">
+                      <span class="input-icon">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
+                          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                          <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                      </span>
+                      <input type="text" v-model="registerForm.prenom" placeholder="Aminata" required />
+                    </div>
+                  </div>
                   <div class="form-group">
                     <label>Nom</label>
                     <div class="input-wrapper">
@@ -234,33 +253,6 @@
                         </svg>
                       </span>
                       <input type="text" v-model="registerForm.nom" placeholder="Diop" required />
-                    </div>
-                  </div>
-                  <div class="form-group">
-                    <label>Prénom</label>
-                    <div class="input-wrapper">
-                      <span class="input-icon">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="2"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                        >
-                          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                          <circle cx="12" cy="7" r="4"></circle>
-                        </svg>
-                      </span>
-                      <input
-                        type="text"
-                        v-model="registerForm.prenom"
-                        placeholder="Aminata"
-                        required
-                      />
                     </div>
                   </div>
                 </div>
@@ -293,8 +285,42 @@
                     />
                   </div>
                 </div>
+                <div class="form-group">
+                  <label>Mot de passe</label>
+                  <div class="input-wrapper">
+                    <span class="input-icon">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                    </span>
+                    <input
+                      :type="showPassword ? 'text' : 'password'"
+                      v-model="registerForm.motDePasse"
+                      placeholder="Minimum 8 caractères"
+                      required
+                    />
+                    <button type="button" class="eye-toggle" @click="showPassword = !showPassword">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    </button>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>Confirmer le mot de passe</label>
+                  <div class="input-wrapper">
+                    <span class="input-icon">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                    </span>
+                    <input
+                      :type="showConfirmPassword ? 'text' : 'password'"
+                      v-model="registerForm.confirmPassword"
+                      placeholder="••••••••"
+                      required
+                    />
+                    <button type="button" class="eye-toggle" @click="showConfirmPassword = !showConfirmPassword">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    </button>
+                  </div>
+                </div>
                 <button type="submit" class="btn-submit" :disabled="authStore.isLoading">
-                  {{ authStore.isLoading ? 'Envoi...' : 'Recevoir le code WhatsApp' }}
+                  Continuer
                   <svg
                     v-if="!authStore.isLoading"
                     xmlns="http://www.w3.org/2000/svg"
@@ -364,81 +390,6 @@
                 Pas reçu ? <a href="#" @click.prevent="resendCode" class="link-bold">Renvoyer</a>
               </div>
             </div>
-
-            <!-- Étape 3 : Mot de passe -->
-            <div v-if="currentStep === 3" class="step-content">
-              <h2 class="auth-title">Créez votre mot de passe</h2>
-              <form @submit.prevent="submitStep3" class="auth-form">
-                <div class="form-group">
-                  <label>Mot de passe</label>
-                  <div class="input-wrapper">
-                    <span class="input-icon"
-                      ><svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                      >
-                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg
-                    ></span>
-                    <input
-                      :type="showPassword ? 'text' : 'password'"
-                      v-model="registerForm.motDePasse"
-                      placeholder="Minimum 8 caractères"
-                      required
-                    />
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label>Confirmer le mot de passe</label>
-                  <div class="input-wrapper">
-                    <span class="input-icon"
-                      ><svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                      >
-                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg
-                    ></span>
-                    <input
-                      :type="showPassword ? 'text' : 'password'"
-                      v-model="registerForm.confirmPassword"
-                      placeholder="••••••••"
-                      required
-                    />
-                  </div>
-                </div>
-                <button
-                  type="submit"
-                  class="btn-submit btn-success"
-                  :disabled="!canSubmit || authStore.isLoading"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="3"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  >
-                    <polyline points="20 6 9 17 4 12"></polyline>
-                  </svg>
-                  Créer mon compte
-                </button>
-              </form>
-            </div>
           </div>
         </div>
       </div>
@@ -463,6 +414,7 @@ const toast = useToast()
 
 const activeTab = ref('login')
 const showPassword = ref(false)
+const showConfirmPassword = ref(false)
 const currentStep = ref(1)
 const codeInputRefs = ref([])
 const codeDemo = ref('1234')
@@ -479,10 +431,6 @@ const registerForm = reactive({
 })
 
 const isCodeComplete = computed(() => registerForm.code.every((d) => d.length === 1))
-const canSubmit = computed(
-  () =>
-    registerForm.motDePasse.length >= 8 && registerForm.motDePasse === registerForm.confirmPassword,
-)
 
 // ── Mot de passe oublié (external component) ─────────────────
 const showMdpModal = ref(false)
@@ -501,7 +449,7 @@ function switchTab(tab) {
 
 function handlePostAuthRedirect(role) {
   if (authStore.pendingAction) {
-    router.push(`/biens/${authStore.pendingAction.bienId}`)
+    router.push(`/locataire/biens/${authStore.pendingAction.bienId}`)
   } else if (role === 'GESTIONNAIRE') {
     router.push('/gestionnaire/dashboard')
   } else {
@@ -524,11 +472,19 @@ async function handleLogin() {
 }
 
 async function submitStep1() {
-  if (!registerForm.nom || !registerForm.prenom || !registerForm.telephone) {
+  if (!registerForm.prenom || !registerForm.nom || !registerForm.telephone) {
     toast.error('Veuillez remplir tous les champs')
     return
   }
-  toast.info('Code envoyé au ' + registerForm.telephone)
+  if (registerForm.motDePasse.length < 8) {
+    toast.error('Le mot de passe doit contenir au moins 8 caractères')
+    return
+  }
+  if (registerForm.motDePasse !== registerForm.confirmPassword) {
+    toast.error('Les mots de passe ne correspondent pas')
+    return
+  }
+  toast.info('Code envoyé au +221 ' + registerForm.telephone)
   currentStep.value = 2
   setTimeout(() => {
     if (codeInputRefs.value[0]) codeInputRefs.value[0].focus()
@@ -537,12 +493,6 @@ async function submitStep1() {
 
 async function submitStep2() {
   if (!isCodeComplete.value) return
-  toast.success('Code vérifié')
-  currentStep.value = 3
-}
-
-async function submitStep3() {
-  if (!canSubmit.value) return
   const result = await authStore.register(
     registerForm.nom,
     registerForm.prenom,

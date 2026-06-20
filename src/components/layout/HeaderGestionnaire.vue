@@ -23,11 +23,19 @@
         <span v-if="compteur > 0" class="notif-badge">{{ compteur }}</span>
 
         <div v-if="open" class="notif-dropdown" role="menu">
-          <ul>
-            <li v-for="n in notifications" :key="n.id">
-              <strong>{{ n.titre }}</strong>
+          <div class="notif-head">
+            <strong>Notifications</strong>
+            <button v-if="compteur > 0" class="notif-lire" @click="notificationsStore.toutLireGestionnaire()">
+              Tout lire
+            </button>
+          </div>
+          <ul v-if="notifications.length">
+            <li v-for="n in notifications" :key="n.id" :class="{ 'notif--lue': n.lue }">
+              <span class="notif-type">{{ n.type }}</span>
+              <span class="notif-msg">{{ n.message }}</span>
             </li>
           </ul>
+          <p v-else class="notif-vide">Aucune notification</p>
         </div>
       </div>
 
@@ -62,8 +70,8 @@ import { useAuthStore } from '@/stores/auth.store'
 const route = useRoute()
 const open = ref(false)
 const notificationsStore = useNotificationsStore()
-const notifications = computed(() => notificationsStore.notifications)
-const compteur = computed(() => notificationsStore.compteur)
+const notifications = computed(() => notificationsStore.pourGestionnaire)
+const compteur = computed(() => notificationsStore.compteurGestionnaire)
 
 const authStore = useAuthStore()
 const nomAffiche = computed(() => authStore.nomComplet || 'Gestionnaire')
@@ -153,6 +161,67 @@ const pageTitle = computed(() => titresRoutes[route.name] ?? 'Tableau de bord')
   justify-content: center;
   line-height: 1;
   border: 2px solid white;
+}
+
+.notif-dropdown {
+  position: absolute;
+  top: 40px;
+  right: 0;
+  width: 320px;
+  max-height: 380px;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid #f0f0f0;
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.14);
+  z-index: 50;
+}
+.notif-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  border-bottom: 1px solid #f1f5f9;
+}
+.notif-lire {
+  background: none;
+  border: none;
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.notif-dropdown ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.notif-dropdown li {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #f8fafc;
+}
+.notif-dropdown li.notif--lue {
+  opacity: 0.55;
+}
+.notif-type {
+  font-size: 10px;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.5px;
+}
+.notif-msg {
+  font-size: 13px;
+  color: #1e293b;
+  line-height: 1.4;
+}
+.notif-vide {
+  padding: 24px;
+  text-align: center;
+  color: #94a3b8;
+  font-size: 13px;
 }
 
 .user-profile {

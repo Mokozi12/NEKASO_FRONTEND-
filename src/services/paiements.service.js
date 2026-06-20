@@ -1,11 +1,18 @@
 import api from './api'
 
+/*
+  paiement-controller
+  - POST  /api/paiements/gestionnaire/create/{idContrat}/{mois}/{methodePaiement}
+  - GET   /api/paiements/historiques-paiements/contrat/{contratId}   (page, size)
+*/
 export const paiementsService = {
-  getListe: (params) => api.get('/paiements/gestionnaire', { params }),
-  enregistrer: (data) => api.post('/paiements', data),
+  // Enregistre un paiement pour un contrat (mois = "Juin", méthode = "OM"/"WAVE"/...).
+  enregistrer: (idContrat, mois, methodePaiement) =>
+    api.post(
+      `/paiements/gestionnaire/create/${idContrat}/${encodeURIComponent(mois)}/${methodePaiement}`,
+    ),
 
-  telechargerQuittance: (id) =>
-    api.get(`/paiements/${id}/quittance`, {
-      responseType: 'blob',
-    }),
+  // Historique des paiements d'un contrat.
+  getHistorique: (contratId, params) =>
+    api.get(`/paiements/historiques-paiements/contrat/${contratId}`, { params }),
 }

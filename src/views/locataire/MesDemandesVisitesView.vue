@@ -1,262 +1,345 @@
+<!--
+  MesDemandesVisitesView (locataire) — design PDF « Mes demandes de visite »
+  + intégration du workflow corrigé :
+    §6-bis : une demande est un simple signal d'intérêt (aucun créneau choisi).
+    §1     : une visite EN_ATTENTE ne peut PAS être annulée.
+    §2/§4  : une fois VALIDÉE, le client voit le créneau + l'agent + son téléphone.
+    §5     : le client ACCEPTE (→ CONFIRMÉE) ou ANNULE.
+-->
 <template>
-  <div class="mes-demandes">
+  <div class="page">
     <div class="container">
       <div class="page-header">
-        <div class="header-row">
-          <div>
-            <h1 class="page-title">Mes demandes de visite</h1>
-            <p class="page-subtitle">Suivez l'avancement de vos demandes de visite</p>
-          </div>
-          <router-link to="/catalogue" class="btn-nouvelle">+ Nouvelle visite</router-link>
+        <div>
+          <h1 class="page-title">Mes demandes de visite</h1>
+          <p class="page-subtitle">Suivez l'avancement de vos demandes de visite</p>
         </div>
+        <button class="btn-nouvelle" @click="router.push('/locataire/biens')">+ Nouvelle visite</button>
       </div>
 
-      <div v-if="demandes.length === 0" class="etat-vide">
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="1.5">
-          <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/>
-          <line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
-        </svg>
-        <p>Aucune demande de visite pour le moment</p>
-        <router-link to="/catalogue" class="btn-catalogue">Parcourir les biens</router-link>
+      <div v-if="visites.length === 0" class="etat-vide">
+        <p>Aucune demande de visite pour le moment.</p>
+        <button class="btn-primaire" @click="router.push('/locataire/biens')">Parcourir les biens</button>
       </div>
 
-      <div v-else class="visites-grid">
-        <div v-for="visite in demandes" :key="visite.id" class="list-card request-card">
-          <div class="card-top">
-            <img :src="visite.photo" :alt="visite.titre" class="item-img" />
-            <div class="item-details">
-              <h3 class="item-titre">{{ visite.titre }}</h3>
-              <p class="item-loc">{{ visite.lieu }} · {{ visite.date }} · {{ visite.creneau }}</p>
+      <div v-else class="liste">
+        <div v-for="v in itemsPage" :key="v.id" class="carte">
+          <!-- En-tête : photo + infos + statut -->
+          <div class="carte-head">
+            <img :src="photo(v.bien)" :alt="v.bien?.intitule" class="vignette" />
+            <div class="infos">
+              <h3 class="titre">{{ v.bien?.intitule }}</h3>
+              <p class="meta">{{ metaLigne(v) }}</p>
+              <p class="demandee">Demandée le {{ formatDate(v.dateCreation) }}</p>
+            </div>
+            <BadgeStatut :label="statut(v).label" :variant="statut(v).variant" />
+          </div>
+
+          <!-- Stepper d'avancement -->
+          <div class="progression">
+            <EtapesProgression :etapes="ETAPES" :courante="statut(v).etape" :ton="statut(v).ton" />
+            <span class="etape-label" :class="`tl-${statut(v).ton}`">{{ statut(v).label }}</span>
+          </div>
+
+          <!-- §4 : créneau proposé + agent (VALIDEE) → accepter / annuler -->
+          <div v-if="v.statut === 'VALIDEE'" class="panneau">
+            <div class="pn-lignes">
+              <div class="pn-l"><span>Créneau proposé</span><strong>{{ formatDate(v.creneau?.date) }} à {{ v.creneau?.heure }}</strong></div>
+              <div class="pn-l"><span>Agent</span><strong>{{ nom(v.agent) }}</strong></div>
+              <div class="pn-l"><span>Téléphone</span><a class="tel" :href="`tel:${v.agent?.telephone}`">{{ v.agent?.telephone }}</a></div>
+            </div>
+            <div class="pn-actions">
+              <button class="btn-vert" @click="accepter(v)">Accepter le créneau</button>
+              <button class="btn-annuler" @click="annuler(v)">Annuler</button>
             </div>
           </div>
 
-          <div class="card-actions" v-if="visite.statut !== 'Confirmée'">
-            <button class="btn-annuler" @click="annuler(visite.id)">Annuler la demande</button>
+          <!-- Confirmée : rappel du créneau + annulation possible -->
+          <div v-else-if="v.statut === 'CONFIRMEE'" class="panneau">
+            <div class="pn-lignes">
+              <div class="pn-l"><span>Créneau confirmé</span><strong>{{ formatDate(v.creneau?.date) }} à {{ v.creneau?.heure }}</strong></div>
+              <div class="pn-l"><span>Agent</span><strong>{{ nom(v.agent) }} · {{ v.agent?.telephone }}</strong></div>
+            </div>
+            <div class="pn-actions">
+              <button class="btn-annuler" @click="annuler(v)">Annuler la visite</button>
+            </div>
           </div>
 
-          <div class="progress-bar-container">
-            <div class="progress-track">
-              <div class="progress-fill" :style="{ width: visite.progression + '%' }"></div>
-              <div
-                v-for="(etape, i) in visite.etapes"
-                :key="i"
-                class="dot"
-                :class="{ active: etape }"
-                :style="{ left: (i / (visite.etapes.length - 1)) * 100 + '%' }"
-              ></div>
-            </div>
-            <div class="progress-status-text">{{ visite.statut }}</div>
-          </div>
+          <!-- Clôturée avec contrat → accès au pré-contrat -->
+          <router-link
+            v-else-if="v.statut === 'CLOTUREE_AVEC_CONTRAT' && preContratDe(v)"
+            :to="`/locataire/contrat/${preContratDe(v).id}`"
+            class="lien-precontrat"
+          >
+            Un pré-contrat vous a été proposé — le consulter →
+          </router-link>
+
+          <!-- Messages d'état simples -->
+          <p v-else-if="message(v)" class="message" :class="`msg-${statut(v).ton}`">{{ message(v) }}</p>
         </div>
       </div>
+
+      <Pagination v-model="page" :total-pages="totalPages" />
     </div>
+
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted } from 'vue'
-import { useVisitesLocataireStore } from '@/stores/visitesLocataire.store'
+import { computed } from 'vue'
+import { useRouter } from 'vue-router'
+import { useVisitesStore } from '@/stores/visites.store'
+import { useContratsStore } from '@/stores/contrats.store'
+import { useNotification } from '@/composables/useNotification'
+import { useFormat } from '@/composables/useFormat'
+import { nomComplet } from '@/mocks/db'
+import BadgeStatut from '@/components/locataire/BadgeStatut.vue'
+import EtapesProgression from '@/components/locataire/EtapesProgression.vue'
+import Pagination from '@/components/common/Pagination.vue'
+import { usePagination } from '@/composables/usePagination'
 
-const store = useVisitesLocataireStore()
+const router = useRouter()
+const visitesStore = useVisitesStore()
+const contratsStore = useContratsStore()
+const { succes, info } = useNotification()
+const { formatDate } = useFormat()
 
-// TODO: remplacer 1 par l'id du locataire connecté quand l'auth sera prête
-onMounted(() => store.chargerVisites(1))
+const ETAPES = ['Demandée', 'Créneau proposé', 'Confirmée', 'Visite']
 
-const demandes = computed(() =>
-  store.visites.map((v) => ({
-    id: v.id,
-    titre: v.bien?.typeBien ? `${v.bien.typeBien} - ${v.bien.adresse}` : v.bien?.adresse,
-    photo: v.bien?.photos?.[0]?.urlPhoto || 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=300&h=300&fit=crop',
-    lieu: v.bien?.adresse || '-',
-    date: v.dateCreation?.split(' ')[0] || '-',
-    creneau: '-',
-    statut: formatStatut(v.statut),
-    progression: getProgression(v.statut),
-    etapes: getEtapes(v.statut),
-  }))
-)
+const visites = computed(() => visitesStore.mesVisites)
+const { page, totalPages, itemsPage } = usePagination(visites, 5)
 
-function formatStatut(statut) {
-  const map = { EN_ATTENTE: 'En attente', CONFIRMEE: 'Confirmée', REFUSEE: 'Refusée' }
-  return map[statut] || statut
+const nom = (p) => nomComplet(p)
+function photo(b) {
+  return b?.photos?.[0]?.urlPhoto || 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=300'
+}
+function quartier(adresse) {
+  if (!adresse) return ''
+  const parts = adresse.split(',').map((s) => s.trim())
+  return parts.length >= 2 ? parts[parts.length - 2] : parts[0]
+}
+function metaLigne(v) {
+  const q = quartier(v.bien?.adresse)
+  if (v.creneau) return `${q} · ${formatDate(v.creneau.date)} · ${v.creneau.heure}`
+  return q
+}
+function preContratDe(v) {
+  return contratsStore.contrats.find(
+    (c) => c.origine?.type === 'VISITE' && c.origine?.refId === v.id,
+  )
 }
 
-function getProgression(statut) {
-  const map = { EN_ATTENTE: 33, CONFIRMEE: 100, REFUSEE: 100 }
-  return map[statut] || 0
+const STATUTS = {
+  EN_ATTENTE: { label: 'En attente', variant: 'amber', etape: 0, ton: 'green' },
+  VALIDEE: { label: 'Créneau proposé', variant: 'info', etape: 1, ton: 'green' },
+  CONFIRMEE: { label: 'Confirmée', variant: 'green', etape: 2, ton: 'green' },
+  CLOTUREE_AVEC_CONTRAT: { label: 'Clôturée', variant: 'green', etape: 3, ton: 'green' },
+  CLOTUREE_SANS_CONTRAT: { label: 'Clôturée', variant: 'neutral', etape: 3, ton: 'green' },
+  REFUSEE: { label: 'Refusée', variant: 'red', etape: 0, ton: 'red' },
+  ANNULEE: { label: 'Annulée', variant: 'neutral', etape: 0, ton: 'red' },
+}
+function statut(v) {
+  return STATUTS[v.statut] || STATUTS.EN_ATTENTE
+}
+function message(v) {
+  return {
+    EN_ATTENTE: 'Votre intérêt a été transmis. En attente du créneau et de l\'agent proposés par le gestionnaire.',
+    CLOTUREE_SANS_CONTRAT: 'Visite effectuée et clôturée.',
+    REFUSEE: 'Votre demande n\'a pas été retenue.',
+    ANNULEE: 'Vous avez annulé cette visite.',
+  }[v.statut] || ''
 }
 
-function getEtapes(statut) {
-  const map = {
-    EN_ATTENTE: [true, false, false],
-    CONFIRMEE: [true, true, true],
-    REFUSEE: [true, true, false],
-  }
-  return map[statut] || [false, false, false]
+async function accepter(v) {
+  await visitesStore.accepterClient(v.id)
+  succes('Créneau accepté : votre visite est confirmée.')
 }
-
-function annuler(id) {
-  store.visites = store.visites.filter((v) => v.id !== id)
+async function annuler(v) {
+  await visitesStore.annulerClient(v.id)
+  info('Visite annulée.')
 }
 </script>
 
 <style scoped>
-.mes-demandes {
+.page {
   padding: 40px 0 80px;
-  background-color: #f8fafc;
-  min-height: calc(100vh - 82px);
+  background: #f4f6fa;
+  min-height: calc(100vh - 70px);
 }
-
 .container {
-  max-width: 1140px;
+  max-width: 1000px;
   margin: 0 auto;
   padding: 0 24px;
 }
-
-.page-header { margin-bottom: 32px; }
-
-.header-row {
+.page-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 28px;
 }
-
 .page-title {
-  font-size: 28px;
+  font-size: 30px;
   font-weight: 700;
-  color: #0f172a;
-  margin: 0 0 6px;
+  color: #1e293b;
 }
-
 .page-subtitle {
   font-size: 15px;
   color: #64748b;
-  margin: 0;
+  margin-top: 2px;
 }
-
 .btn-nouvelle {
   font-size: 14px;
   font-weight: 600;
-  color: #475569;
-  text-decoration: none;
-  padding: 8px 16px;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
+  color: #1e293b;
   background: #fff;
-  transition: background 0.15s;
+  border: 1px solid #e2e8f0;
+  padding: 10px 16px;
+  border-radius: 9px;
+  cursor: pointer;
   white-space: nowrap;
 }
-.btn-nouvelle:hover { background: #f8fafc; }
-
-.visites-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 24px;
+.btn-nouvelle:hover {
+  border-color: #cbd5e1;
 }
 
-.list-card {
-  background: #fff;
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+.liste {
   display: flex;
   flex-direction: column;
+  gap: 16px;
 }
-
-.card-top {
+.carte {
+  background: #fff;
+  border-radius: 14px;
+  padding: 20px 22px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+}
+.carte-head {
   display: flex;
-  gap: 20px;
+  gap: 16px;
+  align-items: center;
 }
-
-.item-img {
-  width: 100px;
-  height: 80px;
-  border-radius: 8px;
+.vignette {
+  width: 64px;
+  height: 64px;
+  border-radius: 10px;
   object-fit: cover;
   flex-shrink: 0;
 }
+.infos {
+  flex: 1;
+  min-width: 0;
+}
+.titre {
+  font-size: 17px;
+  font-weight: 600;
+  color: #1e293b;
+}
+.meta {
+  font-size: 13px;
+  color: #64748b;
+  margin-top: 2px;
+}
+.demandee {
+  font-size: 12px;
+  color: #94a3b8;
+  margin-top: 4px;
+}
 
-.item-details {
+/* Stepper */
+.progression {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-top: 18px;
+  padding-top: 4px;
+}
+.etape-label {
+  font-size: 13.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.tl-green {
+  color: #1e293b;
+}
+.tl-red {
+  color: #dc2626;
+}
+
+/* Panneau créneau / actions */
+.panneau {
+  margin-top: 16px;
+  background: #f8fafc;
+  border: 1px solid #eef2f7;
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+.pn-lignes {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  gap: 8px;
 }
-
-.item-titre {
-  font-size: 17px;
-  font-weight: 700;
-  color: #0f172a;
-  margin: 0 0 6px;
-}
-
-.item-loc {
-  font-size: 14px;
-  color: #64748b;
-  margin: 0;
-}
-
-.progress-bar-container {
-  margin-top: 24px;
+.pn-l {
   display: flex;
-  align-items: center;
-  gap: 24px;
+  justify-content: space-between;
+  font-size: 13.5px;
 }
-
-.progress-track {
-  flex: 1;
-  height: 4px;
-  background: #e2e8f0;
-  border-radius: 2px;
-  position: relative;
-  display: flex;
-  align-items: center;
+.pn-l span {
+  color: #94a3b8;
 }
-
-.progress-fill {
-  position: absolute;
-  left: 0;
-  top: 0;
-  height: 100%;
-  background: #22c55e;
-  border-radius: 2px;
-}
-
-.dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: #e2e8f0;
-  position: absolute;
-  transform: translateX(-50%);
-  border: 2px solid #fff;
-}
-
-.dot.active { background: #22c55e; }
-
-.card-actions {
-  margin-top: 16px;
-  display: flex;
-  justify-content: flex-end;
-}
-
-.btn-annuler {
-  font-size: 13px;
-  font-weight: 500;
-  color: #dc2626;
-  background: none;
-  border: 1px solid #fecaca;
-  border-radius: 7px;
-  padding: 6px 14px;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-.btn-annuler:hover { background: #fef2f2; }
-
-.progress-status-text {
-  font-size: 13px;
+.pn-l strong {
+  color: #1e293b;
   font-weight: 600;
-  color: #334155;
-  white-space: nowrap;
+}
+.tel {
+  color: #1e293b;
+  font-weight: 700;
+  text-decoration: none;
+}
+.pn-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+}
+.btn-vert {
+  background: #22c55e;
+  color: #fff;
+  border: none;
+  border-radius: 9px;
+  padding: 10px 18px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-vert:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.btn-annuler {
+  background: #fff;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  border-radius: 9px;
+  padding: 10px 18px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.lien-precontrat {
+  display: inline-block;
+  margin-top: 14px;
+  color: #15803d;
+  font-weight: 600;
+  font-size: 13.5px;
+  text-decoration: none;
+}
+.message {
+  margin-top: 14px;
+  font-size: 13px;
+  color: #64748b;
+}
+.msg-red {
+  color: #dc2626;
 }
 
 .etat-vide {
@@ -266,22 +349,85 @@ function annuler(id) {
   gap: 16px;
   padding: 80px 0;
   color: #94a3b8;
-  font-size: 15px;
+}
+.btn-primaire {
+  background: #1e293b;
+  color: #fff;
+  border: none;
+  padding: 11px 22px;
+  border-radius: 9px;
+  font-weight: 600;
+  cursor: pointer;
 }
 
-.btn-catalogue {
-  font-size: 14px;
+/* Modale */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 24px;
+}
+.modal {
+  background: #fff;
+  border-radius: 16px;
+  padding: 26px;
+  width: 100%;
+  max-width: 460px;
+}
+.modal h3 {
+  font-size: 19px;
   font-weight: 600;
   color: #1e293b;
-  text-decoration: none;
-  padding: 10px 20px;
+}
+.modal-sub {
+  font-size: 13.5px;
+  color: #64748b;
+  margin: 6px 0 16px;
+}
+.select {
+  width: 100%;
+  padding: 11px 12px;
   border: 1px solid #e2e8f0;
-  border-radius: 8px;
+  border-radius: 9px;
+  font-size: 14px;
+  font-family: inherit;
+}
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+.btn-secondaire {
   background: #fff;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+  border-radius: 9px;
+  padding: 10px 18px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
 }
 
-@media (max-width: 768px) {
-  .visites-grid { grid-template-columns: 1fr; }
-  .header-row { flex-direction: column; gap: 16px; }
+@media (max-width: 640px) {
+  .page-header {
+    flex-direction: column;
+  }
+  .progression {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .pn-actions {
+    flex-direction: column;
+  }
+  .btn-vert,
+  .btn-annuler {
+    width: 100%;
+  }
 }
 </style>

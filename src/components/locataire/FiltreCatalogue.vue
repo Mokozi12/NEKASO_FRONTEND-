@@ -15,7 +15,12 @@
         />
       </div>
 
-      <button class="btn-filtres-avances" @click="$emit('toggle-filtres')" :title="'Filtres avancés'">
+      <button
+        class="btn-filtres-avances"
+        :class="{ actif: ouvert || nbFiltresActifs > 0 }"
+        @click="ouvert = !ouvert"
+        title="Filtres avancés"
+      >
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <line x1="4" x2="4" y1="21" y2="14"/>
           <line x1="4" x2="4" y1="10" y2="3"/>
@@ -27,8 +32,52 @@
           <line x1="9" x2="15" y1="8" y2="8"/>
           <line x1="17" x2="23" y1="16" y2="16"/>
         </svg>
+        <span class="btn-filtres-label">Filtres</span>
+        <span v-if="nbFiltresActifs > 0" class="filtres-count">{{ nbFiltresActifs }}</span>
       </button>
     </div>
+
+    <!-- PANNEAU FILTRES AVANCÉS -->
+    <Transition name="slide-down">
+      <div v-if="ouvert" class="panneau-filtres">
+        <div class="filtre-champ">
+          <label>Loyer min. (FCFA)</label>
+          <input
+            type="number"
+            min="0"
+            step="10000"
+            placeholder="0"
+            :value="loyerMin ?? ''"
+            @input="emitNombre('update:loyerMin', $event.target.value)"
+          />
+        </div>
+        <div class="filtre-champ">
+          <label>Loyer max. (FCFA)</label>
+          <input
+            type="number"
+            min="0"
+            step="10000"
+            placeholder="Sans limite"
+            :value="loyerMax ?? ''"
+            @input="emitNombre('update:loyerMax', $event.target.value)"
+          />
+        </div>
+        <div class="filtre-champ">
+          <label>Nombre de pièces</label>
+          <div class="select-wrap">
+            <select :value="piecesMin ?? ''" @change="emitNombre('update:piecesMin', $event.target.value)">
+              <option value="">Indifférent</option>
+              <option value="1">1 pièce et +</option>
+              <option value="2">2 pièces et +</option>
+              <option value="3">3 pièces et +</option>
+              <option value="4">4 pièces et +</option>
+            </select>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+        <button class="btn-reset" @click="reinitialiser">Réinitialiser</button>
+      </div>
+    </Transition>
 
     <!-- PILLS DE CATÉGORIES -->
     <div class="category-pills">
@@ -46,12 +95,40 @@
 </template>
 
 <script setup>
-defineProps({
+import { ref, computed } from 'vue'
+
+const props = defineProps({
   recherche: { type: String, default: '' },
-  typeActif: { type: [String, null], default: null }
+  typeActif: { type: [String, null], default: null },
+  loyerMin: { type: [Number, null], default: null },
+  loyerMax: { type: [Number, null], default: null },
+  piecesMin: { type: [Number, null], default: null },
 })
 
-defineEmits(['update:recherche', 'update:typeActif', 'toggle-filtres'])
+const emit = defineEmits([
+  'update:recherche',
+  'update:typeActif',
+  'update:loyerMin',
+  'update:loyerMax',
+  'update:piecesMin',
+])
+
+const ouvert = ref(false)
+
+const nbFiltresActifs = computed(
+  () =>
+    (props.loyerMin ? 1 : 0) + (props.loyerMax ? 1 : 0) + (props.piecesMin ? 1 : 0),
+)
+
+function emitNombre(evenement, valeur) {
+  emit(evenement, valeur === '' || valeur === null ? null : Number(valeur))
+}
+
+function reinitialiser() {
+  emit('update:loyerMin', null)
+  emit('update:loyerMax', null)
+  emit('update:piecesMin', null)
+}
 
 const categories = [
   { value: null, label: 'Tout' },
@@ -111,13 +188,18 @@ const categories = [
 .btn-filtres-avances {
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 8px;
   background-color: #ffffff;
   border: 1px solid #e5e7eb;
   border-radius: 10px;
   padding: 13px 18px;
   cursor: pointer;
   transition: all 0.2s;
+  color: #374151;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: inherit;
+  white-space: nowrap;
 }
 
 .btn-filtres-avances:hover {
@@ -127,6 +209,123 @@ const categories = [
 
 .btn-filtres-avances svg {
   stroke: #6b7280;
+}
+
+.btn-filtres-avances.actif {
+  background-color: #1e293b;
+  border-color: #1e293b;
+  color: #ffffff;
+}
+
+.btn-filtres-avances.actif svg {
+  stroke: #ffffff;
+}
+
+.filtres-count {
+  background: #22c55e;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+}
+
+/* ── PANNEAU ── */
+.panneau-filtres {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr auto;
+  gap: 16px;
+  align-items: end;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 18px;
+  margin-bottom: 20px;
+}
+
+.filtre-champ {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.filtre-champ label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.filtre-champ input,
+.select-wrap select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #111827;
+  outline: none;
+  font-family: inherit;
+  background: #f9fafb;
+}
+
+.filtre-champ input:focus,
+.select-wrap select:focus {
+  border-color: #22c55e;
+  background: #fff;
+}
+
+.select-wrap {
+  position: relative;
+}
+
+.select-wrap select {
+  appearance: none;
+  cursor: pointer;
+  padding-right: 34px;
+}
+
+.select-wrap svg {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 15px;
+  height: 15px;
+  stroke: #9ca3af;
+  pointer-events: none;
+}
+
+.btn-reset {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  color: #475569;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  height: 40px;
+}
+
+.btn-reset:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
+}
+
+.slide-down-enter-active,
+.slide-down-leave-active {
+  transition: all 0.2s ease;
+}
+.slide-down-enter-from,
+.slide-down-leave-to {
+  opacity: 0;
+  transform: translateY(-6px);
 }
 
 /* ── PILLS ── */
@@ -162,7 +361,23 @@ const categories = [
 
 @media (max-width: 768px) {
   .filtre-search-row {
-    flex-direction: column;
+    flex-direction: row;
+  }
+
+  .btn-filtres-label {
+    display: none;
+  }
+
+  .btn-filtres-avances {
+    padding: 13px 15px;
+  }
+
+  .panneau-filtres {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .btn-reset {
+    grid-column: 1 / -1;
   }
 
   .category-pills {
@@ -172,6 +387,12 @@ const categories = [
   .pill {
     padding: 8px 16px;
     font-size: 13px;
+  }
+}
+
+@media (max-width: 460px) {
+  .panneau-filtres {
+    grid-template-columns: 1fr;
   }
 }
 </style>

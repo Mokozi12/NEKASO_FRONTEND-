@@ -1,41 +1,84 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
-import { notificationsService } from '@/services/notifications.service'
-import { mockNotifications } from '@/services/mockData'
+import { computed } from 'vue'
+import { db, uid, nowISO, SESSION } from '@/mocks/db'
 
+/*
+  Store des notifications — entièrement mock / en mémoire.
+  Les notifications sont ciblées :
+    - destinataire === 'GESTIONNAIRE'  → visibles côté gestionnaire
+    - destinataire === 'CLIENT'        → visibles par le client (clientId)
+
+  Les autres stores appellent `ajouter()` pour simuler l'envoi d'une
+  notification lors des transitions de statut du workflow.
+*/
 export const useNotificationsStore = defineStore('notifications', () => {
-  const notifications = ref([])
-  const chargement = ref(false)
+  const notifications = computed(() => db.notifications)
 
-  const nonLues = computed(() => notifications.value.filter((n) => !n.lue))
-  const compteur = computed(() => nonLues.value.length)
+  /* Notifications du gestionnaire courant. */
+  const pourGestionnaire = computed(() =>
+    db.notifications
+      .filter((n) => n.destinataire === 'GESTIONNAIRE')
+      .slice()
+      .sort((a, b) => new Date(b.date) - new Date(a.date)),
+  )
 
-  async function charger(params = {}) {
-    chargement.value = true
-    try {
-      // Try real API first
-      try {
-        const res = await notificationsService.getListe(params)
-        notifications.value = res.data
-      } catch (e) {
-        // Fallback mock
-        await new Promise((r) => setTimeout(r, 300))
-        notifications.value = mockNotifications
-      }
-    } finally {
-      chargement.value = false
-    }
+  /* Notifications du client connecté (SESSION.clientId). */
+  const pourClient = computed(() =>
+    db.notifications
+      .filter((n) => n.destinataire === 'CLIENT' && n.clientId === SESSION.clientId)
+      .slice()
+      .sort((a, b) => new Date(b.date) - new Date(a.date)),
+  )
+
+  const nonLuesGestionnaire = computed(() => pourGestionnaire.value.filter((n) => !n.lue))
+  const compteurGestionnaire = computed(() => nonLuesGestionnaire.value.length)
+  const compteurClient = computed(() => pourClient.value.filter((n) => !n.lue).length)
+
+  /* Ajoute une notification (simule un envoi). */
+  function ajouter({ destinataire, clientId = null, type = 'INFO', message }) {
+    db.notifications.push({
+      id: uid('notifications'),
+      destinataire,
+      clientId,
+      type,
+      message,
+      date: nowISO(),
+      lue: false,
+    })
   }
 
-  async function marquerLue(id) {
-    // TODO : await notificationsService.marquerLue(id)
-    notifications.value = notifications.value.map((n) => (n.id === id ? { ...n, lue: true } : n))
+  /* Raccourcis. */
+  function notifierGestionnaire(type, message) {
+    ajouter({ destinataire: 'GESTIONNAIRE', type, message })
+  }
+  function notifierClient(clientId, type, message) {
+    ajouter({ destinataire: 'CLIENT', clientId, type, message })
   }
 
-  async function toutLire() {
-    // TODO : await notificationsService.toutLire()
-    notifications.value = notifications.value.map((n) => ({ ...n, lue: true }))
+  function marquerLue(id) {
+    const n = db.notifications.find((x) => x.id === id)
+    if (n) n.lue = true
   }
 
-  return { notifications, chargement, nonLues, compteur, charger, marquerLue, toutLire }
+  function toutLireGestionnaire() {
+    pourGestionnaire.value.forEach((n) => (n.lue = true))
+  }
+  function toutLireClient() {
+    pourClient.value.forEach((n) => (n.lue = true))
+  }
+
+  return {
+    notifications,
+    pourGestionnaire,
+    pourClient,
+    nonLuesGestionnaire,
+    compteurGestionnaire,
+    compteurClient,
+    ajouter,
+    notifierGestionnaire,
+    notifierClient,
+    marquerLue,
+    toutLireGestionnaire,
+    toutLireClient,
+  }
 })

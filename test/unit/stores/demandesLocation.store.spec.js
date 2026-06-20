@@ -1,151 +1,75 @@
 /**
- * Tests unitaires — demandesLocation.store.js
- * Couvre : charger (API + fallback mock), valider, refuser, computed filters
+ * Tests unitaires — demandesLocation.store.js (logique corrigée §7, §8)
+ * Couvre : regroupement par bien, FIFO, validation (annulation des autres),
+ *          demande express directe.
  */
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
 import { useDemandesLocationStore } from '@/stores/demandesLocation.store'
-
-vi.mock('@/services/demandes-location.service', () => ({
-  demandesLocationService: {
-    getListe: vi.fn(),
-    valider: vi.fn(),
-    refuser: vi.fn(),
-  },
-}))
-
-import { demandesLocationService } from '@/services/demandes-location.service'
-
-const makeDemande = (overrides = {}) => ({
-  id: 1,
-  idBien: 10,
-  idLocataire: 5,
-  statut: 'EN_ATTENTE',
-  dateCreation: '2026-06-01',
-  ...overrides,
-})
+import { reinitialiserDb, db, STATUT_DEMANDE } from '@/mocks/db'
 
 beforeEach(() => {
   setActivePinia(createPinia())
-  vi.clearAllMocks()
+  reinitialiserDb()
 })
 
-// ══════════════════════════════════════════════════════════════════════════
-describe('demandesLocation.store — charger()', () => {
-  it('charge la liste depuis l\'API quand elle répond', async () => {
-    const data = [makeDemande({ id: 1 }), makeDemande({ id: 2 })]
-    demandesLocationService.getListe.mockResolvedValue({ data })
+describe('demandesLocation.store — regroupement par bien (§8)', () => {
+  it('regroupe les demandes par bien', () => {
     const store = useDemandesLocationStore()
-
-    await store.charger()
-
-    expect(store.demandes.length).toBe(2)
-    expect(store.chargement).toBe(false)
-    expect(store.erreur).toBeTruthy() // message d'info fallback ou null
+    const groupeBien2 = store.demandesDuBien(2)
+    // Seed : 3 demandes EN_ATTENTE sur le bien 2 (Studio Plateau)
+    expect(groupeBien2.demandes.length).toBe(3)
+    expect(groupeBien2.nbEnAttente).toBe(3)
   })
 
-  it('utilise les données mock si l\'API échoue (fallback)', async () => {
-    demandesLocationService.getListe.mockRejectedValue(new Error('Network Error'))
+  it('marque le premier arrivé comme prioritaire (FIFO §8-bis)', () => {
     const store = useDemandesLocationStore()
-
-    await store.charger()
-
-    expect(store.demandes.length).toBeGreaterThan(0)
-    expect(store.erreur).toContain('serveur')
-    expect(store.chargement).toBe(false)
+    const groupeBien2 = store.demandesDuBien(2)
+    // La demande la plus ancienne du bien 2 est id 1 (2026-06-10)
+    expect(groupeBien2.prioritaireId).toBe(1)
   })
 })
 
-// ══════════════════════════════════════════════════════════════════════════
-describe('demandesLocation.store — valider()', () => {
-  it('change le statut en VALIDEE', async () => {
-    demandesLocationService.valider.mockResolvedValue({})
+describe('demandesLocation.store — validation (§8)', () => {
+  it('valider une demande annule les autres du même bien et crée un pré-contrat', async () => {
     const store = useDemandesLocationStore()
-    store.demandes = [makeDemande({ id: 10, statut: 'EN_ATTENTE' })]
+    const nbContratsAvant = db.contrats.length
 
-    await store.valider(10)
+    // On valide la demande id 1 (bien 2). Les demandes 2 et 3 (même bien) doivent être annulées.
+    const contrat = await store.validerDemande(1)
 
-    expect(store.demandes[0].statut).toBe('VALIDEE')
+    expect(db.demandes.find((d) => d.id === 1).statut).toBe(STATUT_DEMANDE.VALIDEE)
+    expect(db.demandes.find((d) => d.id === 2).statut).toBe(STATUT_DEMANDE.ANNULEE)
+    expect(db.demandes.find((d) => d.id === 3).statut).toBe(STATUT_DEMANDE.ANNULEE)
+
+    // Le bien passe en réservé
+    expect(db.biens.find((b) => b.id === 2).statutBien).toBe('RESERVE')
+
+    // Un pré-contrat est créé pour le retenu (client 2)
+    expect(db.contrats.length).toBe(nbContratsAvant + 1)
+    expect(contrat.clientId).toBe(2)
+    expect(contrat.statut).toBe('PRE_CONTRAT_ENVOYE')
   })
 
-  it('met à jour localement même si l\'API échoue', async () => {
-    demandesLocationService.valider.mockRejectedValue(new Error('fail'))
+  it('toutAnnuler annule toutes les demandes en attente d\'un bien', async () => {
     const store = useDemandesLocationStore()
-    store.demandes = [makeDemande({ id: 11 })]
-
-    await store.valider(11)
-
-    expect(store.demandes[0].statut).toBe('VALIDEE')
-  })
-
-  it('ne modifie pas les autres demandes', async () => {
-    demandesLocationService.valider.mockResolvedValue({})
-    const store = useDemandesLocationStore()
-    store.demandes = [makeDemande({ id: 1 }), makeDemande({ id: 2 })]
-
-    await store.valider(1)
-
-    expect(store.demandes[1].statut).toBe('EN_ATTENTE')
+    await store.toutAnnuler(2)
+    const restantes = db.demandes.filter(
+      (d) => d.bienId === 2 && d.statut === STATUT_DEMANDE.EN_ATTENTE,
+    )
+    expect(restantes.length).toBe(0)
   })
 })
 
-// ══════════════════════════════════════════════════════════════════════════
-describe('demandesLocation.store — refuser()', () => {
-  it('change le statut en REFUSEE', async () => {
-    demandesLocationService.refuser.mockResolvedValue({})
+describe('demandesLocation.store — demande express (§7-bis)', () => {
+  it('creerDemandeDirecte ajoute une demande EN_ATTENTE de source DIRECTE', async () => {
     const store = useDemandesLocationStore()
-    store.demandes = [makeDemande({ id: 20 })]
-
-    await store.refuser(20)
-
-    expect(store.demandes[0].statut).toBe('REFUSEE')
-  })
-
-  it('met à jour localement même si l\'API échoue', async () => {
-    demandesLocationService.refuser.mockRejectedValue(new Error('fail'))
-    const store = useDemandesLocationStore()
-    store.demandes = [makeDemande({ id: 21 })]
-
-    await store.refuser(21)
-
-    expect(store.demandes[0].statut).toBe('REFUSEE')
-  })
-})
-
-// ══════════════════════════════════════════════════════════════════════════
-describe('demandesLocation.store — computed filters', () => {
-  it('enAttente ne retourne que les demandes EN_ATTENTE', () => {
-    const store = useDemandesLocationStore()
-    store.demandes = [
-      makeDemande({ id: 1, statut: 'EN_ATTENTE' }),
-      makeDemande({ id: 2, statut: 'VALIDEE' }),
-      makeDemande({ id: 3, statut: 'REFUSEE' }),
-    ]
-    expect(store.enAttente.length).toBe(1)
-    expect(store.enAttente[0].id).toBe(1)
-  })
-
-  it('validees retourne uniquement les VALIDEE', () => {
-    const store = useDemandesLocationStore()
-    store.demandes = [
-      makeDemande({ id: 1, statut: 'EN_ATTENTE' }),
-      makeDemande({ id: 2, statut: 'VALIDEE' }),
-      makeDemande({ id: 3, statut: 'VALIDEE' }),
-    ]
-    expect(store.validees.length).toBe(2)
-  })
-
-  it('refusees retourne uniquement les REFUSEE', () => {
-    const store = useDemandesLocationStore()
-    store.demandes = [makeDemande({ id: 1, statut: 'REFUSEE' }), makeDemande({ id: 2, statut: 'EN_ATTENTE' })]
-    expect(store.refusees.length).toBe(1)
-  })
-
-  it('retourne des listes vides quand demandes est vide', () => {
-    const store = useDemandesLocationStore()
-    store.demandes = []
-    expect(store.enAttente.length).toBe(0)
-    expect(store.validees.length).toBe(0)
-    expect(store.refusees.length).toBe(0)
+    const avant = db.demandes.length
+    await store.creerDemandeDirecte(4, 1)
+    expect(db.demandes.length).toBe(avant + 1)
+    const nouvelle = db.demandes[db.demandes.length - 1]
+    expect(nouvelle.statut).toBe(STATUT_DEMANDE.EN_ATTENTE)
+    expect(nouvelle.source).toBe('DIRECTE')
+    expect(nouvelle.bienId).toBe(4)
   })
 })

@@ -14,7 +14,6 @@
       <!-- ACTIONS DROITE -->
       <div class="header-actions">
         <router-link to="/login" class="btn-login">Se connecter</router-link>
-        <router-link to="/inscription" class="btn-signup">Créer un compte</router-link>
       </div>
 
       <!-- MOBILE MENU TOGGLE -->
@@ -48,9 +47,6 @@
         <router-link to="/login" class="mobile-link" @click="mobileOpen = false"
           >Se connecter</router-link
         >
-        <router-link to="/inscription" class="mobile-link mobile-signup" @click="mobileOpen = false"
-          >Créer un compte</router-link
-        >
       </div>
     </Transition>
   </header>
@@ -68,7 +64,7 @@ const authStore = useAuthStore()
 const handleLogoClick = () => {
   // Si l'utilisateur est connecté côté locataire, revenir sur le dashboard
   if (authStore.isAuthenticated && authStore.user?.role === 'LOCATAIRE') {
-    router.push('/locataire/mes-locations')
+    router.push('/locataire/accueil')
     return
   }
   // Sinon, comportement public normal

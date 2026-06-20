@@ -1,0 +1,152 @@
+/*
+  Mappers backend → frontend.
+
+  Le backend NEKASO utilise un modèle de données plus « plat » et des noms de
+  champs parfois différents de ceux attendus par les vues (ex. `libelle` côté
+  backend vs `intitule` côté front). On centralise ici toutes les traductions
+  pour qu'un seul endroit soit à corriger si le contrat d'API évolue.
+*/
+
+/* ───────────── Méthodes de paiement ───────────── */
+const LIBELLE_METHODE = {
+  OM: 'Orange Money',
+  ORANGE_MONEY: 'Orange Money',
+  WAVE: 'Wave',
+  FREE: 'Free Money',
+  ESPECES: 'Espèces',
+  VIREMENT: 'Virement',
+}
+export function libelleMethode(code) {
+  return LIBELLE_METHODE[code] || code || '—'
+}
+
+/* ───────────── Bien immobilier ───────────── */
+export function mapBien(b) {
+  if (!b) return null
+  return {
+    ...b,
+    id: b.id,
+    // Le front utilise `intitule`, le backend renvoie `libelle`.
+    intitule: b.libelle ?? b.intitule ?? '',
+    libelle: b.libelle ?? b.intitule ?? '',
+    type: b.typeBien ?? b.type ?? '',
+    typeBien: b.typeBien ?? b.type ?? '',
+    adresse: b.adresse ?? '',
+    surface: Number(b.surface) || 0,
+    nombrePieces: Number(b.nombrePieces) || 0,
+    loyer: Number(b.loyer) || 0,
+    statutBien: b.statutBien ?? 'DISPONIBLE',
+    description: b.description ?? '',
+    dateAjout: b.dateAjout ?? '',
+    gestionnaireId: b.gestionnaireId ?? null,
+    photos: Array.isArray(b.photos)
+      ? b.photos.map((p) => ({ id: p.id, urlPhoto: p.urlPhoto, dateUpload: p.dateUpload }))
+      : [],
+  }
+}
+export const mapBiens = (liste) => (liste || []).map(mapBien)
+
+/* ───────────── Demande de location ───────────── */
+export function mapDemandeLocation(d) {
+  if (!d) return null
+  return {
+    ...d,
+    id: d.id,
+    statut: d.statut,
+    dateDemande: d.dateDemande,
+    locataireId: d.locataireId ?? d.id_Locataire ?? null,
+    bienId: d.bienId ?? d.id_Bien ?? d.bien?.id ?? null,
+    bien: d.bien ? mapBien(d.bien) : null,
+  }
+}
+export const mapDemandesLocation = (liste) => (liste || []).map(mapDemandeLocation)
+
+/* ───────────── Demande de visite ───────────── */
+export function mapVisite(v) {
+  if (!v) return null
+  return {
+    ...v,
+    id: v.id,
+    statut: v.statut,
+    dateCreation: v.dateCreation,
+    locataireId: v.id_Locataire ?? v.locataireId ?? null,
+    bienId: v.bien?.id ?? v.bienId ?? v.id_Bien ?? null,
+    bien: v.bien ? mapBien(v.bien) : null,
+    agentId: v.agentId ?? v.agent?.id ?? null,
+  }
+}
+export const mapVisites = (liste) => (liste || []).map(mapVisite)
+
+/* ───────────── Pré-contrat ───────────── */
+export function mapPreContrat(p) {
+  if (!p) return null
+  return {
+    ...p,
+    id: p.id,
+    statut: p.statutPreContrat ?? p.statut,
+    statutPreContrat: p.statutPreContrat,
+    conditions: p.conditions ?? '',
+    dateCreation: p.dateCreation,
+    dateDebut: p.dateDebutPrevu ?? p.dateDebut,
+    dateDebutPrevu: p.dateDebutPrevu,
+    jourEcheance: p.jourEcheancePaiement ?? null,
+    montantLoyer: Number(p.montantLoyer) || 0,
+    montantCaution: Number(p.montantCaution) || 0,
+    bienId: p.bienImmobilierId ?? p.bienId ?? null,
+    bienIntitule: p.bienLibelle ?? '',
+    locataireId: p.locataireId ?? null,
+    locataire: {
+      id: p.locataireId,
+      nom: p.locataireNom,
+      prenom: p.locatairePrenom,
+      telephone: p.locataireTelephone,
+    },
+    gestionnaireId: p.gestionnaireId ?? null,
+    gestionnaire: {
+      id: p.gestionnaireId,
+      nom: p.gestionnaireNom,
+      prenom: p.gestionnairePrenom,
+      telephone: p.gestionnaireTelephone,
+    },
+  }
+}
+export const mapPreContrats = (liste) => (liste || []).map(mapPreContrat)
+
+/* ───────────── Contrat de bail définitif ───────────── */
+export function mapContrat(c) {
+  if (!c) return null
+  return {
+    ...c,
+    id: c.id,
+    statut: c.statutContrat ?? c.statut,
+    statutContrat: c.statutContrat,
+    conditions: c.conditions ?? '',
+    dateDebut: c.dateDebut,
+    dateSignature: c.dateSignature,
+    jourEcheance: c.jourEcheanceLoyer ?? null,
+    montantLoyer: Number(c.montantLoyer) || 0,
+    montantCaution: Number(c.montantCaution) || 0,
+    locataireId: c.locataireId ?? null,
+    preContratId: c.preContratId ?? null,
+    cheminPDF: c.cheminPDF ?? null,
+  }
+}
+export const mapContrats = (liste) => (liste || []).map(mapContrat)
+
+/* ───────────── Paiement ───────────── */
+export function mapPaiement(p) {
+  if (!p) return null
+  return {
+    ...p,
+    id: p.id,
+    montant: Number(p.montant) || 0,
+    datePaiement: p.datePaiement,
+    mois: p.mois,
+    reference: p.reference,
+    methodePaiement: p.methodePaiement,
+    methodeLibelle: libelleMethode(p.methodePaiement),
+    contratId: p.contratId ?? null,
+    quittance: p.quittance ?? null,
+  }
+}
+export const mapPaiements = (liste) => (liste || []).map(mapPaiement)

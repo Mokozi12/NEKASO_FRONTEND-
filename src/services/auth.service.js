@@ -35,14 +35,32 @@ export const authService = {
       return Promise.reject(new Error('Le téléphone et le mot de passe sont obligatoires'))
     }
 
-    
- 
-    // Appel API au backend
+    // Nettoyage du numéro : on retire tous les espaces pour correspondre au format backend (ex: "771234567")
+    const telClean = telephone.replace(/\s+/g, '')
+
+    // Appel API au backend — POST /api/v1/auth/login
     return api
-      .post('/auth/login', {
-        telephone,
+      .post('/v1/auth/login', {
+        telephone: telClean,
         motDePasse,
       })
+      .then((response) => response.data)
+  },
+
+  /**
+   * Inscription d'un nouveau locataire — POST /api/v1/auth/register
+   * Body attendu : { telephone, motDePasse, prenom, nom }
+   */
+  register: ({ telephone, motDePasse, prenom, nom }) => {
+    if (!telephone || !motDePasse || !prenom || !nom) {
+      return Promise.reject(new Error('Tous les champs sont obligatoires'))
+    }
+
+    // Nettoyage du numéro
+    const telClean = telephone.replace(/\s+/g, '')
+
+    return api
+      .post('/v1/auth/register', { telephone: telClean, motDePasse, prenom, nom })
       .then((response) => response.data)
   },
 }

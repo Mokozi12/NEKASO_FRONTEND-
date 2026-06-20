@@ -1,8 +1,29 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { authService } from '@/services/auth.service'
-import { mockUser } from '@/services/mockData'
 import { getToken, setToken, removeToken, getUser, setUser, removeUser } from '@/services/storage'
+
+/*
+  Construit l'objet utilisateur à partir de la charge utile renvoyée par le
+  backend au login : { token, nom, prenom, telephone, roles: ["LOCATAIRE"|"GESTIONNAIRE"] }
+
+  OPTION A : les endpoints locataire n'utilisent plus l'id dans l'URL — le backend
+  identifie l'utilisateur via le sub du JWT. Le champ `id` est conservé si le
+  backend l'envoie, mais il n'est plus nécessaire pour les appels API.
+*/
+function construireUser(payload) {
+  const roles = payload.roles || (payload.role ? [payload.role] : [])
+  const role = roles[0] || 'LOCATAIRE'
+  return {
+    id: payload.id ?? null,
+    nom: payload.nom,
+    prenom: payload.prenom,
+    telephone: payload.telephone,
+    role,
+    roles,
+    statut: payload.statut ?? 'ACTIF',
+  }
+}
 
 export const useAuthStore = defineStore('auth', () => {
   const token = ref(getToken())
@@ -13,10 +34,11 @@ export const useAuthStore = defineStore('auth', () => {
   // Contexte pour la reprise d'action post-authentification (ex: visite ou location)
   const pendingAction = ref(JSON.parse(localStorage.getItem('nekaso_pending_action') || 'null'))
 
-  const utilisateurCourant = computed(() => user.value ?? mockUser)
+  const utilisateurCourant = computed(() => user.value)
   const isAuthenticated = computed(() => !!token.value)
   const nomComplet = computed(() => (user.value ? `${user.value.prenom} ${user.value.nom}` : ''))
   const isGestionnaire = computed(() => user.value?.role === 'GESTIONNAIRE')
+  const userId = computed(() => user.value?.id ?? null)
 
   /**
    * Connecter un gestionnaire avec son téléphone et mot de passe.
@@ -35,11 +57,12 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = null
 
     try {
-      // Appel au backend NEKASO
-      const response = await authService.login(telephone, motDePasse)
+      // Appel au backend NEKASO. La charge utile est dans `message`.
+      const body = await authService.login(telephone, motDePasse)
+      const payload = body?.message ?? body
 
-      // Réponse 200 : extraction du token et user
-      const { token: newToken, user: newUser } = response
+      const newToken = payload.token
+      const newUser = construireUser(payload)
 
       // Stockage en mémoire (ref Pinia)
       token.value = newToken
@@ -54,7 +77,8 @@ export const useAuthStore = defineStore('auth', () => {
       // Gestion des erreurs selon le contrat API
       let errorMessage = "Une erreur inconnue s'est produite"
 
-      if (err.response?.status === 401) {
+      // ⚠️ Le backend renvoie 404 (et non 401) pour des identifiants incorrects.
+      if (err.response?.status === 401 || err.response?.status === 404) {
         errorMessage = 'Téléphone ou mot de passe incorrect'
       } else if (err.response?.status === 400) {
         errorMessage = err.response.data?.message || 'Champs obligatoires manquants'
@@ -79,31 +103,29 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = null
 
     try {
-      // Mock d'inscription
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          const newUser = {
-            id: Date.now(),
-            nom: nom,
-            prenom: prenom,
-            role: 'LOCATAIRE',
-            telephone: telephone,
-            statut: 'ACTIF',
-          }
-          const newToken = 'fake-jwt-token-new-locataire'
+      // 1) Inscription (le backend ne renvoie PAS de token ici).
+      await authService.register({ telephone, motDePasse, prenom, nom })
+      // 2) Connexion automatique pour récupérer le token.
+      const body = await authService.login(telephone, motDePasse)
+      const payload = body?.message ?? body
+      const newToken = payload.token
+      const newUser = construireUser(payload)
 
-          token.value = newToken
-          user.value = newUser
-          setToken(newToken)
-          setUser(newUser)
+      token.value = newToken
+      user.value = newUser
+      setToken(newToken)
+      setUser(newUser)
 
-          isLoading.value = false
-          resolve({ success: true, user: newUser })
-        }, 1500)
-      })
+      return { success: true, user: newUser }
     } catch (err) {
+      let errorMessage = "Erreur lors de l'inscription"
+      const apiMsg = err.response?.data?.message
+      if (typeof apiMsg === 'string') errorMessage = apiMsg
+      else if (!err.response) errorMessage = 'Impossible de contacter le serveur.'
+      error.value = errorMessage
+      return { success: false, error: errorMessage }
+    } finally {
       isLoading.value = false
-      return { success: false, error: "Erreur lors de l'inscription" }
     }
   }
 
@@ -137,6 +159,7 @@ export const useAuthStore = defineStore('auth', () => {
     isAuthenticated,
     nomComplet,
     isGestionnaire,
+    userId,
     isLoading,
     error,
     login,

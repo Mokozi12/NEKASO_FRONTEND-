@@ -1,11 +1,13 @@
 <template>
   <div class="bien-detail">
-    <HeaderLocataire v-if="authStore.isAuthenticated && authStore.user?.role === 'LOCATAIRE'" />
-    <HeaderPublic v-else />
+    <template v-if="!$route.meta.sansEntete">
+      <HeaderLocataire v-if="authStore.isAuthenticated && authStore.user?.role === 'LOCATAIRE'" />
+      <HeaderPublic v-else />
+    </template>
 
     <div class="detail-content">
       <div class="container">
-        <router-link to="/catalogue" class="btn-back">
+        <router-link :to="lienRetour" class="btn-back">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="16"
@@ -456,6 +458,9 @@ const router = useRouter()
 const biensStore = useBiensPublicsStore()
 const authStore = useAuthStore()
 
+// Sous l'espace locataire connecté, on reste sur les URLs /locataire/biens.
+const lienRetour = computed(() => (route.meta.sansEntete ? '/locataire/biens' : '/catalogue'))
+
 const bien = ref(null)
 const selectedImage = ref(null)
 const showModalVisite = ref(false)
@@ -517,19 +522,20 @@ const formatMontant = (montant) => {
 }
 
 const demanderVisite = () => {
+  // Déconnecté → connexion/inscription d'abord ; la confirmation sera proposée
+  // au retour sur la page (cf. onMounted + pendingAction).
+  if (!authStore.isAuthenticated) {
+    authStore.setPendingAction({ type: 'visite', bienId: route.params.id })
+    router.push('/login')
+    return
+  }
+  // Connecté → on affiche directement la confirmation.
   showModalVisite.value = true
 }
 
 const confirmerVisite = async () => {
   showModalVisite.value = false
   erreurVisite.value = ''
-
-  // Si l'utilisateur n'est pas connecté, on enregistre l'action en attente
-  if (!authStore.isAuthenticated) {
-    authStore.setPendingAction({ type: 'visite', bienId: route.params.id })
-    router.push('/login')
-    return
-  }
 
   try {
     const res = await visitesLocataireService.demander(authStore.user?.id, Number(bien.value.id))
@@ -553,18 +559,17 @@ const confirmerVisite = async () => {
 }
 
 const demanderLocation = () => {
+  if (!authStore.isAuthenticated) {
+    authStore.setPendingAction({ type: 'location', bienId: route.params.id })
+    router.push('/login')
+    return
+  }
   showModalLocation.value = true
 }
 
 const confirmerLocation = async () => {
   showModalLocation.value = false
   erreurLocation.value = ''
-
-  if (!authStore.isAuthenticated) {
-    authStore.setPendingAction({ type: 'location', bienId: route.params.id })
-    router.push('/login')
-    return
-  }
 
   try {
     await demandesLocationService.creer(authStore.user?.id, Number(bien.value.id))

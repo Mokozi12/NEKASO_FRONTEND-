@@ -53,6 +53,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth.store'
 
 const props = defineProps({
   bien: {
@@ -62,6 +63,7 @@ const props = defineProps({
 })
 
 const router = useRouter()
+const authStore = useAuthStore()
 
 const statutClass = computed(() => {
   const s = (props.bien.statutBien || props.bien.statut)?.toLowerCase()
@@ -87,7 +89,10 @@ const formatMontant = (montant) => {
 }
 
 const voirDetail = () => {
-  router.push(`/biens/${props.bien.id}`)
+  // Locataire connecté → on reste dans l'espace /locataire ; sinon route publique.
+  const connecteLocataire =
+    authStore.isAuthenticated && authStore.user?.role === 'LOCATAIRE'
+  router.push(`${connecteLocataire ? '/locataire/biens' : '/biens'}/${props.bien.id}`)
 }
 </script>
 
