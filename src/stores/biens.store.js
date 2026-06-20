@@ -5,15 +5,7 @@ import { mapBiens } from '@/services/mappers'
 import { pageMeta } from '@/utils/apiResponse'
 import { useAuthStore } from '@/stores/auth.store'
 
-/*
-  Store des BIENS — branché sur le backend NEKASO (bien-immobilier-controller).
 
-  Statuts backend connus : DISPONIBLE, RESERVE, LOUE (+ EN_REPARATION/DESACTIVE/
-  ARCHIVE côté front). Les changements de statut passent par l'endpoint de mise
-  à jour (PATCH update-bien) en renvoyant le champ statutBien.
-*/
-
-// Construit le FormData attendu par le backend à partir d'un bien existant.
 function bienToFormData(bien, overrides = {}) {
   const b = { ...bien, ...overrides }
   const fd = new FormData()
@@ -26,6 +18,13 @@ function bienToFormData(bien, overrides = {}) {
   if (b.nombrePieces != null) fd.append('nombrePieces', String(b.nombrePieces))
   if (b.loyer != null) fd.append('loyer', String(b.loyer))
   if (b.gestionnaireId != null) fd.append('gestionnaireId', String(b.gestionnaireId))
+
+  if (b.photosFichiers && Array.isArray(b.photosFichiers)) {
+    b.photosFichiers.forEach((file) => {
+      fd.append('photos', file)
+    })
+  }
+
   return fd
 }
 
@@ -66,7 +65,6 @@ export const useBiensStore = defineStore('biens', () => {
     return biens.value.find((b) => String(b.id) === String(id)) || null
   }
 
-  // Ajoute le gestionnaireId (absent du formulaire) avant l'envoi.
   function injecterGestionnaire(formData) {
     const gid = useAuthStore().userId
     if (formData instanceof FormData) {
@@ -98,7 +96,6 @@ export const useBiensStore = defineStore('biens', () => {
     }
   }
 
-  // Changements de statut → via l'endpoint de mise à jour.
   async function changerStatut(id, statutBien) {
     const bien = getBien(id)
     if (!bien) return

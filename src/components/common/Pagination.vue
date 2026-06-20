@@ -1,7 +1,3 @@
-<!--
-  Pagination — contrôle de pagination réutilisable (Précédent / pages / Suivant).
-  S'utilise avec v-model (page courante) + :total-pages. Masqué s'il n'y a qu'une page.
--->
 <template>
   <nav v-if="totalPages > 1" class="pagination" aria-label="Pagination">
     <button class="pg-btn" :disabled="modelValue === 1" @click="aller(modelValue - 1)">
@@ -34,7 +30,6 @@ const props = defineProps({
 })
 const emit = defineEmits(['update:modelValue'])
 
-// Fenêtre de pages autour de la page courante, avec « … » si nécessaire.
 const pagesVisibles = computed(() => {
   const total = props.totalPages
   const courant = props.modelValue

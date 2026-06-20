@@ -26,9 +26,9 @@
         </router-link>
 
         <div class="detail-layout" v-if="bien">
-          <!-- LEFT COLUMN: IMAGES & DETAILS -->
+          
           <div class="left-column">
-            <!-- GALLERY -->
+            
             <div class="gallery">
               <div class="main-image">
                 <img
@@ -53,7 +53,7 @@
               </div>
             </div>
 
-            <!-- HEADER / TITLE -->
+            
             <div class="bien-header">
               <div class="title-row">
                 <h1 class="bien-titre">{{ bien.libelle || bien.titre }}</h1>
@@ -84,7 +84,7 @@
               </div>
             </div>
 
-            <!-- SPECS GRID -->
+            
             <div class="specs-list">
               <div
                 class="spec-item"
@@ -142,7 +142,7 @@
               </div>
             </div>
 
-            <!-- DESCRIPTION -->
+            
             <div class="section-block">
               <h2 class="section-title">Description</h2>
               <p class="description-text">
@@ -153,7 +153,7 @@
               </p>
             </div>
 
-            <!-- EQUIPEMENTS -->
+            
             <div class="section-block">
               <h2 class="section-title">Équipements</h2>
               <div class="equipements-grid">
@@ -177,7 +177,7 @@
             </div>
           </div>
 
-          <!-- RIGHT COLUMN: SIDEBAR -->
+          
           <div class="sidebar">
             <div class="action-card sticky">
               <div class="price-box">
@@ -274,7 +274,7 @@
                 </button>
               </div>
 
-              <!-- GESTIONNAIRE INFO -->
+              
               <div class="gestionnaire-section">
                 <div class="gestionnaire-label">GESTIONNAIRE</div>
                 <div class="gestionnaire-info">
@@ -294,7 +294,7 @@
                 </div>
               </div>
 
-              <!-- NO ACCOUNT BANNER -->
+              
               <div v-if="!authStore.isAuthenticated" class="alert-info">
                 <div class="alert-icon">
                   <svg
@@ -327,7 +327,7 @@
       </div>
     </div>
 
-    <!-- MODAL VISITE -->
+    
     <div class="modal-overlay" v-if="showModalVisite" @click.self="showModalVisite = false">
       <div class="modal" style="max-width: 480px; text-align: center; padding: 40px 32px">
         <h3
@@ -382,7 +382,7 @@
       </div>
     </div>
 
-    <!-- MODAL LOCATION -->
+    
     <div class="modal-overlay" v-if="showModalLocation" @click.self="showModalLocation = false">
       <div class="modal" style="max-width: 480px; text-align: center; padding: 40px 32px">
         <h3
@@ -451,14 +451,13 @@ import HeaderLocataire from '@/components/layout/HeaderLocataire.vue'
 import BadgeStatut from '@/components/biens/common/BadgeStatut.vue'
 import ChargementSpinner from '@/components/biens/common/ChargementSpinner.vue'
 import { visitesLocataireService } from '@/services/visites-locataire.service'
-import { demandesLocationService } from '@/services/demandes-location.service'
+import { demandesLocataireService } from '@/services/demandes-locataire.service'
 
 const route = useRoute()
 const router = useRouter()
 const biensStore = useBiensPublicsStore()
 const authStore = useAuthStore()
 
-// Sous l'espace locataire connecté, on reste sur les URLs /locataire/biens.
 const lienRetour = computed(() => (route.meta.sansEntete ? '/locataire/biens' : '/catalogue'))
 
 const bien = ref(null)
@@ -498,7 +497,6 @@ onMounted(async () => {
     selectedImage.value = p?.urlPhoto || p
   }
 
-  // Vérifier s'il y a une action en attente (après authentification)
   if (
     authStore.isAuthenticated &&
     authStore.pendingAction &&
@@ -522,14 +520,11 @@ const formatMontant = (montant) => {
 }
 
 const demanderVisite = () => {
-  // Déconnecté → connexion/inscription d'abord ; la confirmation sera proposée
-  // au retour sur la page (cf. onMounted + pendingAction).
   if (!authStore.isAuthenticated) {
     authStore.setPendingAction({ type: 'visite', bienId: route.params.id })
     router.push('/login')
     return
   }
-  // Connecté → on affiche directement la confirmation.
   showModalVisite.value = true
 }
 
@@ -572,7 +567,7 @@ const confirmerLocation = async () => {
   erreurLocation.value = ''
 
   try {
-    await demandesLocationService.creer(authStore.user?.id, Number(bien.value.id))
+    await demandesLocataireService.creer(Number(bien.value.id))
     router.push(`/locataire/succes-location/${bien.value.id}`)
   } catch (err) {
     const status = err?.response?.status
@@ -639,7 +634,7 @@ const appeler = () => {
   align-items: start;
 }
 
-/* LEFT COLUMN */
+
 .left-column {
   display: flex;
   flex-direction: column;
@@ -688,7 +683,7 @@ const appeler = () => {
   opacity: 1;
 }
 
-/* INFO CARD */
+
 .info-card {
   background-color: #ffffff;
   border-radius: 16px;
@@ -698,7 +693,7 @@ const appeler = () => {
     0 2px 4px -1px rgba(0, 0, 0, 0.03);
 }
 
-/* HEADER INFO */
+
 .title-row {
   display: flex;
   justify-content: space-between;
@@ -721,7 +716,7 @@ const appeler = () => {
   color: #64748b;
 }
 
-/* SPECS LIST */
+
 .specs-list {
   display: flex;
   gap: 32px;
@@ -764,7 +759,7 @@ const appeler = () => {
   color: #64748b;
 }
 
-/* SECTIONS */
+
 .section-block {
   margin-top: 16px;
 }
@@ -801,14 +796,14 @@ const appeler = () => {
   flex-shrink: 0;
 }
 
-/* RIGHT COLUMN: SIDEBAR */
+
 .sidebar {
   position: relative;
 }
 
 .sticky {
   position: sticky;
-  top: 100px; /* Below header */
+  top: 100px; 
 }
 
 .action-card {
@@ -836,7 +831,7 @@ const appeler = () => {
   color: #64748b;
 }
 
-/* ACTIONS */
+
 .actions {
   display: flex;
   flex-direction: column;
@@ -899,7 +894,7 @@ const appeler = () => {
   background-color: #f8fafc;
 }
 
-/* GESTIONNAIRE */
+
 .gestionnaire-section {
   padding-top: 24px;
   border-top: 1px solid #e2e8f0;
@@ -944,7 +939,7 @@ const appeler = () => {
   color: #64748b;
 }
 
-/* ALERT INFO */
+
 .alert-info {
   background-color: #fffbeb;
   border: 1px solid #fef3c7;

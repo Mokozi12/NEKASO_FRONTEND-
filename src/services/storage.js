@@ -1,6 +1,3 @@
-// Petit helper pour centraliser le stockage côté client (token + user).
-// Par défaut on utilise sessionStorage (moins persistant que localStorage)
-// pour réduire la surface d'attaque en cas de XSS.
 
 const TOKEN_KEY = 'nekaso_token'
 const USER_KEY = 'nekaso_user'
@@ -10,7 +7,6 @@ function getToken() {
 }
 
 function setToken(token, { persistent = false } = {}) {
-  // Supprime d'abord partout
   sessionStorage.removeItem(TOKEN_KEY)
   localStorage.removeItem(TOKEN_KEY)
 

@@ -1,13 +1,3 @@
-<!--
-  BadgeStatut — pastille de statut réutilisable côté locataire.
-  Reprend le style des PDF : pilule arrondie, fond clair + texte coloré,
-  avec une icône optionnelle (check / clock / alert).
-
-  Props :
-    - label   : texte affiché
-    - variant : green | amber | red | neutral | info | navy
-    - icon    : '' | 'check' | 'clock' | 'alert'
--->
 <template>
   <span class="badge-statut" :class="`is-${variant}`">
     <svg v-if="icon === 'check'" class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">

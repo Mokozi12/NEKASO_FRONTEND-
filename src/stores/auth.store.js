@@ -4,14 +4,6 @@ import { authService } from '@/services/auth.service'
 import { getToken, setToken, removeToken, getUser, setUser, removeUser } from '@/services/storage'
 import { parseJwt } from '@/utils/jwt'
 
-/*
-  Construit l'objet utilisateur à partir de la charge utile renvoyée par le
-  backend au login : { token, nom, prenom, telephone, roles: ["LOCATAIRE"|"GESTIONNAIRE"] }
-
-  OPTION A : les endpoints locataire n'utilisent plus l'id dans l'URL — le backend
-  identifie l'utilisateur via le sub du JWT. Le champ `id` est conservé si le
-  backend l'envoie, mais il n'est plus nécessaire pour les appels API.
-*/
 function construireUser(payload) {
   const u = payload?.user || payload || {}
   const roles = u.roles || (u.role ? [u.role] : (payload?.roles || (payload?.role ? [payload.role] : [])))
@@ -31,8 +23,6 @@ export const useAuthStore = defineStore('auth', () => {
   const token = ref(getToken())
   const user = ref(getUser())
 
-  // Si on a un token mais pas d'infos utilisateur en stockage,
-  // on décode le JWT pour récupérer au moins le téléphone (sub) de manière résiliente.
   if (token.value && !user.value) {
     const jwtPayload = parseJwt(token.value)
     if (jwtPayload && jwtPayload.sub) {
@@ -51,7 +41,6 @@ export const useAuthStore = defineStore('auth', () => {
   const isLoading = ref(false)
   const error = ref(null)
 
-  // Contexte pour la reprise d'action post-authentification (ex: visite ou location)
   const pendingAction = ref(JSON.parse(localStorage.getItem('nekaso_pending_action') || 'null'))
 
   const utilisateurCourant = computed(() => user.value)
@@ -66,44 +55,27 @@ export const useAuthStore = defineStore('auth', () => {
   const isGestionnaire = computed(() => user.value?.role === 'GESTIONNAIRE')
   const userId = computed(() => user.value?.id ?? null)
 
-  /**
-   * Connecter un gestionnaire avec son téléphone et mot de passe.
-   * Appelle le backend NEKASO via authService.
-   *
-   * @param {string} telephone - Numéro de téléphone (ex: "771234567")
-   * @param {string} motDePasse - Mot de passe
-   *
-   * Selon le contrat API :
-   * - Réponse 200 : stocke le token et les infos utilisateur
-   * - Réponse 401 : authentification échouée
-   * - Réponse 400 : champs obligatoires manquants
-   */
   async function login(telephone, motDePasse) {
     isLoading.value = true
     error.value = null
 
     try {
-      // Appel au backend NEKASO. La charge utile est dans `message`.
       const body = await authService.login(telephone, motDePasse)
       const payload = body?.message ?? body
 
       const newToken = payload.token
       const newUser = construireUser(payload)
 
-      // Stockage en mémoire (ref Pinia)
       token.value = newToken
       user.value = newUser
 
-      // Stockage persistant via helper (utilise sessionStorage par défaut)
       setToken(newToken)
       setUser(newUser)
 
       return { success: true, user: newUser }
     } catch (err) {
-      // Gestion des erreurs selon le contrat API
       let errorMessage = "Une erreur inconnue s'est produite"
 
-      // ⚠️ Le backend renvoie 404 (et non 401) pour des identifiants incorrects.
       if (err.response?.status === 401 || err.response?.status === 404) {
         errorMessage = 'Téléphone ou mot de passe incorrect'
       } else if (err.response?.status === 400) {
@@ -121,17 +93,12 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  /**
-   * Inscription d'un nouveau locataire.
-   */
   async function register(nom, prenom, telephone, motDePasse) {
     isLoading.value = true
     error.value = null
 
     try {
-      // 1) Inscription (le backend ne renvoie PAS de token ici).
       await authService.register({ telephone, motDePasse, prenom, nom })
-      // 2) Connexion automatique pour récupérer le token.
       const body = await authService.login(telephone, motDePasse)
       const payload = body?.message ?? body
       const newToken = payload.token
@@ -155,10 +122,6 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  /**
-   * Déconnecter l'utilisateur actuel.
-   * Supprime le token et les infos utilisateur du localStorage et de la mémoire.
-   */
   function logout() {
     token.value = null
     user.value = null

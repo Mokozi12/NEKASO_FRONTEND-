@@ -1,84 +1,40 @@
 import { defineStore } from 'pinia'
-import { computed } from 'vue'
-import { db, uid, nowISO, SESSION } from '@/mocks/db'
+import { ref, computed } from 'vue'
 
-/*
-  Store des notifications — entièrement mock / en mémoire.
-  Les notifications sont ciblées :
-    - destinataire === 'GESTIONNAIRE'  → visibles côté gestionnaire
-    - destinataire === 'CLIENT'        → visibles par le client (clientId)
-
-  Les autres stores appellent `ajouter()` pour simuler l'envoi d'une
-  notification lors des transitions de statut du workflow.
-*/
 export const useNotificationsStore = defineStore('notifications', () => {
-  const notifications = computed(() => db.notifications)
+  const notifications = ref([])
 
-  /* Notifications du gestionnaire courant. */
-  const pourGestionnaire = computed(() =>
-    db.notifications
-      .filter((n) => n.destinataire === 'GESTIONNAIRE')
-      .slice()
-      .sort((a, b) => new Date(b.date) - new Date(a.date)),
-  )
+  const pourGestionnaire = computed(() => [])
+  const pourClient = computed(() => [])
 
-  /* Notifications du client connecté (SESSION.clientId). */
-  const pourClient = computed(() =>
-    db.notifications
-      .filter((n) => n.destinataire === 'CLIENT' && n.clientId === SESSION.clientId)
-      .slice()
-      .sort((a, b) => new Date(b.date) - new Date(a.date)),
-  )
-
-  const nonLuesGestionnaire = computed(() => pourGestionnaire.value.filter((n) => !n.lue))
-  const compteurGestionnaire = computed(() => nonLuesGestionnaire.value.length)
-  const compteurClient = computed(() => pourClient.value.filter((n) => !n.lue).length)
-
-  /* Ajoute une notification (simule un envoi). */
-  function ajouter({ destinataire, clientId = null, type = 'INFO', message }) {
-    db.notifications.push({
-      id: uid('notifications'),
-      destinataire,
-      clientId,
-      type,
-      message,
-      date: nowISO(),
-      lue: false,
-    })
-  }
-
-  /* Raccourcis. */
-  function notifierGestionnaire(type, message) {
-    ajouter({ destinataire: 'GESTIONNAIRE', type, message })
-  }
   function notifierClient(clientId, type, message) {
-    ajouter({ destinataire: 'CLIENT', clientId, type, message })
+    console.warn("notifierClient: Endpoint backend manquant")
+  }
+
+  function notifierGestionnaire(type, message) {
+    console.warn("notifierGestionnaire: Endpoint backend manquant")
   }
 
   function marquerLue(id) {
-    const n = db.notifications.find((x) => x.id === id)
-    if (n) n.lue = true
+    console.warn("marquerLue: Endpoint backend manquant")
   }
 
-  function toutLireGestionnaire() {
-    pourGestionnaire.value.forEach((n) => (n.lue = true))
+  function toutMarquerLuClient() {
+    console.warn("toutMarquerLuClient: Endpoint backend manquant")
   }
-  function toutLireClient() {
-    pourClient.value.forEach((n) => (n.lue = true))
+
+  function toutMarquerLuGestionnaire() {
+    console.warn("toutMarquerLuGestionnaire: Endpoint backend manquant")
   }
 
   return {
     notifications,
     pourGestionnaire,
     pourClient,
-    nonLuesGestionnaire,
-    compteurGestionnaire,
-    compteurClient,
-    ajouter,
-    notifierGestionnaire,
     notifierClient,
+    notifierGestionnaire,
     marquerLue,
-    toutLireGestionnaire,
-    toutLireClient,
+    toutMarquerLuClient,
+    toutMarquerLuGestionnaire,
   }
 })

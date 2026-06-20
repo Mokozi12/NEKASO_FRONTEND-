@@ -14,7 +14,6 @@ export const useBiensPublicsStore = defineStore('biensPublics', () => {
   const biensEnVedette = computed(() => biensDisponibles.value.slice(0, 3))
   const totalBiens = computed(() => biens.value.length)
 
-  // GET /api/biens/locataire/biens_disponibles
   async function chargerBiens(params = {}) {
     chargement.value = true
     erreur.value = null
@@ -28,12 +27,10 @@ export const useBiensPublicsStore = defineStore('biensPublics', () => {
     }
   }
 
-  // Pas de GET /biens/{bienId} → on charge tous les biens disponibles et on filtre par ID
   async function chargerBienParId(id) {
     chargement.value = true
     erreur.value = null
     try {
-      // Cherche d'abord dans les biens déjà chargés
       let trouve = biens.value.find((b) => String(b.id) === String(id))
       if (!trouve) {
         const tous = await biensPublicsService.getAll()
@@ -50,7 +47,6 @@ export const useBiensPublicsStore = defineStore('biensPublics', () => {
     }
   }
 
-  // GET /api/biens/locataire/biens_disponibles (avec filtres)
   async function rechercher(filtres) {
     chargement.value = true
     erreur.value = null

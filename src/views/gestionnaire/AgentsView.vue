@@ -1,8 +1,3 @@
-<!--
-  AgentsView (gestionnaire) — Gestion des agents de visite (§3).
-  Enregistrer des agents avec leurs créneaux de disponibilité. Ces créneaux
-  alimentent la validation des visites (croisement des dispos).
--->
 <template>
   <div class="agents-page">
     <div class="page-header page-header--flex">
@@ -75,7 +70,6 @@ const { page, totalPages, itemsPage: agentsPage } = usePagination(
   6,
 )
 
-// Petit modèle local pour le formulaire « ajouter un créneau » par agent
 const nouveauCreneau = reactive({})
 watchEffect(() => {
   agentsStore.agents.forEach((a) => {

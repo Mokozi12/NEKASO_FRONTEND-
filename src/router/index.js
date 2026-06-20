@@ -29,7 +29,6 @@ const router = createRouter({
       ],
     },
 
-    // === AUTH ROUTES (pas de layout parent, pas de meta.public) ===
     {
       path: '/login',
       name: 'login',
@@ -45,11 +44,10 @@ const router = createRouter({
       redirect: '/login'
     },
 
-    // === GESTIONNAIRE ===
     {
       path: '/gestionnaire',
       component: () => import('@/components/layout/GestionnaireLayout.vue'),
-      meta: { title: 'NEKASO', requiresAuth: true },
+      meta: { title: 'NEKASO', requiresAuth: true, role: 'GESTIONNAIRE' },
       children: [
         {
           path: 'dashboard',
@@ -132,11 +130,10 @@ const router = createRouter({
       ],
     },
 
-    // === LOCATAIRE ===
     {
       path: '/locataire',
       component: () => import('@/components/layout/LocataireLayout.vue'),
-      meta: { title: 'NEKASO', requiresAuth: true },
+      meta: { title: 'NEKASO', requiresAuth: true, role: 'LOCATAIRE' },
       children: [
         {
           path: '',
@@ -220,18 +217,18 @@ const router = createRouter({
 router.beforeEach((to) => {
   const auth = useAuthStore()
   
-  // Interdire l'accès aux pages protégées si on n'est pas connecté
   if (to.meta.requiresAuth && !auth.isAuthenticated) {
     return { name: 'login' }
   }
 
-  // Interdire l'accès aux pages de login/inscription si on est déjà connecté
+  if (to.meta.role && auth.isAuthenticated && auth.user?.role !== to.meta.role) {
+    return { name: auth.user?.role === 'GESTIONNAIRE' ? 'dashboard' : 'accueil-locataire' }
+  }
+
   if (to.meta.guest && auth.isAuthenticated) {
     return { name: auth.user?.role === 'GESTIONNAIRE' ? 'dashboard' : 'accueil-locataire' }
   }
 
-  // Navigation d'accueil cohérente : un locataire connecté n'a pas besoin de la
-  // landing publique. On le renvoie systématiquement vers son tableau de bord.
   if (
     (to.name === 'landing' || to.path === '/locataire' || to.path === '/locataire/') &&
     auth.isAuthenticated &&

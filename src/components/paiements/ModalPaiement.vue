@@ -11,22 +11,20 @@
       <Transition name="modal-pop" appear>
         <div class="modal" v-if="show">
 
-          <!-- ✕ Fermeture -->
+          
           <button class="modal__close" @click="fermer" aria-label="Fermer">
             <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
               <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
             </svg>
           </button>
 
-          <!-- Titre -->
+          
           <h3 :id="titreId" class="modal__titre">{{ titre }}</h3>
 
-          <!-- ═══════════════════════════════════════════
-               MODE : ENCAISSER
-          ═══════════════════════════════════════════ -->
+          
           <template v-if="mode === 'encaisser'">
 
-            <!-- Méthode -->
+            
             <div class="champ">
               <label for="champ-methode">Méthode</label>
               <div class="champ__select-wrap">
@@ -41,7 +39,7 @@
               </div>
             </div>
 
-            <!-- Montant -->
+            
             <div class="champ">
               <label for="champ-montant">Montant *</label>
               <input
@@ -53,7 +51,7 @@
               />
             </div>
 
-            <!-- Référence -->
+            
             <div class="champ">
               <label for="champ-ref">Référence transaction</label>
               <input
@@ -64,13 +62,13 @@
               />
             </div>
 
-            <!-- Info -->
+            
             <p class="modal__info">
               Si vide, une référence sera générée automatiquement. Une quittance
               PDF sera produite.
             </p>
 
-            <!-- Actions -->
+            
             <div class="modal__actions">
               <button class="btn-cancel" @click="fermer">Annuler</button>
               <button
@@ -84,12 +82,10 @@
             </div>
           </template>
 
-          <!-- ═══════════════════════════════════════════
-               MODE : NOUVEAU
-          ═══════════════════════════════════════════ -->
+          
           <template v-else>
 
-            <!-- Contrat -->
+            
             <div class="champ">
               <label for="champ-contrat">Contrat</label>
               <div class="champ__select-wrap">
@@ -105,13 +101,13 @@
               </div>
             </div>
 
-            <!-- Date d'échéance -->
+            
             <div class="champ">
               <label for="champ-echeance">Date d'échéance *</label>
               <input id="champ-echeance" type="date" v-model="form.dateEcheance" />
             </div>
 
-            <!-- Actions (bouton seul, aligné à droite) -->
+            
             <div class="modal__actions">
               <button class="btn-primary" @click="submitAttendu">Enregistrer</button>
             </div>
@@ -137,7 +133,6 @@ const props = defineProps({
 const emits = defineEmits(['close', 'submit'])
 const { erreur } = useNotification()
 
-/* ── Formulaire ────────────────────────────────────── */
 const form = ref(resetForm())
 const submitting = ref(false)
 
@@ -156,7 +151,6 @@ function resetForm() {
   }
 }
 
-/* Pré-remplissage à l'ouverture / reset à la fermeture */
 watch(
   () => props.show,
   (open) => {
@@ -171,7 +165,6 @@ watch(
   },
 )
 
-/* ── Handlers ────────────────────────────────────────── */
 function fermer() {
   emits('close')
 }
@@ -208,11 +201,7 @@ function submitAttendu() {
 </script>
 
 <style scoped>
-/*
- * ─────────────────────────────────────────────────────
- * TRANSITIONS
- * ─────────────────────────────────────────────────────
- */
+
 .overlay-fade-enter-active,
 .overlay-fade-leave-active {
   transition: opacity .2s ease;
@@ -230,11 +219,7 @@ function submitAttendu() {
   transform: translateY(-10px) scale(.97);
 }
 
-/*
- * ─────────────────────────────────────────────────────
- * OVERLAY
- * ─────────────────────────────────────────────────────
- */
+
 .overlay {
   position: fixed;
   inset: 0;
@@ -246,11 +231,7 @@ function submitAttendu() {
   padding: 20px;
 }
 
-/*
- * ─────────────────────────────────────────────────────
- * MODAL
- * ─────────────────────────────────────────────────────
- */
+
 .modal {
   background: #fff;
   border-radius: 14px;
@@ -263,7 +244,7 @@ function submitAttendu() {
     0 16px 48px rgba(10, 15, 30, .14);
 }
 
-/* ── Bouton × ──────────────────────────────────────── */
+
 .modal__close {
   position: absolute;
   top: 16px;
@@ -285,7 +266,7 @@ function submitAttendu() {
   color: #0f172a;
 }
 
-/* ── Titre ────────────────────────────────────────── */
+
 .modal__titre {
   font-size: 16px;
   font-weight: 700;
@@ -295,11 +276,7 @@ function submitAttendu() {
   line-height: 1.3;
 }
 
-/*
- * ─────────────────────────────────────────────────────
- * CHAMPS
- * ─────────────────────────────────────────────────────
- */
+
 .champ {
   margin-bottom: 14px;
 }
@@ -313,7 +290,7 @@ function submitAttendu() {
   line-height: 1;
 }
 
-/* Inputs (texte, nombre, date) */
+
 .champ input {
   width: 100%;
   box-sizing: border-box;
@@ -333,7 +310,7 @@ function submitAttendu() {
   box-shadow: 0 0 0 3px rgba(148, 163, 184, .12);
 }
 
-/* Select (wrapper + chevron) */
+
 .champ__select-wrap {
   position: relative;
   display: flex;
@@ -367,11 +344,7 @@ function submitAttendu() {
   pointer-events: none;
 }
 
-/*
- * ─────────────────────────────────────────────────────
- * TEXTE INFO
- * ─────────────────────────────────────────────────────
- */
+
 .modal__info {
   font-size: 12.5px;
   color: #94a3b8;
@@ -379,11 +352,7 @@ function submitAttendu() {
   margin: 0 0 18px;
 }
 
-/*
- * ─────────────────────────────────────────────────────
- * ACTIONS
- * ─────────────────────────────────────────────────────
- */
+
 .modal__actions {
   display: flex;
   align-items: center;
@@ -392,7 +361,7 @@ function submitAttendu() {
   margin-top: 4px;
 }
 
-/* Annuler */
+
 .btn-cancel {
   padding: 9px 18px;
   border-radius: 8px;
@@ -410,7 +379,7 @@ function submitAttendu() {
   border-color: #cbd5e1;
 }
 
-/* Valider / Enregistrer */
+
 .btn-primary {
   display: inline-flex;
   align-items: center;
@@ -433,7 +402,7 @@ function submitAttendu() {
   cursor: not-allowed;
 }
 
-/* Spinner dans le bouton */
+
 .btn-primary__spin {
   display: inline-block;
   width: 12px;
@@ -445,11 +414,7 @@ function submitAttendu() {
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/*
- * ─────────────────────────────────────────────────────
- * RESPONSIVE
- * ─────────────────────────────────────────────────────
- */
+
 @media (max-width: 500px) {
   .modal {
     padding: 20px 18px 16px;

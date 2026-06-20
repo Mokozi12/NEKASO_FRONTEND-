@@ -1,11 +1,3 @@
-<!--
-  DemandesLocationView (gestionnaire) — §7, §8.
-
-  Ce sont des DEMANDES de réservation (pas une réservation instantanée) :
-  un même bien peut recevoir plusieurs demandes. On n'affiche donc PAS une liste
-  plate mais la liste des BIENS ayant fait l'objet de demandes. Cliquer sur un
-  bien ouvre le détail de toutes ses demandes (FIFO).
--->
 <template>
   <div class="demandes-page">
     <div class="page-header">
@@ -48,19 +40,22 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useDemandesLocationStore } from '@/stores/demandesLocation.store'
 import { useFormat } from '@/composables/useFormat'
 import { usePagination } from '@/composables/usePagination'
-import { nomComplet } from '@/mocks/db'
+import { nomComplet } from '@/utils/constants'
 import Pagination from '@/components/common/Pagination.vue'
 
 const router = useRouter()
 const store = useDemandesLocationStore()
 const { formatMontant } = useFormat()
 
-// On n'affiche que les biens ayant au moins une demande en attente ou attribuée.
+onMounted(() => {
+  store.chargerDemandesBackend()
+})
+
 const groupes = computed(() =>
   store.biensAvecDemandes.filter((g) => g.bien && (g.nbEnAttente > 0 || g.validee)),
 )

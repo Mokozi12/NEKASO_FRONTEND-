@@ -1,6 +1,3 @@
-// Données fictives pour développer sans attendre le backend
-// Quand un endpoint Spring Boot est prêt, remplacer dans le store :
-// mockBiens → await biensService.getMesBiens()
 
 export const mockUser = {
   id: 3,
@@ -11,7 +8,6 @@ export const mockUser = {
   statut: 'ACTIF',
 }
 
-// ✅ CORRIGÉ : données alignées avec les maquettes UI
 export const mockBiens = [
   {
     id: 1, intitule: 'Appartement Almadies', typeBien: 'APPARTEMENT', adresse: 'Rue 12, Almadies, Dakar',
@@ -108,7 +104,6 @@ export const mockContrats = [
   }
 ]
 
-/* Candidats disponibles = visites confirmées, pour le wizard de création de contrat */
 export const mockCandidats = [
   {
     id: 1,
@@ -169,7 +164,6 @@ export const mockNotifications = [
   { id: 3, type: 'PAIEMENT',  message: 'Loyer Mai 2024 enregistré pour Oumar Ba', dateEnvoi: '2024-05-05', lue: true }
 ]
 
-/** Données du tableau de bord (maquette NEKASO) */
 export const mockStats = {
   totalBiens: 5,
   biensLoues: 2,
@@ -226,10 +220,6 @@ export const mockStats = {
   ],
 }
 
-/**
- * Biens publics pour le catalogue et la landing page.
- * Structure alignée avec CarteBienPublic.vue.
- */
 export const mockBiensPublics = [
   {
     id: 1,

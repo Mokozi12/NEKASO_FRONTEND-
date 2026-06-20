@@ -1,8 +1,3 @@
-<!--
-  MesLocationsView (locataire) — design PDF « Mes locations ».
-  Liste des baux ACTIFS du locataire ; « Voir contrat » ouvre la page
-  Contrat & Paiements du bail concerné.
--->
 <template>
   <div class="page">
     <div class="container">
@@ -47,7 +42,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useContratsStore } from '@/stores/contrats.store'
 import { useFormat } from '@/composables/useFormat'
 import BadgeStatut from '@/components/locataire/BadgeStatut.vue'
@@ -56,6 +51,10 @@ import { usePagination } from '@/composables/usePagination'
 
 const contratsStore = useContratsStore()
 const { formatMontant, formatDate } = useFormat()
+
+onMounted(() => {
+  contratsStore.chargerLocataire()
+})
 
 const contrats = computed(() => contratsStore.mesContratsActifs)
 const { page, totalPages, itemsPage } = usePagination(contrats, 5)

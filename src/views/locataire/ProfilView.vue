@@ -1,8 +1,3 @@
-<!--
-  ProfilView (locataire) — design PDF « Mon profil ».
-  Lecture des informations puis édition (Enregistrer / Annuler) + déconnexion.
-  Les données proviennent du client de session de la base mock.
--->
 <template>
   <div class="page">
     <div class="container">
@@ -12,7 +7,7 @@
       </div>
 
       <div class="carte">
-        <!-- En-tête identité -->
+        
         <div class="identite">
           <div class="avatar">{{ initiales }}</div>
           <div>
@@ -105,7 +100,6 @@ const form = reactive({
 
 const edition = ref(false)
 
-// Champ « Nom complet » manipulé en une seule ligne mais stocké en prénom + nom
 const nomComplet = computed({
   get: () => `${form.prenom} ${form.nom}`.trim(),
   set: (v) => {
@@ -120,13 +114,10 @@ const initiales = computed(() =>
 )
 
 function enregistrer() {
-  // Ici vous pourrez appeler une API (ex: authService.updateProfile)
-  // Pour l'instant, on met à jour le store localement
   if (authStore.user) {
     authStore.user.prenom = form.prenom
     authStore.user.nom = form.nom
     authStore.user.telephone = form.telephone
-    // ... email, profession, ville si gérés par le store
   }
   edition.value = false
   succes('Informations enregistrées.')

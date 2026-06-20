@@ -1,11 +1,11 @@
 <template>
   <div class="bien-detail-view">
-    <!-- Header principal -->
+    
     <div class="view-header">
       <h1 class="view-title">Fiche du bien</h1>
     </div>
 
-    <!-- Actions header -->
+    
     <div class="detail-actions-header">
       <div class="detail-title-group">
         <button class="btn-retour" @click="router.push('/gestionnaire/biens')">
@@ -60,16 +60,16 @@
       </div>
     </div>
 
-    <!-- Layout principal : photo + sidebar -->
+    
     <div class="detail-layout">
-      <!-- Colonne gauche : Photo + Infos -->
+      
       <div class="detail-main">
-        <!-- Main Photo -->
+        
         <div class="main-photo-container">
           <img :src="getPhoto(bien)" :alt="bien.libelle || bien.intitule" />
         </div>
 
-        <!-- Informations principales -->
+        
         <div class="info-card">
           <h3 class="card-title">Informations principales</h3>
 
@@ -106,9 +106,9 @@
         </div>
       </div>
 
-      <!-- Colonne droite : Sidebar -->
+      
       <div class="detail-sidebar">
-        <!-- Locataire actuel -->
+        
         <div class="sidebar-card">
           <h3 class="card-title">Locataire actuel</h3>
           <template v-if="bien.locataire">
@@ -131,7 +131,7 @@
           </template>
         </div>
 
-        <!-- Paiements -->
+        
         <div class="sidebar-card">
           <h3 class="card-title">Paiements</h3>
           <div class="paiement-row">
@@ -145,7 +145,7 @@
           <button class="btn-outline full-width mt-16">Voir tous les paiements</button>
         </div>
 
-        <!-- Action Buttons -->
+        
         <div class="action-buttons-stack">
           <button class="btn-primary-dark" @click="telechargerContrat">
             <svg
@@ -180,7 +180,7 @@
       </div>
     </div>
 
-    <!-- Modals -->
+    
     <FormulaireBien
       :show="showEditModal"
       :is-edit="true"
@@ -212,14 +212,12 @@ function telechargerContrat() {
   succes('Téléchargement du contrat en cours...')
 }
 
-// Charger les biens si pas encore fait
 onMounted(async () => {
   if (biensStore.biens.length === 0) {
     await biensStore.charger()
   }
 })
 
-// Trouver le bien par ID
 const bien = computed(() => {
   const id = Number(route.params.id)
   return (
@@ -246,7 +244,6 @@ const bien = computed(() => {
   )
 })
 
-// Helpers
 function getPhoto(bien) {
   if (bien.photos && bien.photos.length > 0 && bien.photos[0].urlPhoto) {
     return bien.photos[0].urlPhoto.replace('w=400&h=400', 'w=1200&h=500')
@@ -284,7 +281,6 @@ function getInitial(locataire) {
   return locataire.prenom ? locataire.prenom.charAt(0).toUpperCase() : 'L'
 }
 
-// Actions
 const handleEditSave = (data) => {
   if (import.meta.env.DEV) console.log('Modifié:', data)
   showEditModal.value = false
@@ -308,7 +304,7 @@ const handleEditSave = (data) => {
   margin: 0;
 }
 
-/* Actions Header */
+
 .detail-actions-header {
   display: flex;
   justify-content: space-between;
@@ -420,7 +416,7 @@ const handleEditSave = (data) => {
   border-color: #d1d5db;
 }
 
-/* Layout principal */
+
 .detail-layout {
   display: grid;
   grid-template-columns: 1fr 340px;
@@ -428,7 +424,7 @@ const handleEditSave = (data) => {
   align-items: start;
 }
 
-/* Main Photo */
+
 .main-photo-container {
   width: 100%;
   height: 320px;
@@ -444,7 +440,7 @@ const handleEditSave = (data) => {
   object-fit: cover;
 }
 
-/* Info Card */
+
 .info-card,
 .sidebar-card {
   background-color: white;
@@ -491,7 +487,7 @@ const handleEditSave = (data) => {
   font-weight: 500;
 }
 
-/* Sidebar Cards */
+
 .sidebar-card {
   margin-bottom: 24px;
 }
@@ -570,7 +566,7 @@ const handleEditSave = (data) => {
   margin-top: 16px;
 }
 
-/* Buttons */
+
 .btn-outline {
   background-color: white;
   border: 1px solid #e5e7eb;

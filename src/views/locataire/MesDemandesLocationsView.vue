@@ -1,12 +1,3 @@
-<!--
-  MesDemandesLocationsView (locataire) — design PDF « Mes demandes de location »
-  + workflow corrigé :
-    §7    : c'est une DEMANDE de réservation (validée par le gestionnaire, pas instantanée).
-    §7-bis: « logement express » = demande directe sans visite.
-    §8    : un même bien peut recevoir plusieurs demandes ; une seule est retenue,
-            les autres reçoivent « le bien ne vous a pas été octroyé ».
-    §9    : une demande retenue débouche sur un pré-contrat à valider.
--->
 <template>
   <div class="page">
     <div class="container">
@@ -30,7 +21,7 @@
             <div class="infos">
               <h3 class="titre">{{ d.bien?.intitule }}</h3>
               <p class="meta">{{ quartier(d.bien?.adresse) }} · {{ d.source === 'DIRECTE' ? 'Demande express' : 'Suite à une visite' }}</p>
-              <p class="envoyee">Envoyée le {{ formatDate(d.dateCreation) }}</p>
+              <p class="envoyee">Envoyée le {{ formatDate(d.dateDemande || d.dateCreation) }}</p>
             </div>
             <BadgeStatut :label="st(d).label" :variant="st(d).variant" />
           </div>
@@ -63,9 +54,9 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useDemandesLocationStore } from '@/stores/demandesLocation.store'
+import { useDemandesLocataireStore } from '@/stores/demandesLocataire.store'
 import { useContratsStore } from '@/stores/contrats.store'
 import { useNotification } from '@/composables/useNotification'
 import { useFormat } from '@/composables/useFormat'
@@ -75,10 +66,12 @@ import Pagination from '@/components/common/Pagination.vue'
 import { usePagination } from '@/composables/usePagination'
 
 const router = useRouter()
-const store = useDemandesLocationStore()
+const store = useDemandesLocataireStore()
 const contratsStore = useContratsStore()
 const { info } = useNotification()
 const { formatDate } = useFormat()
+
+onMounted(() => store.chargerDemandes())
 
 const ETAPES = ['Demande envoyée', 'Pré-contrat', 'Bail actif']
 
@@ -119,7 +112,7 @@ function message(d) {
 }
 
 async function annuler(d) {
-  await store.annulerClient(d.id)
+  await store.annuler(d.id)
   info('Demande annulée.')
 }
 </script>
@@ -276,7 +269,6 @@ async function annuler(d) {
   cursor: pointer;
 }
 
-/* Modale */
 .overlay {
   position: fixed;
   inset: 0;

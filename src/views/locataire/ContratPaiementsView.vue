@@ -8,7 +8,7 @@
         </p>
       </div>
 
-      <!-- TABS (Pills) -->
+      
       <div class="tabs-container">
         <div class="tabs">
           <button
@@ -28,7 +28,7 @@
         </div>
       </div>
 
-      <!-- CONTRAT TAB -->
+      
       <div v-if="activeTab === 'contrat'" class="tab-content">
         <div class="contrat-card">
           <div class="contrat-header">
@@ -147,7 +147,7 @@
         </div>
       </div>
 
-      <!-- HISTORIQUE TAB -->
+      
       <div v-if="activeTab === 'historique'" class="tab-content">
         <div class="info-banner top-banner">
           <div class="alert-icon">
@@ -358,7 +358,7 @@ const getPaiementStatusClass = (statut) => {
   color: #64748b;
 }
 
-/* TABS PILLS */
+
 .tabs-container {
   margin-bottom: 32px;
 }
@@ -385,7 +385,7 @@ const getPaiementStatusClass = (statut) => {
 }
 
 .tab.active {
-  background-color: #1e293b; /* Dark navy */
+  background-color: #1e293b; 
   color: #ffffff;
 }
 
@@ -393,7 +393,7 @@ const getPaiementStatusClass = (statut) => {
   color: #1e293b;
 }
 
-/* CARDS */
+
 .tab-content {
   background-color: white;
   border-radius: 12px;
@@ -489,12 +489,12 @@ const getPaiementStatusClass = (statut) => {
   color: #1e293b;
 }
 
-/* BANNERS */
+
 .info-banner {
   display: flex;
   align-items: center;
   gap: 12px;
-  background-color: #f1f5f9; /* Changed to greyish instead of light blue to match image better */
+  background-color: #f1f5f9; 
   border-radius: 8px;
   padding: 16px;
   font-size: 14px;
@@ -515,11 +515,11 @@ const getPaiementStatusClass = (statut) => {
 .top-banner {
   margin: 32px 32px 0 32px;
   background-color: #ffffff;
-  border: 1px solid #f1f5f9; /* Outline as per image */
+  border: 1px solid #f1f5f9; 
   color: #64748b;
 }
 
-/* TABLE */
+
 .paiements-table-container {
   padding: 32px;
 }

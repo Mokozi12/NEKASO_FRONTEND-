@@ -1,4 +1,3 @@
-/** Plugin Chart.js : texte centré dans un donut */
 export const centerTextPlugin = {
   id: 'centerText',
   beforeDraw(chart) {

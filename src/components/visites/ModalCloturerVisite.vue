@@ -1,13 +1,3 @@
-<!--
-  ModalCloturerVisite — Clôture d'une visite confirmée + effectuée (§6).
-
-  Deux issues possibles :
-    - AVEC_CONTRAT → génère automatiquement un pré-contrat pré-rempli.
-    - SANS_CONTRAT → la visite se ferme sans suite.
-
-  Le bouton « Clôturer avec contrat » est l'équivalent du bouton « Créer contrat »
-  à l'issue d'une visite aboutie (§6, §7-bis chemin A).
--->
 <template>
   <div class="overlay" @click.self="$emit('close')">
     <div class="modal">
@@ -71,15 +61,15 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { getBien, getClient, nomComplet } from '@/mocks/db'
+import { nomComplet } from '@/utils/constants'
 
 const props = defineProps({
   visite: { type: Object, required: true },
 })
 const emit = defineEmits(['close', 'cloturer'])
 
-const bien = computed(() => getBien(props.visite.bienId))
-const nomClient = computed(() => nomComplet(getClient(props.visite.clientId)))
+const bien = computed(() => props.visite.bien || {})
+const nomClient = computed(() => nomComplet(props.visite.client || props.visite.locataire))
 
 const compteRendu = ref('')
 const issue = ref('')

@@ -1,6 +1,6 @@
 <template>
   <div class="biens-view">
-    <!-- Actions Row -->
+    
     <div class="page-actions-section">
       <span class="biens-count">{{ biensAffiches.length }} bien(s) trouvé(s)</span>
       <button class="btn-ajouter" @click="openAddModal">
@@ -21,9 +21,9 @@
       </button>
     </div>
 
-    <!-- Content Card -->
+    
     <div class="content-card">
-      <!-- Filters -->
+      
       <div class="biens-filters">
         <div class="search-bar">
           <svg
@@ -90,18 +90,18 @@
         </div>
       </div>
 
-      <!-- Chargement -->
+      
       <div v-if="biensStore.chargement" class="loading-state">
         Chargement des biens...
       </div>
 
-      <!-- Erreur -->
+      
       <div v-else-if="biensStore.erreur" class="error-state">
         {{ biensStore.erreur }}
         <button @click="biensStore.charger()" class="btn-retry">Réessayer</button>
       </div>
 
-      <!-- Table -->
+      
       <div v-else class="table-responsive">
         <table class="biens-table">
           <thead>
@@ -199,7 +199,7 @@
       </div>
     </div>
 
-    <!-- Pagination -->
+    
     <div class="biens-pagination">
       <div class="pagination-controls">
         <button class="pagination-btn" :disabled="pageActuelle === 1" @click="pageActuelle--">
@@ -224,7 +224,7 @@
       </div>
     </div>
 
-    <!-- Modals -->
+    
     <FormulaireBien
       :show="showAddModal"
       :is-edit="false"
@@ -249,7 +249,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useBiensStore } from '@/stores/biens.store'
 import { useFormat } from '@/composables/useFormat'
@@ -260,31 +260,29 @@ const router = useRouter()
 const biensStore = useBiensStore()
 const { formatMontant } = useFormat()
 
-// Charger les biens au montage
 onMounted(() => {
   biensStore.charger({ page: 0, size: 100 })
 })
 
-// Filtres
 const searchQuery = ref('')
 const filterStatut = ref('')
 const filterType = ref('')
 
-// Pagination
 const pageActuelle = ref(1)
-const parPage = ref(10)
+const parPage = ref(5)
 
-// Modal states
+watch([searchQuery, filterStatut, filterType], () => {
+  pageActuelle.value = 1
+})
+
 const showAddModal = ref(false)
 const showEditModal = ref(false)
 const showArchiveModal = ref(false)
 const selectedBien = ref(null)
 
-// Biens filtrés
 const biensAffiches = computed(() => {
   let result = biensStore.biens
 
-  // Filtre recherche
   if (searchQuery.value) {
     const q = searchQuery.value.toLowerCase()
     result = result.filter(
@@ -293,12 +291,10 @@ const biensAffiches = computed(() => {
     )
   }
 
-  // Filtre statut
   if (filterStatut.value) {
     result = result.filter((b) => b.statutBien === filterStatut.value)
   }
 
-  // Filtre type
   if (filterType.value) {
     result = result.filter((b) => b.typeBien === filterType.value)
   }
@@ -306,7 +302,6 @@ const biensAffiches = computed(() => {
   return result
 })
 
-// Pagination calculée
 const totalPages = computed(() => {
   return Math.max(1, Math.ceil(biensAffiches.value.length / parPage.value))
 })
@@ -316,7 +311,6 @@ const biensPagines = computed(() => {
   return biensAffiches.value.slice(debut, debut + parPage.value)
 })
 
-// Helpers d'affichage
 function getIntitule(bien) {
   return bien.libelle || bien.intitule || `${formatTypeBien(bien.typeBien)} - ${bien.adresse}`
 }
@@ -358,7 +352,6 @@ function getStatutClass(statut) {
   return classes[statut] || ''
 }
 
-// Actions
 const openAddModal = () => {
   showAddModal.value = true
 }
@@ -599,7 +592,7 @@ const viewDetails = (id) => {
   font-size: 14px;
 }
 
-/* Status badges */
+
 .status-badge {
   display: inline-flex;
   align-items: center;
@@ -632,7 +625,7 @@ const viewDetails = (id) => {
   color: #4b5563;
 }
 
-/* Action buttons */
+
 .action-buttons {
   display: flex;
   gap: 12px;
@@ -670,7 +663,7 @@ const viewDetails = (id) => {
   pointer-events: none;
 }
 
-/* Empty state */
+
 .empty-state {
   text-align: center;
   padding: 48px 0 !important;

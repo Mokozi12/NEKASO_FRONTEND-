@@ -70,7 +70,6 @@ export function computeVariationPourcent(mois = []) {
   return Math.round(((dernier - precedent) / precedent) * 1000) / 10
 }
 
-/** 6 derniers mois pour le graphique (API : montant uniquement) */
 export function mapRevenusGraphique(revenusParMois = []) {
   return revenusParMois.slice(-6).map((m) => ({
     mois: m.mois,

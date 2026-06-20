@@ -157,7 +157,6 @@ import { useToast } from 'vue-toastification'
 import HeaderPublic from '@/components/layout/HeaderPublic.vue'
 import HeaderLocataire from '@/components/layout/HeaderLocataire.vue'
 import { useAuthStore } from '@/stores/auth.store'
-import { demandesLocationService } from '@/services/demandes-location.service'
 
 const route = useRoute()
 const router = useRouter()
@@ -194,7 +193,7 @@ const formatMontant = (montant) => {
 const submitDemande = async () => {
   isSubmitting.value = true
   try {
-    await demandesLocationService.creer(Number(bien.value.id))
+    await demandesStore.creerDemande(Number(bien.value.id))
     toast.success('Demande de location envoyée')
     router.push({ name: 'succes-location', params: { bienId: bien.value.id } })
   } catch (error) {

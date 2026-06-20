@@ -1,4 +1,3 @@
-/** Icônes PNG fournies (dossier public/icons) */
 export const iconAssets = {
   layout: '/icons/layout.png',
   building: '/icons/building.png',

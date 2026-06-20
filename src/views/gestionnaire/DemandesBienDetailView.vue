@@ -1,13 +1,3 @@
-<!--
-  DemandesBienDetailView (gestionnaire) — Détail des demandes d'UN bien (§8, §8-bis).
-
-  Affiche toutes les demandes du bien par ordre chronologique (FIFO). Le premier
-  arrivé est marqué « Prioritaire ». Le gestionnaire peut :
-    - valider UNE demande → un pré-contrat est créé, les autres sont annulées
-      et les non-retenus reçoivent une notification ;
-    - tout annuler.
-  Les coordonnées (téléphone) du client sont visibles côté gestionnaire.
--->
 <template>
   <div class="detail-page">
     <button class="retour" @click="$router.push('/gestionnaire/demandes-location')">
@@ -90,7 +80,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useDemandesLocationStore } from '@/stores/demandesLocation.store'
 import { useNotification } from '@/composables/useNotification'
 import { useFormat } from '@/composables/useFormat'
-import { nomComplet } from '@/mocks/db'
+import { nomComplet } from '@/utils/constants'
 
 const route = useRoute()
 const router = useRouter()

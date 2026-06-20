@@ -39,13 +39,6 @@ function getMockDashboard() {
   }
 }
 
-/**
- * Charge le tableau de bord depuis l'API NEKASO :
- * - GET /dashboard/stats
- * - GET /paiements/gestionnaire (liste loyers en retard)
- * - GET /visites/gestionnaire (visites en attente)
- * - GET /biens/gestionnaire (répartition portefeuille)
- */
 export const dashboardService = {
   async load() {
     if (USE_MOCK_ONLY) {

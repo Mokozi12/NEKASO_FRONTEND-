@@ -1,21 +1,15 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { visitesService } from '@/services/visites.service'
-import { unwrapList, listeOuVide } from '@/utils/apiResponse'
+import { preContratsService } from '@/services/pre-contrats.service'
+import { listeOuVide } from '@/utils/apiResponse'
+import { mapVisites, mapPreContrats } from '@/services/mappers'
 
-/*
-  Store visites côté GESTIONNAIRE — branché sur le VRAI backend.
-  Endpoints :
-    GET   /api/visites/gestionnaire/demande                          (statut?, page, size)
-    PATCH /api/visites/gestionnaire/demande/{id}/statut/{statut}
-    PATCH /api/visites/gestionnaire/demande/{id}/confirmer/bien/{idBien}/agent/{idAgent}
-*/
 export const useVisitesGestionnaireStore = defineStore('visitesGestionnaire', () => {
   const visites = ref([])
   const chargement = ref(false)
   const erreur = ref(null)
 
-  // Filtres côté client en attendant la pagination serveur complète.
   const enAttente  = computed(() => visites.value.filter((v) => v.statut === 'EN_ATTENTE'))
   const validees   = computed(() => visites.value.filter((v) => ['VALIDEE', 'CONFIRMEE'].includes(v.statut)))
   const confirmees = computed(() => visites.value.filter((v) => v.statut === 'CONFIRMEE'))
@@ -25,15 +19,42 @@ export const useVisitesGestionnaireStore = defineStore('visitesGestionnaire', ()
     ),
   )
 
-  /**
-   * Charge toutes les visites (toutes pages) depuis le backend.
-   * On pagine côté serveur avec size=50 par défaut pour récupérer l'essentiel.
-   */
+  async function chargerAnnuaireLocataires() {
+    try {
+      const pcs = mapPreContrats(await listeOuVide(preContratsService.getParGestionnaire({ page: 0, size: 200 })))
+      const annuaire = new Map()
+      for (const pc of pcs) {
+        const loc = pc.locataire
+        if (pc.locataireId != null && loc && (loc.nom || loc.prenom || loc.telephone)) {
+          annuaire.set(String(pc.locataireId), {
+            id: pc.locataireId,
+            nom: loc.nom || '',
+            prenom: loc.prenom || '',
+            telephone: loc.telephone || '',
+          })
+        }
+      }
+      return annuaire
+    } catch (e) {
+      return new Map()
+    }
+  }
+
   async function charger(params = {}) {
     chargement.value = true
     erreur.value = null
     try {
-      visites.value = await listeOuVide(visitesService.getListe({ page: 0, size: 50, ...params }))
+      const [liste, annuaire] = await Promise.all([
+        listeOuVide(visitesService.getListe({ page: 0, size: 50, ...params })),
+        chargerAnnuaireLocataires(),
+      ])
+      visites.value = mapVisites(liste).map((v) => ({
+        ...v,
+        client:
+          v.client ||
+          annuaire.get(String(v.locataireId)) ||
+          { id: v.locataireId, nom: `Client #${v.locataireId}`, prenom: '', telephone: '' },
+      }))
     } catch (e) {
       erreur.value = 'Impossible de charger les visites.'
       console.error('Erreur chargement visites gestionnaire:', e?.response?.status, e?.response?.data)
@@ -42,19 +63,16 @@ export const useVisitesGestionnaireStore = defineStore('visitesGestionnaire', ()
     }
   }
 
-  /** Changer le statut d'une visite (ex : REFUSEE). */
   async function changerStatut(id, statut) {
     await visitesService.changerStatut(id, statut)
     await charger()
   }
 
-  /** Raccourci : refuser une visite. */
   async function refuser(id) {
     await visitesService.refuser(id)
     await charger()
   }
 
-  /** Confirmer une visite (affecter créneau + agent). */
   async function confirmer(id, idBien, idAgent) {
     await visitesService.confirmer(id, idBien, idAgent)
     await charger()

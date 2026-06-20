@@ -1,22 +1,22 @@
 <template>
   <header class="header-public">
     <div class="header-container">
-      <!-- LOGO -->
+      
       <router-link to="/" class="logo" @click="handleLogoClick">
         <img src="/logo-nekaso.png?v=2" alt="NEKASO" class="logo-icon" />
       </router-link>
 
-      <!-- NAV CENTRE -->
+      
       <nav class="nav-centre">
         <router-link to="/" class="nav-pill">Accueil</router-link>
       </nav>
 
-      <!-- ACTIONS DROITE -->
+      
       <div class="header-actions">
         <router-link to="/login" class="btn-login">Se connecter</router-link>
       </div>
 
-      <!-- MOBILE MENU TOGGLE -->
+      
       <button class="mobile-toggle" @click="mobileOpen = !mobileOpen" aria-label="Menu">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -38,7 +38,7 @@
       </button>
     </div>
 
-    <!-- MOBILE MENU -->
+    
     <Transition name="slide">
       <div v-if="mobileOpen" class="mobile-menu">
         <router-link to="/" class="mobile-link" @click="mobileOpen = false"
@@ -62,12 +62,10 @@ const router = useRouter()
 const authStore = useAuthStore()
 
 const handleLogoClick = () => {
-  // Si l'utilisateur est connecté côté locataire, revenir sur le dashboard
   if (authStore.isAuthenticated && authStore.user?.role === 'LOCATAIRE') {
     router.push('/locataire/accueil')
     return
   }
-  // Sinon, comportement public normal
   router.push('/')
 }
 </script>
@@ -91,7 +89,7 @@ const handleLogoClick = () => {
   justify-content: space-between;
 }
 
-/* ── LOGO ── */
+
 .logo {
   display: flex;
   align-items: center;
@@ -108,7 +106,7 @@ const handleLogoClick = () => {
   display: block;
 }
 
-/* ── NAV CENTRE ── */
+
 .nav-centre {
   position: absolute;
   left: 50%;
@@ -132,7 +130,7 @@ const handleLogoClick = () => {
   border-color: rgba(255, 255, 255, 0.5);
 }
 
-/* ── ACTIONS ── */
+
 .header-actions {
   display: flex;
   gap: 12px;
@@ -181,7 +179,7 @@ const handleLogoClick = () => {
   background-color: #16a34a;
 }
 
-/* ── MOBILE ── */
+
 .mobile-toggle {
   display: none;
   background: none;
@@ -212,7 +210,7 @@ const handleLogoClick = () => {
   border-bottom: none;
 }
 
-/* Transition */
+
 .slide-enter-active,
 .slide-leave-active {
   transition: all 0.25s ease;

@@ -1,7 +1,3 @@
-/**
- * Libellé affiché pour un bien dans les listes et formulaires.
- * Ex. : « Appartement Almadies »
- */
 export function libelleBien(bien) {
   if (!bien) return ''
 

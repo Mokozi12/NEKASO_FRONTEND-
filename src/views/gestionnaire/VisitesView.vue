@@ -1,12 +1,3 @@
-<!--
-  VisitesView (gestionnaire) — Pilotage du workflow de visites (§1,2,4,5,6).
-
-  Onglets :
-    - En attente : valider (créneau + agent) ou refuser. Pas d'annulation ici.
-    - Validées   : créneau + agent affectés, en attente d'acceptation client.
-    - Confirmées : le client a accepté → clôture possible (avec / sans contrat).
-    - Clôturées  : historique avec compte-rendu et issue.
--->
 <template>
   <div class="visites-page">
     <div class="page-header">
@@ -16,8 +7,7 @@
       </p>
     </div>
 
-    <!-- Onglets -->
-    <div class="tabs-container">
+<div class="tabs-container">
       <div class="tabs">
         <button
           v-for="t in onglets"
@@ -32,8 +22,7 @@
       </div>
     </div>
 
-    <!-- ===== EN ATTENTE ===== -->
-    <div v-if="ongletActif === 'attente'" class="carte section-carte">
+<div v-if="ongletActif === 'attente'" class="carte section-carte">
       <table v-if="visitesStore.enAttente.length" class="tableau">
         <thead>
           <tr>
@@ -47,7 +36,7 @@
         <tbody>
           <tr v-for="v in itemsPage" :key="v.id">
             <td class="fort">{{ nom(v.client) }}</td>
-            <td class="gris">{{ v.client?.telephone }}</td>
+            <td class="gris">{{ v.client?.telephone || '—' }}</td>
             <td>{{ v.bien?.intitule }}</td>
             <td class="gris">{{ formatDateHeure(v.dateCreation) }}</td>
             <td class="ta-right">
@@ -60,8 +49,7 @@
       <p v-else class="vide">Aucune demande en attente.</p>
     </div>
 
-    <!-- ===== VALIDÉES ===== -->
-    <div v-if="ongletActif === 'validees'" class="carte section-carte">
+<div v-if="ongletActif === 'validees'" class="carte section-carte">
       <table v-if="visitesStore.validees.length" class="tableau">
         <thead>
           <tr>
@@ -85,8 +73,7 @@
       <p v-else class="vide">Aucune visite validée.</p>
     </div>
 
-    <!-- ===== CONFIRMÉES ===== -->
-    <div v-if="ongletActif === 'confirmees'" class="carte section-carte">
+<div v-if="ongletActif === 'confirmees'" class="carte section-carte">
       <table v-if="visitesStore.confirmees.length" class="tableau">
         <thead>
           <tr>
@@ -112,8 +99,7 @@
       <p v-else class="vide">Aucune visite confirmée.</p>
     </div>
 
-    <!-- ===== CLÔTURÉES ===== -->
-    <div v-if="ongletActif === 'cloturees'" class="carte section-carte">
+<div v-if="ongletActif === 'cloturees'" class="carte section-carte">
       <table v-if="visitesStore.cloturees.length" class="tableau">
         <thead>
           <tr>
@@ -144,8 +130,7 @@
 
     <Pagination v-model="page" :total-pages="totalPages" />
 
-    <!-- Modales -->
-    <ModalValiderVisite
+<ModalValiderVisite
       v-if="visiteAValider"
       :visite="visiteAValider"
       @close="visiteAValider = null"
@@ -186,7 +171,6 @@ const onglets = computed(() => [
   { cle: 'cloturees', libelle: 'Clôturées', liste: visitesStore.cloturees, badge: '' },
 ])
 
-// Liste de l'onglet courant + pagination (remise à 1 au changement d'onglet).
 const listeActive = computed(
   () =>
     ({
@@ -203,7 +187,6 @@ watch(ongletActif, () => {
 
 const nom = (p) => p ? `${p.prenom || ''} ${p.nom || ''}`.trim() || p.telephone || '—' : '—'
 
-/* Validation */
 const visiteAValider = ref(null)
 function ouvrirValidation(v) {
   visiteAValider.value = v
@@ -219,13 +202,11 @@ async function refuser(id) {
   info('Demande de visite refusée.')
 }
 
-/* Clôture */
 const visiteACloturer = ref(null)
 function ouvrirCloture(v) {
   visiteACloturer.value = v
 }
 async function confirmerCloture(payload) {
-  // Clôture via changement de statut backend selon l'issue.
   const statut = payload.issue === 'AVEC_CONTRAT' ? 'CLOTUREE_AVEC_CONTRAT' : 'CLOTUREE_SANS_CONTRAT'
   await visitesStore.changerStatut(visiteACloturer.value.id, statut)
   visiteACloturer.value = null

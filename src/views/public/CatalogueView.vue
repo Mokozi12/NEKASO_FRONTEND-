@@ -7,7 +7,7 @@
 
     <div class="catalogue-content">
       <div class="container">
-        <!-- STATS CARDS (locataire connecté uniquement) -->
+        
         <template v-if="authStore.isAuthenticated && authStore.user?.role === 'LOCATAIRE'">
           <div class="bienvenue">
             <h2 class="bienvenue-titre">Bonjour, trouvez votre prochain logement à Dakar</h2>
@@ -87,13 +87,13 @@
           </div>
         </template>
 
-        <!-- HEADER CATALOGUE -->
+        
         <div class="catalogue-header">
           <h1 class="page-title">Biens à louer à Dakar</h1>
           <p class="page-subtitle">{{ filteredBiens.length }} logement(s) trouvé(s)</p>
         </div>
 
-        <!-- FILTRES -->
+        
         <FiltreCatalogue
           v-model:recherche="searchQuery"
           v-model:type-actif="selectedType"
@@ -102,17 +102,17 @@
           v-model:pieces-min="piecesMin"
         />
 
-        <!-- GRILLE DE BIENS -->
+        
         <div class="biens-grid" v-if="!biensStore.chargement && biensPagines.length > 0">
           <CarteBienPublic v-for="bien in biensPagines" :key="bien.id" :bien="bien" />
         </div>
 
-        <!-- LOADING -->
+        
         <div v-else-if="biensStore.chargement" class="empty-state">
           <ChargementSpinner message="Chargement des biens..." />
         </div>
 
-        <!-- VIDE -->
+        
         <div v-else class="empty-state">
           <MessageVide
             icone="🏠"
@@ -121,7 +121,7 @@
           />
         </div>
 
-        <!-- PAGINATION -->
+        
         <div v-if="totalPages > 1" class="pagination">
           <button class="page-btn" :disabled="pageActuelle === 1" @click="pageActuelle--">
             Précédent
@@ -169,7 +169,6 @@ const loyerMax = ref(null)
 const piecesMin = ref(null)
 const pageActuelle = ref(1)
 
-// Pagination responsive : 5 biens / page en mobile, 9 sur grand écran.
 const largeurEcran = ref(typeof window !== 'undefined' ? window.innerWidth : 1200)
 const parPage = computed(() => (largeurEcran.value <= 768 ? 5 : 9))
 function onResize() {
@@ -221,7 +220,6 @@ const biensPagines = computed(() => {
   return filteredBiens.value.slice(debut, debut + parPage.value)
 })
 
-// Revenir à la page 1 quand les filtres ou le format d'affichage changent
 watch([searchQuery, selectedType, loyerMin, loyerMax, piecesMin, parPage], () => {
   pageActuelle.value = 1
 })
@@ -243,7 +241,7 @@ watch([searchQuery, selectedType, loyerMin, loyerMax, piecesMin, parPage], () =>
   padding: 0 24px;
 }
 
-/* ── BIENVENUE ── */
+
 .bienvenue {
   margin-bottom: 24px;
 }
@@ -261,7 +259,7 @@ watch([searchQuery, selectedType, loyerMin, loyerMax, piecesMin, parPage], () =>
   margin: 0;
 }
 
-/* ── STATS CARDS ── */
+
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -316,7 +314,7 @@ watch([searchQuery, selectedType, loyerMin, loyerMax, piecesMin, parPage], () =>
   color: #0f172a;
 }
 
-/* ── HEADER ── */
+
 .catalogue-header {
   margin-bottom: 24px;
 }
@@ -334,7 +332,7 @@ watch([searchQuery, selectedType, loyerMin, loyerMax, piecesMin, parPage], () =>
   color: #6b7280;
 }
 
-/* ── GRILLE ── */
+
 .biens-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -347,7 +345,7 @@ watch([searchQuery, selectedType, loyerMin, loyerMax, piecesMin, parPage], () =>
   text-align: center;
 }
 
-/* ── PAGINATION ── */
+
 .pagination {
   display: flex;
   justify-content: center;

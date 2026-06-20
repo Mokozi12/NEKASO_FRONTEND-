@@ -1,8 +1,3 @@
-<!--
-  ForgotPasswordModal — réinitialisation du mot de passe (design maquette, 2 étapes) :
-    1. Numéro       : téléphone + nouveau mot de passe + confirmation → « Envoyer le code »
-    2. Vérification : code à 4 chiffres (code démo : 1234) → « Vérifier le code »
--->
 <template>
   <Teleport to="body">
     <div v-if="modelValue" class="mdp-overlay" @click.self="close">
@@ -28,7 +23,7 @@
         </div>
 
         <div class="mdp-body">
-          <!-- Étape 1 : Numéro + nouveau mot de passe -->
+          
           <template v-if="mdpStep === 1">
             <p class="mdp-desc">Entrez votre numéro. Vous recevrez un code de vérification à 4 chiffres.</p>
 
@@ -67,8 +62,7 @@
             <button class="btn-submit" @click="sendCode" :disabled="!peutEnvoyer">Envoyer le code</button>
           </template>
 
-          <!-- Étape 2 : Vérification -->
-          <template v-else>
+<template v-else>
             <p class="mdp-desc">Code envoyé au <strong>{{ mdpForm.telephone }}</strong>.</p>
             <p class="demo-code-hint">Code démo : <strong>{{ codeDemo }}</strong></p>
             <div class="code-inputs">

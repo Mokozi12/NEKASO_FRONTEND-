@@ -1,9 +1,3 @@
-<!--
-  AlertesView (gestionnaire) — Suivi des biens défectueux (§12).
-
-  Le locataire signale un problème → le gestionnaire peut mettre le bien en
-  réparation / le désactiver, suivre l'avancement et clore l'alerte.
--->
 <template>
   <div class="alertes-page">
     <div class="page-header">
@@ -25,8 +19,7 @@
 
         <p class="alerte-msg">{{ a.message }}</p>
 
-        <!-- Suivi -->
-        <div v-if="a.suivi.length" class="suivi">
+<div v-if="a.suivi.length" class="suivi">
           <div v-for="s in a.suivi" :key="s.id" class="suivi-item">
             <span class="dot"></span>
             <div>
@@ -36,8 +29,7 @@
           </div>
         </div>
 
-        <!-- Actions -->
-        <div class="actions">
+<div class="actions">
           <template v-if="a.statut === 'NOUVELLE'">
             <button class="btn-rep" @click="mettreEnReparation(a)">Mettre en réparation</button>
             <button class="btn-desac" @click="desactiver(a)">Désactiver le bien</button>
@@ -65,7 +57,7 @@ import { useAlertesStore } from '@/stores/alertes.store'
 import { useNotification } from '@/composables/useNotification'
 import { useFormat } from '@/composables/useFormat'
 import { usePagination } from '@/composables/usePagination'
-import { nomComplet } from '@/mocks/db'
+import { nomComplet } from '@/utils/constants'
 import Pagination from '@/components/common/Pagination.vue'
 
 const alertesStore = useAlertesStore()

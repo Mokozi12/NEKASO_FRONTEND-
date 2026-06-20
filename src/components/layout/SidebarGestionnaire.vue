@@ -1,13 +1,13 @@
 <template>
   <aside class="sidebar">
-    <!-- Logo et nom de l'application -->
+    
     <RouterLink to="/gestionnaire/dashboard" class="sidebar-logo-wrapper">
       <img src="/logo-nekaso.png?v=2" alt="NEKASO" class="sidebar-logo" />
     </RouterLink>
 
-    <!-- Liens de navigation -->
+    
     <nav class="sidebar-nav">
-      <!-- Section MENU -->
+      
       <div class="nav-section">
         <h4 class="section-titre">MENU</h4>
 
@@ -140,7 +140,7 @@
         </RouterLink>
       </div>
 
-      <!-- Section GESTION -->
+      
       <div class="nav-section">
         <h4 class="section-titre">GESTION</h4>
 
@@ -216,7 +216,7 @@
         </RouterLink>
       </div>
 
-      <!-- Section OUTILS -->
+      
       <div class="nav-section mt-auto">
         <h4 class="section-titre">OUTILS</h4>
 
@@ -294,7 +294,7 @@ function seDeconnecter() {
   z-index: 100;
 }
 
-/* ===== LOGO BLOCK ===== */
+
 .sidebar-logo-wrapper {
   padding: 28px 24px 24px;
   display: flex;
@@ -309,7 +309,7 @@ function seDeconnecter() {
   display: block;
 }
 
-/* ===== NAVIGATION ===== */
+
 .sidebar-nav {
   flex: 1;
   padding: 0 20px 24px 20px;
@@ -364,7 +364,7 @@ function seDeconnecter() {
   transition: color 0.2s ease;
 }
 
-/* État actif */
+
 .sidebar-lien--actif {
   background-color: var(--couleur-primaire, #1a2e4a);
   color: #ffffff;

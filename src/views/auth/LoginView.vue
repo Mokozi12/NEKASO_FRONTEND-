@@ -3,7 +3,7 @@
     <HeaderPublic />
 
     <div class="auth-content">
-      <!-- BANNER contextuel -->
+      
       <div v-if="authStore.pendingAction" class="alert-banner">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -24,7 +24,7 @@
       </div>
 
       <div class="auth-card">
-        <!-- TABS -->
+        
         <div class="tabs">
           <button
             class="tab"
@@ -43,7 +43,7 @@
         </div>
 
         <div class="auth-body">
-          <!-- ═══════════ LOGIN ═══════════ -->
+          
           <div v-if="activeTab === 'login'">
             <h1 class="auth-title">Bon retour !</h1>
             <p class="auth-subtitle">Connectez-vous à votre compte NEKASO</p>
@@ -155,7 +155,7 @@
             </form>
           </div>
 
-          <!-- ═══════════ REGISTER (rôle toujours LOCATAIRE) ═══════════ -->
+          
           <div v-if="activeTab === 'register'">
             <div class="step-indicator">
               <div
@@ -205,7 +205,7 @@
               </div>
             </div>
 
-            <!-- Étape 1 : Identité -->
+            
             <div v-if="currentStep === 1" class="step-content">
               <h2 class="auth-title">Créez votre compte</h2>
               <p class="auth-subtitle">Rejoignez NEKASO en quelques secondes</p>
@@ -340,7 +340,7 @@
               </form>
             </div>
 
-            <!-- Étape 2 : Vérification -->
+            
             <div v-if="currentStep === 2" class="step-content text-center">
               <div class="wa-bubble">
                 <svg
@@ -395,7 +395,7 @@
       </div>
     </div>
 
-    <!-- extracted Forgot Password modal -->
+    
     <ForgotPasswordModal v-model="showMdpModal" />
   </div>
 </template>
@@ -432,13 +432,11 @@ const registerForm = reactive({
 
 const isCodeComplete = computed(() => registerForm.code.every((d) => d.length === 1))
 
-// ── Mot de passe oublié (external component) ─────────────────
 const showMdpModal = ref(false)
 function ouvrirMdpModal() {
   showMdpModal.value = true
 }
 
-// ── Auth ────────────────────────────────────────────────────
 onMounted(() => {
   if (authStore.pendingAction) activeTab.value = 'register'
 })
@@ -525,7 +523,7 @@ function handleCodeKeydown(index, event) {
 </script>
 
 <style scoped>
-/* ── Layout ───────────────────────────────────────────────── */
+
 .auth-layout {
   min-height: 100vh;
   background-color: #f8fafc;
@@ -542,7 +540,7 @@ function handleCodeKeydown(index, event) {
   padding: 40px 16px;
 }
 
-/* ── Banner ───────────────────────────────────────────────── */
+
 .alert-banner {
   background-color: #fff7ed;
   border: 1px solid #fdba74;
@@ -559,7 +557,7 @@ function handleCodeKeydown(index, event) {
   max-width: 480px;
 }
 
-/* ── Card ─────────────────────────────────────────────────── */
+
 .auth-card {
   width: 100%;
   max-width: 480px;
@@ -569,7 +567,7 @@ function handleCodeKeydown(index, event) {
   overflow: hidden;
 }
 
-/* ── Tabs ─────────────────────────────────────────────────── */
+
 .tabs {
   display: flex;
   border-bottom: 1px solid #e2e8f0;
@@ -597,7 +595,7 @@ function handleCodeKeydown(index, event) {
   color: #475569;
 }
 
-/* ── Body ─────────────────────────────────────────────────── */
+
 .auth-body {
   padding: 32px 40px 40px;
 }
@@ -624,7 +622,7 @@ function handleCodeKeydown(index, event) {
   margin-bottom: 24px;
 }
 
-/* ── Form ─────────────────────────────────────────────────── */
+
 .auth-form {
   display: flex;
   flex-direction: column;
@@ -718,7 +716,7 @@ function handleCodeKeydown(index, event) {
   color: #64748b;
 }
 
-/* ── Mot de passe oublié lien ─────────────────────────────── */
+
 .lien-mdp-row {
   display: flex;
   justify-content: flex-end;
@@ -737,7 +735,7 @@ function handleCodeKeydown(index, event) {
   text-decoration: underline;
 }
 
-/* ── Button ───────────────────────────────────────────────── */
+
 .btn-submit {
   display: flex;
   align-items: center;
@@ -769,7 +767,7 @@ function handleCodeKeydown(index, event) {
   cursor: not-allowed;
 }
 
-/* ── Step indicator (inscription) ─────────────────────────── */
+
 .step-indicator {
   display: flex;
   align-items: center;
@@ -834,7 +832,7 @@ function handleCodeKeydown(index, event) {
   }
 }
 
-/* ── WhatsApp bubble ──────────────────────────────────────── */
+
 .wa-bubble {
   width: 56px;
   height: 56px;
@@ -851,7 +849,7 @@ function handleCodeKeydown(index, event) {
   text-align: center;
 }
 
-/* ── Code inputs ──────────────────────────────────────────── */
+
 .code-inputs {
   display: flex;
   justify-content: center;
@@ -894,7 +892,7 @@ function handleCodeKeydown(index, event) {
   text-decoration: underline;
 }
 
-/* ══════════════ MODAL MOT DE PASSE OUBLIÉ ══════════════════ */
+
 .mdp-overlay {
   position: fixed;
   inset: 0;
@@ -936,7 +934,7 @@ function handleCodeKeydown(index, event) {
   }
 }
 
-/* En-tête sombre */
+
 .mdp-header {
   background: linear-gradient(135deg, #1a2e4a 0%, #1e3a5f 100%);
   padding: 28px 28px 24px;
@@ -981,7 +979,7 @@ function handleCodeKeydown(index, event) {
   margin: 0 0 24px;
 }
 
-/* Steps pills */
+
 .mdp-steps {
   display: flex;
   align-items: center;
@@ -1032,7 +1030,7 @@ function handleCodeKeydown(index, event) {
   background: #22c55e;
 }
 
-/* Corps blanc */
+
 .mdp-body {
   background: #fff;
   padding: 28px;
@@ -1067,7 +1065,7 @@ function handleCodeKeydown(index, event) {
   color: #1e293b;
 }
 
-/* ══════════════ RESPONSIVE ══════════════════════════════════ */
+
 @media (max-width: 520px) {
   .form-row {
     flex-direction: column;

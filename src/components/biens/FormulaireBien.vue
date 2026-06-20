@@ -3,11 +3,11 @@
     <div class="form-content">
       <h2 class="form-title">{{ isEdit ? 'Modifier le bien' : 'Nouveau bien immobilier' }}</h2>
 
-      <!-- Photos section -->
+      
       <div class="form-section">
         <label class="form-label">Photos du bien <span class="form-hint">(5 images maximum)</span></label>
         <div class="photos-container">
-          <!-- Photos existantes -->
+          
           <div v-for="(photo, index) in photos" :key="index" class="photo-item">
             <img :src="photo.url" :alt="'Photo ' + (index + 1)" />
             <span v-if="index === 0" class="photo-badge">Principale</span>
@@ -25,7 +25,7 @@
               </svg>
             </button>
           </div>
-          <!-- Bouton ajouter (masqué à 5 images) -->
+          
           <button v-if="photos.length < MAX_PHOTOS" class="photo-add" @click="triggerFileInput">
             <svg
               width="24"
@@ -55,7 +55,7 @@
       </div>
 
       <div class="form-grid">
-        <!-- Nom du bien -->
+        
         <div class="form-group full-width">
           <label class="form-label">Nom du bien *</label>
           <input
@@ -66,7 +66,7 @@
           />
         </div>
 
-        <!-- Adresse -->
+        
         <div class="form-group full-width">
           <label class="form-label">Adresse *</label>
           <input
@@ -77,9 +77,9 @@
           />
         </div>
 
-        <!-- Non-edit form fields -->
+        
         <template v-if="!isEdit">
-          <!-- Type & Surface -->
+          
           <div class="form-group">
             <label class="form-label">Type</label>
             <div class="select-wrapper">
@@ -112,7 +112,7 @@
             />
           </div>
 
-          <!-- Pièces & Loyer -->
+          
           <div class="form-group">
             <label class="form-label">Pièces</label>
             <div class="number-input-wrapper">
@@ -165,9 +165,9 @@
           </div>
         </template>
 
-        <!-- Edit form fields -->
+        
         <template v-else>
-          <!-- Loyer & Charges (for edit mode) -->
+          
           <div class="form-group">
             <label class="form-label">Loyer *</label>
             <input type="number" class="form-input" v-model="formData.loyer" />
@@ -178,7 +178,7 @@
           </div>
         </template>
 
-        <!-- Description -->
+        
         <div class="form-group full-width">
           <label class="form-label">Description</label>
           <textarea
@@ -190,7 +190,7 @@
         </div>
       </div>
 
-      <!-- Actions -->
+      
       <div class="form-actions">
         <button v-if="isEdit" class="btn-cancel" @click="$emit('cancel')">Annuler</button>
         <button class="btn-save" @click="handleSave">Enregistrer</button>
@@ -276,12 +276,10 @@ function handleFileSelect(event) {
     const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg']
     let limiteAtteinte = false
     for (const file of files) {
-      // Limite à 5 images maximum
       if (photos.value.length >= MAX_PHOTOS) {
         limiteAtteinte = true
         break
       }
-      // Vérifier que c'est bien une image JPEG/PNG/JPG
       if (!allowedTypes.includes(file.type)) {
         console.warn(`Type de fichier non supporté : ${file.type}`)
         continue
@@ -293,7 +291,6 @@ function handleFileSelect(event) {
       toast.warning(`Vous pouvez ajouter au maximum ${MAX_PHOTOS} images.`)
     }
   }
-  // Reset pour permettre re-sélection des mêmes fichiers
   event.target.value = ''
 }
 
@@ -312,7 +309,6 @@ function buildFormData() {
     }
   }
 
-  // Ajouter les champs texte
   const fields = formData.value
   if (fields.libelle) fd.append('libelle', fields.libelle)
   if (fields.adresse) fd.append('adresse', fields.adresse)
@@ -322,7 +318,11 @@ function buildFormData() {
   if (fields.loyer) fd.append('loyer', String(fields.loyer))
   if (fields.charges) fd.append('charges', String(fields.charges))
   if (fields.description) fd.append('description', fields.description)
-  if (!props.isEdit) fd.append('statutBien', 'DISPONIBLE')
+  if (!props.isEdit) {
+    fd.append('statutBien', 'DISPONIBLE')
+  } else if (props.initialData && props.initialData.statutBien) {
+    fd.append('statutBien', props.initialData.statutBien)
+  }
 
   return fd
 }
@@ -363,7 +363,7 @@ function handleSave() {
   color: #9ca3af;
 }
 
-/* Photos section */
+
 .photos-container {
   display: flex;
   gap: 16px;
@@ -443,7 +443,7 @@ function handleSave() {
   display: none;
 }
 
-/* Form Grid */
+
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -483,7 +483,7 @@ function handleSave() {
   min-height: 80px;
 }
 
-/* Select wrapper */
+
 .select-wrapper {
   position: relative;
 }
@@ -503,7 +503,7 @@ function handleSave() {
   pointer-events: none;
 }
 
-/* Number input wrapper */
+
 .number-input-wrapper {
   position: relative;
   display: flex;
@@ -545,7 +545,7 @@ function handleSave() {
   color: #4b5563;
 }
 
-/* Actions */
+
 .form-actions {
   display: flex;
   justify-content: flex-end;

@@ -3,7 +3,7 @@
     <HeaderLocataire v-if="authStore.isAuthenticated && authStore.user?.role === 'LOCATAIRE'" />
     <HeaderPublic v-else />
 
-    <!-- ══════ HERO ══════ -->
+    
     <section class="hero">
       <div class="container">
         <div class="hero-content">
@@ -14,7 +14,7 @@
             villas — dans les meilleurs quartiers de Dakar.
           </p>
 
-          <!-- SEARCH BAR -->
+          
           <div class="search-bar">
             <div class="search-input-wrapper">
               <svg
@@ -44,11 +44,11 @@
       </div>
     </section>
 
-    <!-- ══════ FEATURES ══════ -->
+    
     <section class="features">
       <div class="container">
         <div class="features-grid">
-          <!-- Biens vérifiés -->
+          
           <div class="feature-card">
             <div class="feature-icon feature-icon--blue">
               <svg
@@ -70,7 +70,7 @@
             <p class="feature-desc">Chaque annonce est validée par nos gestionnaires locaux.</p>
           </div>
 
-          <!-- Paiements validés -->
+          
           <div class="feature-card">
             <div class="feature-icon feature-icon--green">
               <svg
@@ -92,7 +92,7 @@
             <p class="feature-desc">Orange Money, Wave ou espèces — historique toujours à jour.</p>
           </div>
 
-          <!-- Support WhatsApp -->
+          
           <div class="feature-card">
             <div class="feature-icon feature-icon--amber">
               <svg
@@ -118,7 +118,7 @@
       </div>
     </section>
 
-    <!-- ══════ BIENS EN VEDETTE ══════ -->
+    
     <section class="featured-section">
       <div class="container">
         <div class="section-header">
@@ -141,7 +141,7 @@
       </div>
     </section>
 
-    <!-- ══════ CHAMBRES DISPONIBLES ══════ -->
+    
     <section v-if="chambres.length" class="featured-section chambres-section">
       <div class="container">
         <div class="section-header">
@@ -157,7 +157,7 @@
       </div>
     </section>
 
-    <!-- ══════ FOOTER ══════ -->
+    
     <footer class="footer">
       <div class="container footer-inner">
         <p class="footer-left">© 2026 NEKASO — Dakar, Sénégal</p>
@@ -182,7 +182,6 @@ const biensStore = useBiensPublicsStore()
 const authStore = useAuthStore()
 
 const searchQuery = ref('')
-// Section dédiée aux chambres (sinon elles n'apparaissent pas dans les 3 biens en vedette).
 const chambres = computed(() =>
   biensStore.biensDisponibles.filter(
     (b) => (b.typeBien || b.type || '').toUpperCase() === 'CHAMBRE',
@@ -213,7 +212,7 @@ const handleSearch = () => {
   padding: 0 24px;
 }
 
-/* ══════ HERO ══════ */
+
 .hero {
   background: linear-gradient(160deg, #1a2e4a 0%, #1e3a5f 40%, #234a6e 100%);
   color: #ffffff;
@@ -251,7 +250,7 @@ const handleSearch = () => {
   margin-bottom: 36px;
 }
 
-/* ── Search Bar ── */
+
 .search-bar {
   display: flex;
   gap: 0;
@@ -306,7 +305,7 @@ const handleSearch = () => {
   background-color: #16a34a;
 }
 
-/* ── Quartiers ── */
+
 .popular-locations {
   display: flex;
   flex-wrap: wrap;
@@ -335,7 +334,7 @@ const handleSearch = () => {
   border-color: rgba(255, 255, 255, 0.4);
 }
 
-/* ══════ FEATURES ══════ */
+
 .features {
   padding: 72px 0;
   background-color: #f9fafb;
@@ -406,7 +405,7 @@ const handleSearch = () => {
   line-height: 1.55;
 }
 
-/* ══════ BIENS EN VEDETTE ══════ */
+
 .featured-section {
   padding: 72px 0 80px;
   background-color: #ffffff;
@@ -456,7 +455,7 @@ const handleSearch = () => {
   padding: 60px 20px;
 }
 
-/* ══════ FOOTER ══════ */
+
 .footer {
   background-color: #1f2937;
   color: #ffffff;
@@ -479,7 +478,7 @@ const handleSearch = () => {
   color: rgba(255, 255, 255, 0.55);
 }
 
-/* ══════ RESPONSIVE ══════ */
+
 @media (max-width: 1024px) {
   .properties-grid {
     grid-template-columns: repeat(2, 1fr);

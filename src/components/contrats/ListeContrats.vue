@@ -1,8 +1,3 @@
-<!--
-  ListeContrats — Tableau des contrats existants.
-  Affiche les colonnes : Bien, Locataire, Début, Loyer, Statut, Actions (PDF).
-  Correspond à l'écran "Voir la liste" des captures.
--->
 <template>
   <div class="carte">
     <table class="tableau">
@@ -69,7 +64,6 @@ defineProps({
 function formatNomBien(bien) {
   if (!bien) return '—'
   const type = bien.typeBien ? bien.typeBien.charAt(0) + bien.typeBien.slice(1).toLowerCase() : ''
-  // Extraire le nom du quartier depuis l'adresse
   const quartier = bien.adresse ? bien.adresse.split(',')[0].trim() : ''
   return `${type} ${quartier}`
 }

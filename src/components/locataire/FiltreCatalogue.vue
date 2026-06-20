@@ -1,6 +1,6 @@
 <template>
   <div class="filtre-catalogue">
-    <!-- BARRE DE RECHERCHE -->
+    
     <div class="filtre-search-row">
       <div class="search-wrapper">
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -37,8 +37,7 @@
       </button>
     </div>
 
-    <!-- PANNEAU FILTRES AVANCÉS -->
-    <Transition name="slide-down">
+<Transition name="slide-down">
       <div v-if="ouvert" class="panneau-filtres">
         <div class="filtre-champ">
           <label>Loyer min. (FCFA)</label>
@@ -79,8 +78,7 @@
       </div>
     </Transition>
 
-    <!-- PILLS DE CATÉGORIES -->
-    <div class="category-pills">
+<div class="category-pills">
       <button
         v-for="cat in categories"
         :key="cat.value"
@@ -235,7 +233,6 @@ const categories = [
   padding: 0 5px;
 }
 
-/* ── PANNEAU ── */
 .panneau-filtres {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr auto;
@@ -328,7 +325,6 @@ const categories = [
   transform: translateY(-6px);
 }
 
-/* ── PILLS ── */
 .category-pills {
   display: flex;
   gap: 10px;

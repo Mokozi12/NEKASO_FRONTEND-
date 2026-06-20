@@ -1,14 +1,6 @@
-<!--
-  AccueilLocataireView — tableau de bord du locataire (maquette PDF « Accueil »).
-
-  - Bandeau de bienvenue « Bonjour, {prénom} ».
-  - 3 cartes de raccourci : Mes locations / Demandes de visite / Demandes de location.
-  - Bandeau « pré-contrat à valider » (§9) quand un pré-contrat attend le client.
-  - Section « Découvrir de nouveaux biens » (sélection des biens disponibles).
--->
 <template>
   <div class="accueil">
-    <!-- ══════ HERO ══════ -->
+    
     <section class="hero">
       <div class="container">
         <p class="hello">Bonjour,</p>
@@ -18,7 +10,7 @@
     </section>
 
     <div class="container">
-      <!-- ══════ STAT CARDS ══════ -->
+      
       <div class="stats">
         <router-link to="/locataire/mes-locations" class="stat">
           <span class="stat-ic">
@@ -54,8 +46,7 @@
         </router-link>
       </div>
 
-      <!-- ══════ PRÉ-CONTRAT À VALIDER (§9) ══════ -->
-      <router-link
+<router-link
         v-if="preContratAValider"
         :to="`/locataire/contrat/${preContratAValider.id}`"
         class="banniere-precontrat"
@@ -70,8 +61,7 @@
         <span class="bp-cta">Valider →</span>
       </router-link>
 
-      <!-- ══════ DÉCOUVRIR ══════ -->
-      <section class="decouvrir">
+<section class="decouvrir">
         <div class="sec-head">
           <div>
             <h2 class="sec-titre">Découvrir de nouveaux biens</h2>
@@ -136,7 +126,6 @@ const biensDispo = computed(() => biensStore.biensDisponibles.slice(0, 3))
   padding: 0 24px;
 }
 
-/* ── Hero ── */
 .hero {
   background: #1e293b;
   color: #fff;
@@ -159,7 +148,6 @@ const biensDispo = computed(() => biensStore.biensDisponibles.slice(0, 3))
   max-width: 520px;
 }
 
-/* ── Stats ── */
 .stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -215,7 +203,6 @@ const biensDispo = computed(() => biensStore.biensDisponibles.slice(0, 3))
   font-size: 18px;
 }
 
-/* ── Bannière pré-contrat ── */
 .banniere-precontrat {
   display: flex;
   align-items: center;
@@ -266,7 +253,6 @@ const biensDispo = computed(() => biensStore.biensDisponibles.slice(0, 3))
   white-space: nowrap;
 }
 
-/* ── Découvrir ── */
 .decouvrir {
   margin-top: 44px;
 }

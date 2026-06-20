@@ -1,6 +1,6 @@
 <template>
   <div class="gestionnaire-login-layout">
-    <!-- LEFT PANEL -->
+    
     <div class="brand-panel">
       <div class="brand-content">
         <h1 class="brand-title">
@@ -27,9 +27,9 @@
       </div>
     </div>
 
-    <!-- RIGHT PANEL -->
+    
     <div class="login-panel">
-      <!-- Back button to home for convenience -->
+      
       <router-link to="/" class="back-link">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
         Retour au site
@@ -79,10 +79,10 @@
       </div>
     </div>
 
-    <!-- MODAL MOT DE PASSE OUBLIÉ -->
+    
     <div v-if="isResetModalOpen" class="modal-overlay" @click.self="closeResetModal">
       <div class="reset-modal">
-        <!-- Header Dark -->
+        
         <div class="reset-modal-header">
           <button class="btn-close" @click="closeResetModal">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
@@ -92,21 +92,21 @@
           <h3 class="reset-title">Mot de passe oublié</h3>
           
           <div class="reset-stepper">
-            <!-- Etape 1 -->
+            
             <div class="step-pill" :class="{ 'step-active': resetStep === 1, 'step-done': resetStep > 1 }">
               <svg v-if="resetStep > 1" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
               <svg v-else xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
               Numéro
             </div>
             <div class="step-line"></div>
-            <!-- Etape 2 -->
+            
             <div class="step-pill" :class="{ 'step-active': resetStep === 2, 'step-done': resetStep > 2, 'step-pending': resetStep < 2 }">
               <svg v-if="resetStep > 2" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
               <svg v-else xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
               Vérification
             </div>
             <div class="step-line"></div>
-            <!-- Etape 3 -->
+            
             <div class="step-pill" :class="{ 'step-active': resetStep === 3, 'step-pending': resetStep < 3 }">
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path></svg>
               Nouveau MDP
@@ -114,9 +114,9 @@
           </div>
         </div>
 
-        <!-- Body White -->
+        
         <div class="reset-modal-body">
-          <!-- ETAPE 1 : Numéro -->
+          
           <div v-if="resetStep === 1" class="step-content">
             <p class="step-desc">Entrez votre numéro de téléphone. Vous recevrez un code SMS à 6 chiffres.</p>
             
@@ -131,7 +131,7 @@
             <button class="btn-submit mt-4" :disabled="!resetForm.telephone" @click="goToStep(2)">Envoyer le code</button>
           </div>
 
-          <!-- ETAPE 2 : Vérification -->
+          
           <div v-if="resetStep === 2" class="step-content">
             <p class="step-desc">Un code à 6 chiffres a été envoyé au <strong>{{ resetForm.telephone }}</strong>.</p>
             
@@ -146,7 +146,7 @@
             </button>
           </div>
 
-          <!-- ETAPE 3 : Nouveau mot de passe -->
+          
           <div v-if="resetStep === 3" class="step-content">
             <p class="step-desc">Choisissez un nouveau mot de passe sécurisé pour votre compte.</p>
             
@@ -224,7 +224,6 @@ const handleLogin = async () => {
   }
 }
 
-// === Modal Reset Password Logic ===
 const isResetModalOpen = ref(false)
 const resetStep = ref(1)
 
@@ -240,7 +239,7 @@ const showResetPassword2 = ref(false)
 
 const openResetModal = () => {
   resetStep.value = 1
-  resetForm.telephone = loginForm.telephone // Pre-fill
+  resetForm.telephone = loginForm.telephone
   resetForm.otp = ['', '', '', '', '', '']
   resetForm.newPassword = ''
   resetForm.confirmPassword = ''
@@ -275,7 +274,6 @@ const finishReset = () => {
   if (isPasswordsMatch.value) {
     toast.success('Mot de passe réinitialisé avec succès !')
     closeResetModal()
-    // Pre-fill login
     loginForm.motDePasse = resetForm.newPassword
   }
 }
@@ -289,10 +287,10 @@ const finishReset = () => {
   width: 100%;
 }
 
-/* ── LEFT PANEL (BRAND) ── */
+
 .brand-panel {
   flex: 1;
-  background-color: #111827; /* Dark navy as in mockup */
+  background-color: #111827; 
   color: #ffffff;
   padding: 60px;
   display: flex;
@@ -347,7 +345,7 @@ const finishReset = () => {
   color: #94a3b8;
 }
 
-/* ── RIGHT PANEL (LOGIN) ── */
+
 .login-panel {
   flex: 1;
   background-color: #f8fafc;
@@ -408,7 +406,7 @@ const finishReset = () => {
   margin-bottom: 32px;
 }
 
-/* ── FORM ── */
+
 .login-form {
   display: flex;
   flex-direction: column;
@@ -515,12 +513,12 @@ const finishReset = () => {
   color: #475569;
 }
 
-/* BUTTONS */
+
 .btn-submit {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #1e293b; /* Dark navy */
+  background-color: #1e293b; 
   color: #ffffff;
   border: none;
   border-radius: 8px;
@@ -572,7 +570,7 @@ const finishReset = () => {
 .mt-4 { margin-top: 24px; }
 .mb-3 { margin-bottom: 16px; }
 
-/* ── MODAL ── */
+
 .modal-overlay {
   position: fixed;
   top: 0;

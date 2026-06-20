@@ -1,6 +1,6 @@
 <template>
   <div class="carte-bien-public" @click="voirDetail">
-    <!-- IMAGE + BADGES -->
+    
     <div class="bien-image">
       <img :src="bien.photos?.[0]?.urlPhoto || bien.photos?.[0] || 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=600&h=400&fit=crop'" :alt="bien.titre" loading="lazy" />
       <div class="badges">
@@ -9,7 +9,7 @@
       </div>
     </div>
 
-    <!-- CONTENU -->
+    
     <div class="bien-content">
       <h3 class="bien-titre">{{ bien.libelle || bien.titre || bien.typeBien }}</h3>
 
@@ -21,7 +21,7 @@
         {{ typeof bien.adresse === 'string' ? bien.adresse : (bien.adresse?.quartier ? `${bien.adresse.quartier}, ${bien.adresse.ville || 'Dakar'}` : 'Dakar') }}
       </div>
 
-      <!-- SPECS -->
+      
       <div class="bien-specs">
         <div class="spec-item" v-if="bien.nombrePieces || bien.caracteristiques?.nombreChambres">
           <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -41,7 +41,7 @@
         </div>
       </div>
 
-      <!-- PRIX -->
+      
       <div class="bien-footer">
         <span class="prix">{{ formatMontant(bien.loyer) }}</span>
         <span class="periode">/mois</span>
@@ -89,7 +89,6 @@ const formatMontant = (montant) => {
 }
 
 const voirDetail = () => {
-  // Locataire connecté → on reste dans l'espace /locataire ; sinon route publique.
   const connecteLocataire =
     authStore.isAuthenticated && authStore.user?.role === 'LOCATAIRE'
   router.push(`${connecteLocataire ? '/locataire/biens' : '/biens'}/${props.bien.id}`)
@@ -113,7 +112,7 @@ const voirDetail = () => {
   transform: translateY(-3px);
 }
 
-/* ── IMAGE ── */
+
 .bien-image {
   position: relative;
   width: 100%;
@@ -133,7 +132,7 @@ const voirDetail = () => {
   transform: scale(1.04);
 }
 
-/* ── BADGES ── */
+
 .badges {
   position: absolute;
   top: 12px;
@@ -177,7 +176,7 @@ const voirDetail = () => {
   font-weight: 600;
 }
 
-/* ── CONTENU ── */
+
 .bien-content {
   padding: 18px 20px 20px;
   display: flex;
@@ -212,7 +211,7 @@ const voirDetail = () => {
   flex-shrink: 0;
 }
 
-/* ── SPECS ── */
+
 .bien-specs {
   display: flex;
   gap: 14px;
@@ -235,7 +234,7 @@ const voirDetail = () => {
   flex-shrink: 0;
 }
 
-/* ── FOOTER / PRIX ── */
+
 .bien-footer {
   display: flex;
   justify-content: space-between;

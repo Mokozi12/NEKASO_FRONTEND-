@@ -1,22 +1,8 @@
-<!--
-  ContratDetailView (gestionnaire) — Cycle de vie complet d'un contrat.
-
-  Pré-contrat (§9) :
-    - fil des retours / suggestions du client,
-    - corriger & renvoyer / invalider,
-    - enregistrer & activer (2ᵉ partie de la validation finale) lorsque le client a validé.
-
-  Contrat actif (§10, §11) :
-    - échéances de paiement,
-    - historique des paiements,
-    - formulaire d'enregistrement d'un paiement (échéance présélectionnée).
--->
 <template>
   <div class="detail-page" v-if="contrat">
     <button class="retour" @click="$router.push('/gestionnaire/contrats')">← Retour aux contrats</button>
 
-    <!-- En-tête -->
-    <div class="carte entete">
+<div class="carte entete">
       <div>
         <div class="numero">{{ contrat.numero }}</div>
         <h1 class="titre">{{ contrat.bien?.intitule }}</h1>
@@ -28,8 +14,7 @@
       <span class="chip" :class="chipClass(contrat.statut)">{{ libelleStatut(contrat.statut) }}</span>
     </div>
 
-    <!-- Détails -->
-    <div class="carte bloc">
+<div class="carte bloc">
       <h2 class="bloc-titre">Détails du contrat</h2>
       <div class="grille">
         <div><span class="lbl">Début</span><span class="val">{{ formatDate(contrat.dateDebut) }}</span></div>
@@ -44,10 +29,9 @@
       </div>
     </div>
 
-    <!-- ===== PRÉ-CONTRAT : retours + actions ===== -->
-    <template v-if="estPreContrat">
+<template v-if="estPreContrat">
       <div class="carte bloc">
-        <!-- Validé par le client → enregistrer et activer -->
+        
         <template v-if="contrat.statut === 'VALIDE_CLIENT'">
           <div class="info-ok">
             Le client a validé ce pré-contrat. Enregistrez-le pour qu'il commence à s'exécuter.
@@ -57,8 +41,7 @@
           </button>
         </template>
 
-        <!-- Sinon → corriger / invalider -->
-        <template v-else-if="contrat.statut !== 'ANNULE'">
+<template v-else-if="contrat.statut !== 'ANNULE'">
           <h2 class="bloc-titre">Corriger le pré-contrat</h2>
           <div class="grille-2">
             <div class="champ">
@@ -88,8 +71,7 @@
       </div>
     </template>
 
-    <!-- ===== CONTRAT ACTIF : échéances + paiements ===== -->
-    <template v-if="contrat.statut === 'ACTIF'">
+<template v-if="contrat.statut === 'ACTIF'">
       <div class="carte bloc">
         <div class="bloc-head">
           <h2 class="bloc-titre">Échéances de paiement</h2>
@@ -118,8 +100,7 @@
         <Pagination v-model="pageEcheances" :total-pages="totalPagesEcheances" />
       </div>
 
-      <!-- Enregistrer un paiement (échéance présélectionnée §11) -->
-      <div class="carte bloc">
+<div class="carte bloc">
         <h2 class="bloc-titre">Enregistrer un paiement</h2>
         <div v-if="echeancesAPayer.length" class="grille-2">
           <div class="champ">
@@ -159,8 +140,7 @@
         </button>
       </div>
 
-      <!-- Historique des paiements -->
-      <div class="carte bloc">
+<div class="carte bloc">
         <h2 class="bloc-titre">Historique des paiements</h2>
         <table v-if="historique.length" class="tableau">
           <thead>
@@ -185,14 +165,14 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, watch } from 'vue'
+import { ref, reactive, computed, watch, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useContratsStore } from '@/stores/contrats.store'
 import { usePaiementsStore } from '@/stores/paiements.store'
 import { useNotification } from '@/composables/useNotification'
 import { useFormat } from '@/composables/useFormat'
 import { usePagination } from '@/composables/usePagination'
-import { nomComplet, STATUTS_PRE_CONTRAT } from '@/mocks/db'
+import { nomComplet, STATUTS_PRE_CONTRAT } from '@/utils/constants'
 import Pagination from '@/components/common/Pagination.vue'
 
 const route = useRoute()
@@ -203,7 +183,7 @@ const { formatMontant, formatDate } = useFormat()
 
 const enCours = ref(false)
 const id = computed(() => Number(route.params.id))
-const contrat = computed(() => contratsStore.getContratHydrate(id.value))
+const contrat = computed(() => preContratsStore.preContrats.find(c => Number(c.id) === id.value))
 
 const estPreContrat = computed(
   () => contrat.value && (STATUTS_PRE_CONTRAT.includes(contrat.value.statut) || contrat.value.statut === 'ANNULE'),
@@ -211,7 +191,6 @@ const estPreContrat = computed(
 
 const nom = (p) => nomComplet(p)
 
-/* Formulaire de correction (préremps depuis le contrat) */
 const edit = reactive({ dateDebut: '', montantLoyer: 0, montantCaution: 0, conditions: '' })
 watch(
   contrat,
@@ -226,14 +205,22 @@ watch(
   { immediate: true },
 )
 
-/* Échéances & paiements */
 const echeancesTriees = computed(() =>
   (contrat.value?.echeances || [])
     .slice()
     .sort((a, b) => new Date(a.dateEcheance) - new Date(b.dateEcheance)),
 )
 const echeancesAPayer = computed(() => paiementsStore.echeancesAPayer(contrat.value))
-const historique = computed(() => paiementsStore.paiementsParContrat(id.value))
+
+watch(id, (newId) => {
+  if (newId) {
+    paiementsStore.chargerHistorique(newId, { page: 0, size: 100 })
+  }
+}, { immediate: true })
+
+const historique = computed(() => {
+  return paiementsStore.historique
+})
 
 const { page: pageEcheances, totalPages: totalPagesEcheances, itemsPage: echeancesPage } =
   usePagination(echeancesTriees, 5)
@@ -242,7 +229,6 @@ const { page: pageHistorique, totalPages: totalPagesHistorique, itemsPage: histo
 
 const paiement = reactive({ echeanceId: null, montant: 0, methodePaiement: 'ORANGE_MONEY', reference: '' })
 
-/* Présélection automatique de l'échéance courante (§11) */
 watch(
   () => contrat.value?.statut === 'ACTIF' && echeancesAPayer.value,
   () => {
@@ -262,50 +248,71 @@ watch(
   },
 )
 
-/* Actions pré-contrat */
 async function corriger() {
   enCours.value = true
-  await contratsStore.corrigerPreContrat(id.value, {
-    dateDebut: edit.dateDebut,
-    montantLoyer: edit.montantLoyer,
-    montantCaution: edit.montantCaution,
-    conditions: edit.conditions,
-  })
+  try {
+    await preContratsStore.modifier(id.value)
+    succes('Pré-contrat corrigé et renvoyé au client.')
+  } catch (e) {
+    info('Erreur lors de la correction.')
+  }
   enCours.value = false
-  succes('Pré-contrat corrigé et renvoyé au client.')
 }
 async function invalider() {
   enCours.value = true
-  await contratsStore.invaliderPreContrat(id.value)
+  try {
+    await preContratsStore.invalider(id.value)
+    info('Pré-contrat invalidé.')
+  } catch(e) {
+    info('Erreur lors de l\'invalidation.')
+  }
   enCours.value = false
-  info('Pré-contrat invalidé.')
 }
 async function activer() {
   enCours.value = true
-  await contratsStore.enregistrerEtActiver(id.value)
+  try {
+    await contratsStore.creerContratDefinitif(id.value)
+    succes('Le contrat de bail a été édité et activé avec succès !')
+  } catch(e) {
+    info('Erreur lors de la création du contrat de bail.')
+  }
   enCours.value = false
-  succes('Contrat enregistré et activé. Il commence à s\'exécuter.')
 }
 
-/* Actions contrat actif */
 function regenererEcheances() {
   const ech = contratsStore.genererEcheances(contrat.value)
   contratsStore.definirEcheances(id.value, ech)
   info('Échéances générées.')
 }
-async function enregistrerPaiement() {
-  enCours.value = true
-  await paiementsStore.enregistrerPaiement(id.value, paiement.echeanceId, {
-    montant: paiement.montant,
-    methodePaiement: paiement.methodePaiement,
-    reference: paiement.reference,
-  })
-  paiement.reference = ''
-  enCours.value = false
-  succes('Paiement enregistré. Le client a été notifié.')
+
+function getMoisBackend(dateString) {
+  if (!dateString) return 'AOUT'
+  const m = new Date(dateString).getMonth()
+  return [
+    'JANVIER', 'FEVRIER', 'MARS', 'AVRIL', 'MAI', 'JUIN',
+    'JUILLET', 'AOUT', 'SEPTEMBRE', 'OCTOBRE', 'NOVEMBRE', 'DECEMBRE'
+  ][m]
 }
 
-/* Libellés */
+async function enregistrerPaiement() {
+  enCours.value = true
+  const ech = echeancesAPayer.value.find((x) => x.id === paiement.echeanceId)
+  
+  const moisStr = ech ? getMoisBackend(ech.dateEcheance) : "AOUT"
+  
+  try {
+    await paiementsStore.enregistrerPaiementBackend(id.value, moisStr, paiement.methodePaiement)
+    succes('Paiement enregistré sur le serveur.')
+  } catch (err) {
+    info('Erreur lors de l\'enregistrement du paiement.')
+  }
+
+  await paiementsStore.chargerHistorique(id.value, { page: 0, size: 100 })
+
+  paiement.reference = ''
+  enCours.value = false
+}
+
 function libelleStatut(s) {
   return {
     PRE_CONTRAT_ENVOYE: 'Pré-contrat envoyé',

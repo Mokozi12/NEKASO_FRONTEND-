@@ -1,12 +1,3 @@
-<!--
-  WizardContrat — Assistant de création de PRÉ-CONTRAT (§9-bis).
-
-  Le formulaire multi-étapes existant est conservé mais sa FINALITÉ change :
-  à la confirmation, on ne crée pas un contrat final mais un PRÉ-CONTRAT soumis
-  au client (qui devra le valider ou faire des retours).
-
-  Étapes : données client → mois/durée → conditions particulières → résumé → confirmation.
--->
 <template>
   <div class="carte wizard">
     <div class="wizard-header">
@@ -20,8 +11,7 @@
       </div>
     </div>
 
-    <!-- Étape 1 : Données client -->
-    <div v-if="etape === 1" class="wizard-body">
+<div v-if="etape === 1" class="wizard-body">
       <div class="champ">
         <label>Client *</label>
         <select v-model="form.clientId" @change="majMontants">
@@ -46,8 +36,7 @@
       </div>
     </div>
 
-    <!-- Étape 2 : Mois / durée -->
-    <div v-if="etape === 2" class="wizard-body">
+<div v-if="etape === 2" class="wizard-body">
       <div class="grille-2">
         <div class="champ">
           <label>Date de début *</label>
@@ -73,8 +62,7 @@
       </div>
     </div>
 
-    <!-- Étape 3 : Conditions + montants -->
-    <div v-if="etape === 3" class="wizard-body">
+<div v-if="etape === 3" class="wizard-body">
       <div class="grille-2">
         <div class="champ">
           <label>Loyer mensuel *</label>
@@ -95,8 +83,7 @@
       </div>
     </div>
 
-    <!-- Étape 4 : Résumé -->
-    <div v-if="etape === 4" class="wizard-body">
+<div v-if="etape === 4" class="wizard-body">
       <h4 class="section-label">Résumé du pré-contrat</h4>
       <div class="apercu">
         <h4 class="apercu-titre">PRÉ-CONTRAT DE BAIL — RÉPUBLIQUE DU SÉNÉGAL</h4>
@@ -112,8 +99,7 @@
       </div>
     </div>
 
-    <!-- Étape 5 : Confirmation -->
-    <div v-if="etape === 5" class="wizard-body wizard-body--centrer">
+<div v-if="etape === 5" class="wizard-body wizard-body--centrer">
       <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
         <circle cx="28" cy="28" r="27" stroke="#00d15a" stroke-width="2" />
         <path d="M17 28.5L24.5 36L39 21" stroke="#00d15a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
@@ -124,8 +110,7 @@
       </p>
     </div>
 
-    <!-- Navigation -->
-    <div class="wizard-footer">
+<div class="wizard-footer">
       <button v-if="etape > 1" class="btn-secondaire" @click="etape--">Précédent</button>
       <span v-else></span>
       <button v-if="etape < 5" class="btn-primaire" :disabled="!etapeValide" @click="etape++">

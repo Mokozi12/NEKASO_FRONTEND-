@@ -1,6 +1,6 @@
 <template>
   <div class="parametres-page">
-    <!-- Header -->
+    
     <div class="page-header">
       <h1 class="page-titre">Paramètres</h1>
       <button class="btn-ajouter" @click="showAddUserModal = true">
@@ -11,7 +11,7 @@
       </button>
     </div>
 
-    <!-- Section 1: Utilisateurs -->
+    
     <div class="section">
       <h2 class="section-titre">Utilisateurs & Équipes</h2>
       <div class="panel">
@@ -59,7 +59,7 @@
       </div>
     </div>
 
-    <!-- Section 2: Informations entreprise -->
+    
     <div class="section">
       <h2 class="section-titre">Informations entreprise</h2>
       <div class="panel">
@@ -80,12 +80,12 @@
       </div>
     </div>
 
-    <!-- Bouton Enregistrer global -->
+    
     <div class="save-zone">
       <button class="btn-save" @click="saveAll">Enregistrer les modifications</button>
     </div>
 
-    <!-- Modal Ajout Utilisateur -->
+    
     <div v-if="showAddUserModal" class="modal-overlay" @click.self="showAddUserModal = false">
       <div class="modal-card">
         <div class="modal-header">
@@ -124,7 +124,7 @@
       </div>
     </div>
 
-    <!-- Modal Confirmation Statut -->
+    
     <div v-if="showConfirmModal" class="modal-overlay" @click.self="showConfirmModal = false">
       <div class="modal-card modal-sm">
         <div class="modal-body">
@@ -211,7 +211,7 @@ function saveAll() {
 <style scoped>
 .parametres-page { padding: 0; }
 
-/* Header */
+
 .page-header {
   display: flex;
   justify-content: space-between;
@@ -240,7 +240,7 @@ function saveAll() {
 }
 .btn-ajouter:hover { background: #1e293b; }
 
-/* Sections */
+
 .section { margin-bottom: 28px; }
 .section-titre {
   font-size: 16px;
@@ -257,7 +257,7 @@ function saveAll() {
   box-shadow: 0 1px 3px rgba(0,0,0,.04);
 }
 
-/* Table */
+
 .table-wrapper { overflow-x: auto; }
 table {
   width: 100%;
@@ -313,7 +313,7 @@ tbody tr:hover { background: #fafbfc; }
 }
 .btn-action:hover { color: #0f172a; }
 
-/* Forms */
+
 .form-grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -346,7 +346,7 @@ tbody tr:hover { background: #fafbfc; }
 .form-input:focus { border-color: #94a3b8; background: white; }
 .form-input::placeholder { color: #94a3b8; }
 
-/* Save zone */
+
 .save-zone {
   display: flex;
   justify-content: flex-end;
@@ -365,7 +365,7 @@ tbody tr:hover { background: #fafbfc; }
 }
 .btn-save:hover { background: #1e293b; }
 
-/* Modals */
+
 .modal-overlay {
   position: fixed;
   inset: 0;

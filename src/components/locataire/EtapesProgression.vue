@@ -1,14 +1,3 @@
-<!--
-  EtapesProgression — petit indicateur d'avancement (stepper) repris des PDF
-  « Mes demandes de visite / de location » : une suite de pastilles reliées,
-  les étapes franchies sont vertes (ou rouges si la demande est rejetée/annulée).
-
-  Props :
-    - etapes : string[]  (libellés des étapes)
-    - courante : number  (index de l'étape atteinte, 0-based)
-    - ton : 'green' | 'red'   (rouge = annulée / refusée)
-    - libelles : boolean (afficher les libellés sous les pastilles)
--->
 <template>
   <div class="stepper" :class="`ton-${ton}`">
     <div v-for="(etape, i) in etapes" :key="i" class="etape" :class="{ atteinte: i <= courante }">
@@ -77,7 +66,7 @@ defineProps({
   color: #94a3b8;
   white-space: nowrap;
 }
-/* Étapes franchies */
+
 .ton-green .etape.atteinte .pastille {
   background: #22c55e;
 }

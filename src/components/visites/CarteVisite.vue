@@ -1,6 +1,6 @@
 <template>
   <div class="carte carte-visite">
-    <!-- En haut : locataire + badge -->
+    
     <div class="visite-entete">
       <div>
         <p class="visite-nom">{{ visite.locataire.nom }} {{ visite.locataire.prenom }}</p>
@@ -9,7 +9,7 @@
       <BadgeStatut :statut="visite.statut" />
     </div>
 
-    <!-- Au milieu : infos du bien -->
+    
     <div class="visite-corps">
       <p class="visite-bien">{{ visite.bien.adresse }}</p>
       <p class="visite-type">{{ typeLibelle(visite.bien.typeBien) }}</p>
@@ -17,13 +17,13 @@
       <p class="visite-date">Demandée le {{ formatDate(visite.dateCreation) }}</p>
     </div>
 
-    <!-- En bas : boutons (seulement si EN_ATTENTE) -->
+    
     <div v-if="visite.statut === 'EN_ATTENTE'" class="visite-actions">
       <button class="btn-secondaire" @click="$emit('refuser', visite.id)">Refuser</button>
       <button class="btn-primaire" @click="$emit('approuver', visite.id)">Approuver</button>
     </div>
 
-    <!-- Si déjà traitée -->
+    
     <div v-else class="visite-statut-final">
       <span v-if="visite.statut === 'CONFIRMEE'" style="color: var(--couleur-succes)">
         Confirmées

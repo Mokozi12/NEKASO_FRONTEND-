@@ -1,11 +1,3 @@
-<!--
-  PaiementsView (gestionnaire) — §10.
-
-  Les paiements sont gérés DEPUIS LA LISTE DES CONTRATS (pas une liste de
-  paiements isolée). On présente ici les contrats actifs, filtrables par
-  téléphone / nom client / numéro de contrat ; ouvrir un contrat permet
-  d'enregistrer un paiement sur l'échéance présélectionnée.
--->
 <template>
   <div class="paiements-page">
     <div class="page-header">
@@ -74,7 +66,7 @@ import { useContratsStore } from '@/stores/contrats.store'
 import { usePaiementsStore } from '@/stores/paiements.store'
 import { useFormat } from '@/composables/useFormat'
 import { usePagination } from '@/composables/usePagination'
-import { nomComplet, STATUT_CONTRAT } from '@/mocks/db'
+import { nomComplet, STATUT_CONTRAT } from '@/utils/constants'
 import Pagination from '@/components/common/Pagination.vue'
 
 const contratsStore = useContratsStore()

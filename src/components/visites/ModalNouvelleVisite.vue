@@ -1,6 +1,3 @@
-<!--
-  ModalNouvelleVisite — Création ou reprogrammation d'une demande de visite.
--->
 <template>
   <div v-if="visible" class="modal-overlay" @click.self="emit('fermer')">
     <div class="modal" role="dialog" aria-modal="true" :aria-labelledby="titreId">

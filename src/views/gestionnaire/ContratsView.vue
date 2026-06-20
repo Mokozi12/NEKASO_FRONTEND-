@@ -1,10 +1,3 @@
-<!--
-  ContratsView (gestionnaire) — §9, §10.
-
-  Liste des contrats (pré-contrats + actifs), filtrable par téléphone, nom client
-  ou numéro de contrat. La gestion des paiements se fait en ouvrant un contrat.
-  Un assistant permet de créer un nouveau pré-contrat (§9-bis).
--->
 <template>
   <div class="contrats-page">
     <div class="page-header page-header--flex">
@@ -17,8 +10,7 @@
       <button class="btn-nouvelle" @click="wizardOuvert = true">+ Nouveau pré-contrat</button>
     </div>
 
-    <!-- Filtres (§10) -->
-    <div class="barre-filtres carte">
+<div class="barre-filtres carte">
       <div class="recherche">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2">
           <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
@@ -74,8 +66,7 @@
 
     <Pagination v-model="page" :total-pages="totalPages" />
 
-    <!-- Wizard pré-contrat -->
-    <div v-if="wizardOuvert" class="overlay" @click.self="wizardOuvert = false">
+<div v-if="wizardOuvert" class="overlay" @click.self="wizardOuvert = false">
       <div class="wizard-modal">
         <button class="x" @click="wizardOuvert = false" aria-label="Fermer">✕</button>
         <WizardContrat
@@ -89,26 +80,30 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useContratsStore } from '@/stores/contrats.store'
+import { usePreContratsStore } from '@/stores/preContrats.store'
 import { useBiensStore } from '@/stores/biens.store'
 import { useNotification } from '@/composables/useNotification'
 import { useFormat } from '@/composables/useFormat'
 import { usePagination } from '@/composables/usePagination'
-import { db, nomComplet, STATUTS_PRE_CONTRAT, STATUT_CONTRAT } from '@/mocks/db'
+import { nomComplet, STATUTS_PRE_CONTRAT, STATUT_CONTRAT } from '@/utils/constants'
 import WizardContrat from '@/components/contrats/WizardContrat.vue'
 import Pagination from '@/components/common/Pagination.vue'
 
 const router = useRouter()
 const contratsStore = useContratsStore()
+const preContratsStore = usePreContratsStore()
 const biensStore = useBiensStore()
-const { succes } = useNotification()
+const { succes, erreur: notifErreur } = useNotification()
 const { formatMontant } = useFormat()
 
 const recherche = ref('')
 const filtreStatut = ref('tous')
 const wizardOuvert = ref(false)
+
+onMounted(() => contratsStore.chargerGestionnaire())
 
 const tabs = [
   { cle: 'tous', libelle: 'Tous' },
@@ -116,23 +111,37 @@ const tabs = [
   { cle: 'actifs', libelle: 'Actifs' },
 ]
 
-const clients = computed(() => db.clients)
+const clients = ref([])
 const biensDisponibles = computed(() =>
   biensStore.biens.filter((b) => ['DISPONIBLE', 'RESERVE'].includes(b.statutBien)),
 )
 
+const tousLesContrats = computed(() => {
+  return contratsStore.contrats
+})
+
 const contratsAffiches = computed(() => {
-  let liste = contratsStore.filtrer(recherche.value)
+  const q = recherche.value.trim().toLowerCase()
+  let liste = tousLesContrats.value
+
   if (filtreStatut.value === 'precontrats') {
     liste = liste.filter((c) => STATUTS_PRE_CONTRAT.includes(c.statut))
   } else if (filtreStatut.value === 'actifs') {
     liste = liste.filter((c) => c.statut === STATUT_CONTRAT.ACTIF)
   }
+
+  if (q) {
+    liste = liste.filter((c) => {
+      const tel = (c.client?.telephone || c.locataire?.telephone || '').toLowerCase()
+      const nom = `${c.locataire?.prenom || c.client?.prenom || ''} ${c.locataire?.nom || c.client?.nom || ''}`.toLowerCase()
+      const num = (c.numero || c.reference || '').toLowerCase()
+      return tel.includes(q) || nom.includes(q) || num.includes(q)
+    })
+  }
   return liste
 })
 
 const { page, totalPages, itemsPage: contratsPage } = usePagination(contratsAffiches, 8)
-// Revenir en page 1 quand le filtre ou la recherche change.
 watch([recherche, filtreStatut], () => {
   page.value = 1
 })
@@ -144,10 +153,14 @@ function ouvrir(id) {
 }
 
 async function onPreContratCree(data) {
-  const contrat = await contratsStore.creerPreContratDepuisWizard(data)
-  wizardOuvert.value = false
-  succes('Pré-contrat créé et envoyé au client.')
-  router.push(`/gestionnaire/contrats/${contrat.id}`)
+  try {
+    const contrat = await preContratsStore.creer(data)
+    wizardOuvert.value = false
+    succes('Pré-contrat créé et envoyé au client.')
+    if (contrat?.id) router.push(`/gestionnaire/contrats/${contrat.id}`)
+  } catch (e) {
+    notifErreur('Erreur lors de la création du pré-contrat.')
+  }
 }
 
 function libelleStatut(s) {

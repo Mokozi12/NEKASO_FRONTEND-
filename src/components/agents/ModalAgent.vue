@@ -1,6 +1,3 @@
-<!--
-  ModalAgent — Enregistrement d'un agent de visite avec ses créneaux (§3).
--->
 <template>
   <div class="overlay" @click.self="$emit('close')">
     <div class="modal">

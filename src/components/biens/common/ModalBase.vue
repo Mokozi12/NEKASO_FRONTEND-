@@ -47,7 +47,7 @@ defineEmits(['close'])
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.4); /* Assombrissement du fond */
+  background-color: rgba(0, 0, 0, 0.4); 
   display: flex;
   justify-content: center;
   align-items: center;
@@ -86,7 +86,7 @@ defineEmits(['close'])
   color: #111827;
 }
 
-/* Transitions pour Vue <Transition name="modal"> */
+
 .modal-enter-active,
 .modal-leave-active {
   transition: opacity 0.3s ease;

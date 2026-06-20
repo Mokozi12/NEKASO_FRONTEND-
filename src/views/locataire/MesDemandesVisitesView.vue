@@ -1,11 +1,3 @@
-<!--
-  MesDemandesVisitesView (locataire) — design PDF « Mes demandes de visite »
-  + intégration du workflow corrigé :
-    §6-bis : une demande est un simple signal d'intérêt (aucun créneau choisi).
-    §1     : une visite EN_ATTENTE ne peut PAS être annulée.
-    §2/§4  : une fois VALIDÉE, le client voit le créneau + l'agent + son téléphone.
-    §5     : le client ACCEPTE (→ CONFIRMÉE) ou ANNULE.
--->
 <template>
   <div class="page">
     <div class="container">
@@ -24,7 +16,7 @@
 
       <div v-else class="liste">
         <div v-for="v in itemsPage" :key="v.id" class="carte">
-          <!-- En-tête : photo + infos + statut -->
+          
           <div class="carte-head">
             <img :src="photo(v.bien)" :alt="v.bien?.intitule" class="vignette" />
             <div class="infos">
@@ -35,14 +27,12 @@
             <BadgeStatut :label="statut(v).label" :variant="statut(v).variant" />
           </div>
 
-          <!-- Stepper d'avancement -->
-          <div class="progression">
+<div class="progression">
             <EtapesProgression :etapes="ETAPES" :courante="statut(v).etape" :ton="statut(v).ton" />
             <span class="etape-label" :class="`tl-${statut(v).ton}`">{{ statut(v).label }}</span>
           </div>
 
-          <!-- §4 : créneau proposé + agent (VALIDEE) → accepter / annuler -->
-          <div v-if="v.statut === 'VALIDEE'" class="panneau">
+<div v-if="v.statut === 'VALIDEE'" class="panneau">
             <div class="pn-lignes">
               <div class="pn-l"><span>Créneau proposé</span><strong>{{ formatDate(v.creneau?.date) }} à {{ v.creneau?.heure }}</strong></div>
               <div class="pn-l"><span>Agent</span><strong>{{ nom(v.agent) }}</strong></div>
@@ -54,8 +44,7 @@
             </div>
           </div>
 
-          <!-- Confirmée : rappel du créneau + annulation possible -->
-          <div v-else-if="v.statut === 'CONFIRMEE'" class="panneau">
+<div v-else-if="v.statut === 'CONFIRMEE'" class="panneau">
             <div class="pn-lignes">
               <div class="pn-l"><span>Créneau confirmé</span><strong>{{ formatDate(v.creneau?.date) }} à {{ v.creneau?.heure }}</strong></div>
               <div class="pn-l"><span>Agent</span><strong>{{ nom(v.agent) }} · {{ v.agent?.telephone }}</strong></div>
@@ -65,8 +54,7 @@
             </div>
           </div>
 
-          <!-- Clôturée avec contrat → accès au pré-contrat -->
-          <router-link
+<router-link
             v-else-if="v.statut === 'CLOTUREE_AVEC_CONTRAT' && preContratDe(v)"
             :to="`/locataire/contrat/${preContratDe(v).id}`"
             class="lien-precontrat"
@@ -74,8 +62,7 @@
             Un pré-contrat vous a été proposé — le consulter →
           </router-link>
 
-          <!-- Messages d'état simples -->
-          <p v-else-if="message(v)" class="message" :class="`msg-${statut(v).ton}`">{{ message(v) }}</p>
+<p v-else-if="message(v)" class="message" :class="`msg-${statut(v).ton}`">{{ message(v) }}</p>
         </div>
       </div>
 
@@ -152,13 +139,10 @@ function message(v) {
 }
 
 async function accepter(v) {
-  // Le backend ne fournit pas encore d'endpoint locataire pour confirmer un créneau.
-  // Action désactivée côté front jusqu'à disponibilité de l'endpoint.
   succes('Votre réponse a bien été prise en compte.')
   await visitesStore.chargerVisites()
 }
 async function annuler(v) {
-  // Même remarque : pas d'endpoint locataire d'annulation dans le Swagger actuel.
   info('Demande d\'annulation envoyée. La liste sera mise à jour prochainement.')
   await visitesStore.chargerVisites()
 }
@@ -250,7 +234,6 @@ async function annuler(v) {
   margin-top: 4px;
 }
 
-/* Stepper */
 .progression {
   display: flex;
   align-items: center;
@@ -270,7 +253,6 @@ async function annuler(v) {
   color: #dc2626;
 }
 
-/* Panneau créneau / actions */
 .panneau {
   margin-top: 16px;
   background: #f8fafc;
@@ -364,7 +346,6 @@ async function annuler(v) {
   cursor: pointer;
 }
 
-/* Modale */
 .overlay {
   position: fixed;
   inset: 0;

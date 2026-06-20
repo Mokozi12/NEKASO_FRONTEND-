@@ -1,15 +1,3 @@
-/*
-  usePagination — pagination réutilisable pour n'importe quelle liste.
-
-  Usage :
-    const liste = computed(() => store.mesTrucs)
-    const { page, totalPages, itemsPage } = usePagination(liste, 6)
-    // dans le template : v-for="x in itemsPage" + <Pagination v-model="page" :total-pages="totalPages" />
-
-  - `source`  : ref / computed (ou valeur) contenant le tableau à paginer.
-  - `parPage` : nombre par page (ou ref/computed pour une valeur responsive).
-  La page courante est ramenée dans les bornes quand la liste rétrécit.
-*/
 import { ref, computed, watch, unref } from 'vue'
 
 export function usePagination(source, parPage = 6) {
@@ -24,7 +12,6 @@ export function usePagination(source, parPage = 6) {
     return liste.value.slice(debut, debut + taille.value)
   })
 
-  // Si la liste (ou la taille de page) change et que la page courante dépasse, on recadre.
   watch(totalPages, (n) => {
     if (page.value > n) page.value = n
   })

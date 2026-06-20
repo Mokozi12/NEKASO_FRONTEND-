@@ -1,24 +1,13 @@
-<!--
-  MonContratView (locataire) — page « Contrat & Paiements » (design PDF) pour UN
-  contrat (`/locataire/contrat/:id`). Le rendu dépend du statut :
-
-    • Pré-contrat (§9)        : relecture des termes, fil des retours,
-                                actions « valider » / « envoyer un retour ».
-    • Bail actif (PDF-11/12)  : onglets Contrat / Historique des paiements
-                                + signalement d'un problème (§12).
--->
 <template>
   <div class="page">
     <div class="container">
       <router-link to="/locataire/mes-locations" class="retour">← Mes locations</router-link>
 
-      <!-- Contrat introuvable / non autorisé -->
-      <div v-if="!contrat" class="carte vide">
+<div v-if="!contrat" class="carte vide">
         Ce contrat est introuvable ou ne vous appartient pas.
       </div>
 
-      <!-- ══════════ PRÉ-CONTRAT (§9) ══════════ -->
-      <template v-else-if="estPreContrat">
+<template v-else-if="estPreContrat">
         <div class="page-header">
           <h1 class="page-title">Pré-contrat à valider</h1>
           <p class="page-subtitle">Relisez les termes proposés, validez ou envoyez vos suggestions au gestionnaire.</p>
@@ -43,8 +32,7 @@
 
           <div v-if="contrat.conditions" class="conditions">{{ contrat.conditions }}</div>
 
-          <!-- Fil des échanges -->
-          <div v-if="contrat.retours.length" class="fil">
+<div v-if="contrat.retours.length" class="fil">
             <div
               v-for="r in contrat.retours"
               :key="r.id"
@@ -56,8 +44,7 @@
             </div>
           </div>
 
-          <!-- Actions selon l'état -->
-          <template v-if="['PRE_CONTRAT_ENVOYE', 'PRE_CONTRAT_CORRIGE'].includes(contrat.statut)">
+<template v-if="['PRE_CONTRAT_ENVOYE', 'PRE_CONTRAT_CORRIGE'].includes(contrat.statut)">
             <div class="suggestion">
               <input v-model="suggestion" type="text" placeholder="Une suggestion ou un point à revoir ? (optionnel)" />
               <button class="btn-secondaire" @click="suggerer">Envoyer un retour</button>
@@ -76,8 +63,7 @@
         </div>
       </template>
 
-      <!-- ══════════ BAIL ACTIF (PDF-11/12) ══════════ -->
-      <template v-else-if="contrat.statut === 'ACTIF'">
+<template v-else-if="contrat.statut === 'ACTIF'">
         <div class="page-header">
           <h1 class="page-title">Contrat &amp; Paiements</h1>
           <p class="page-subtitle">Consultez votre bail et l'historique des loyers validés par votre gestionnaire.</p>
@@ -88,8 +74,7 @@
           <button class="tab" :class="{ actif: onglet === 'historique' }" @click="onglet = 'historique'">Historique</button>
         </div>
 
-        <!-- Onglet CONTRAT -->
-        <div v-if="onglet === 'contrat'" class="carte">
+<div v-if="onglet === 'contrat'" class="carte">
           <div class="bail-head">
             <div class="bail-titre-bloc">
               <span class="doc-ic">
@@ -122,8 +107,7 @@
             Pour toute modification, contactez directement votre gestionnaire via WhatsApp.
           </div>
 
-          <!-- §12 : signaler un problème -->
-          <div class="signalement">
+<div class="signalement">
             <h3 class="sous-titre">Signaler un problème</h3>
             <div class="alerte-form">
               <input v-model="alerte.titre" type="text" placeholder="Objet (ex : Fuite d'eau)" />
@@ -133,8 +117,7 @@
           </div>
         </div>
 
-        <!-- Onglet HISTORIQUE -->
-        <div v-else class="carte">
+<div v-else class="carte">
           <div class="banniere-info">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9" /><line x1="12" y1="11" x2="12" y2="16" /><line x1="12" y1="8" x2="12" y2="8" /></svg>
             Historique validé par votre gestionnaire. Les paiements s'effectuent en Orange Money, Wave ou espèces — aucune transaction en ligne.
@@ -159,8 +142,7 @@
         </div>
       </template>
 
-      <!-- ══════════ Autres états ══════════ -->
-      <div v-else class="carte vide">
+<div v-else class="carte vide">
         {{ contrat.statut === 'ANNULE' ? 'Ce pré-contrat a été invalidé.' : 'Contrat terminé.' }}
       </div>
     </div>
@@ -168,31 +150,36 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useContratsStore } from '@/stores/contrats.store'
+import { usePreContratsStore } from '@/stores/preContrats.store'
 import { useAlertesStore } from '@/stores/alertes.store'
 import { useNotification } from '@/composables/useNotification'
 import { useFormat } from '@/composables/useFormat'
-import { nomComplet, SESSION, todayISO } from '@/mocks/db'
+import { nomComplet, todayISO } from '@/utils/constants'
+import { useAuthStore } from '@/stores/auth.store'
 import BadgeStatut from '@/components/locataire/BadgeStatut.vue'
 import Pagination from '@/components/common/Pagination.vue'
 import { usePagination } from '@/composables/usePagination'
 
 const route = useRoute()
 const contratsStore = useContratsStore()
+const preContratsStore = usePreContratsStore()
 const alertesStore = useAlertesStore()
-const { succes, info } = useNotification()
+const { succes, info, erreur } = useNotification()
 const { formatMontant, formatDate } = useFormat()
+const authStore = useAuthStore()
 
 const onglet = ref('contrat')
 const suggestion = ref('')
 const alerte = reactive({ titre: '', message: '' })
 
+onMounted(() => contratsStore.chargerLocataire())
+
 const contrat = computed(() => {
-  const c = contratsStore.getContratHydrate(Number(route.params.id))
-  if (!c || c.clientId !== SESSION.clientId) return null
-  return c
+  const id = Number(route.params.id)
+  return preContratsStore.preContrats.find(c => Number(c.id) === id)
 })
 const estPreContrat = computed(() =>
   ['PRE_CONTRAT_ENVOYE', 'PRE_CONTRAT_CORRIGE', 'RETOURS_CLIENT', 'VALIDE_CLIENT'].includes(
@@ -200,7 +187,6 @@ const estPreContrat = computed(() =>
   ),
 )
 
-// Historique = échéances déjà échues uniquement (les mois futurs n'y figurent pas).
 const echeances = computed(() =>
   (contrat.value?.echeances || [])
     .filter((e) => e.dateEcheance <= todayISO())
@@ -218,7 +204,6 @@ function datePaiement(e) {
   return p ? formatDate(p.datePaiement) : '—'
 }
 function etat(e) {
-  // Plus de statut « Attente » : une échéance échue est soit payée, soit en retard.
   if (e.statut === 'PAYE') return { label: 'Payé', variant: 'green', icon: 'check' }
   return { label: 'Retard', variant: 'red', icon: 'alert' }
 }
@@ -241,12 +226,20 @@ function variantPre(s) {
 }
 
 async function valider() {
-  await contratsStore.validerParClient(contrat.value.id)
-  succes('Pré-contrat validé. Le gestionnaire va l\'enregistrer.')
+  try {
+    await preContratsStore.valider(contrat.value.id)
+    succes('Pré-contrat validé. Le gestionnaire va l\'enregistrer.')
+  } catch (e) {
+    erreur('Erreur lors de la validation.')
+  }
 }
 async function annuler() {
-  await contratsStore.annulerParClient(contrat.value.id)
-  info('Pré-contrat annulé.')
+  try {
+    await preContratsStore.invalider(contrat.value.id)
+    info('Pré-contrat annulé.')
+  } catch (e) {
+    erreur('Erreur lors de l\'annulation.')
+  }
 }
 async function suggerer() {
   const msg = suggestion.value.trim()
@@ -321,7 +314,6 @@ function telechargerPdf() {
   padding: 50px;
 }
 
-/* ── Tabs ── */
 .tabs {
   display: inline-flex;
   background: #fff;
@@ -345,7 +337,6 @@ function telechargerPdf() {
   color: #fff;
 }
 
-/* ── Pré-contrat ── */
 .pc-head {
   display: flex;
   justify-content: space-between;
@@ -446,7 +437,6 @@ function telechargerPdf() {
   color: #15803d;
 }
 
-/* ── Bail actif ── */
 .bail-head {
   display: flex;
   justify-content: space-between;
@@ -569,7 +559,6 @@ function telechargerPdf() {
   cursor: not-allowed;
 }
 
-/* Boutons verts */
 .btn-vert {
   background: #22c55e;
   color: #fff;
@@ -611,7 +600,6 @@ function telechargerPdf() {
   white-space: nowrap;
 }
 
-/* Tableau historique */
 .table-scroll {
   margin-top: 16px;
   overflow-x: auto;

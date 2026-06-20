@@ -82,7 +82,7 @@ defineEmits(['cancel', 'confirm'])
 }
 
 .btn-confirm {
-  background-color: #1e293b; /* Dark navy */
+  background-color: #1e293b; 
   border: none;
   color: white;
 }

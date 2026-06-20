@@ -1,13 +1,4 @@
-/*
-  Mappers backend → frontend.
 
-  Le backend NEKASO utilise un modèle de données plus « plat » et des noms de
-  champs parfois différents de ceux attendus par les vues (ex. `libelle` côté
-  backend vs `intitule` côté front). On centralise ici toutes les traductions
-  pour qu'un seul endroit soit à corriger si le contrat d'API évolue.
-*/
-
-/* ───────────── Méthodes de paiement ───────────── */
 const LIBELLE_METHODE = {
   OM: 'Orange Money',
   ORANGE_MONEY: 'Orange Money',
@@ -20,13 +11,11 @@ export function libelleMethode(code) {
   return LIBELLE_METHODE[code] || code || '—'
 }
 
-/* ───────────── Bien immobilier ───────────── */
 export function mapBien(b) {
   if (!b) return null
   return {
     ...b,
     id: b.id,
-    // Le front utilise `intitule`, le backend renvoie `libelle`.
     intitule: b.libelle ?? b.intitule ?? '',
     libelle: b.libelle ?? b.intitule ?? '',
     type: b.typeBien ?? b.type ?? '',
@@ -46,7 +35,6 @@ export function mapBien(b) {
 }
 export const mapBiens = (liste) => (liste || []).map(mapBien)
 
-/* ───────────── Demande de location ───────────── */
 export function mapDemandeLocation(d) {
   if (!d) return null
   return {
@@ -61,15 +49,22 @@ export function mapDemandeLocation(d) {
 }
 export const mapDemandesLocation = (liste) => (liste || []).map(mapDemandeLocation)
 
-/* ───────────── Demande de visite ───────────── */
 export function mapVisite(v) {
   if (!v) return null
+  const locId = v.id_Locataire ?? v.locataireId ?? v.locataire?.id ?? null
+  const locImbrique = v.locataire ?? v.client ?? null
+  const locPlat =
+    v.locataireNom || v.locatairePrenom || v.locataireTelephone
+      ? { id: locId, nom: v.locataireNom, prenom: v.locatairePrenom, telephone: v.locataireTelephone }
+      : null
+  const client = locImbrique || locPlat
   return {
     ...v,
     id: v.id,
     statut: v.statut,
     dateCreation: v.dateCreation,
-    locataireId: v.id_Locataire ?? v.locataireId ?? null,
+    locataireId: locId,
+    client,
     bienId: v.bien?.id ?? v.bienId ?? v.id_Bien ?? null,
     bien: v.bien ? mapBien(v.bien) : null,
     agentId: v.agentId ?? v.agent?.id ?? null,
@@ -77,7 +72,6 @@ export function mapVisite(v) {
 }
 export const mapVisites = (liste) => (liste || []).map(mapVisite)
 
-/* ───────────── Pré-contrat ───────────── */
 export function mapPreContrat(p) {
   if (!p) return null
   return {
@@ -112,7 +106,6 @@ export function mapPreContrat(p) {
 }
 export const mapPreContrats = (liste) => (liste || []).map(mapPreContrat)
 
-/* ───────────── Contrat de bail définitif ───────────── */
 export function mapContrat(c) {
   if (!c) return null
   return {
@@ -133,7 +126,6 @@ export function mapContrat(c) {
 }
 export const mapContrats = (liste) => (liste || []).map(mapContrat)
 
-/* ───────────── Paiement ───────────── */
 export function mapPaiement(p) {
   if (!p) return null
   return {

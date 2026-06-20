@@ -1,11 +1,11 @@
 <template>
-  <!-- Overlay sombre semi-transparent -->
+  
   <div class="overlay" @click.self="$emit('close')">
 
-    <!-- Boîte du modal -->
+    
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-titre">
 
-      <!-- En-tête : titre + X -->
+      
       <div class="modal-header">
         <h3 id="modal-titre" class="modal-titre">Nouvelle demande de location</h3>
         <button class="btn-fermer" @click="$emit('close')" aria-label="Fermer">
@@ -17,22 +17,22 @@
         </button>
       </div>
 
-      <!-- Corps du formulaire -->
+      
       <div class="modal-body">
 
-        <!-- Candidat -->
+        
         <div class="champ">
           <label for="candidat">Candidat <span class="requis">*</span></label>
           <input id="candidat" v-model="form.candidat" type="text" autocomplete="off" />
         </div>
 
-        <!-- Contact -->
+        
         <div class="champ">
           <label for="contact">Contact <span class="requis">*</span></label>
           <input id="contact" v-model="form.contact" type="text" autocomplete="off" />
         </div>
 
-        <!-- Bien (select avec flèche) -->
+        
         <div class="champ">
           <label for="bien">Bien</label>
           <div class="select-wrap">
@@ -49,7 +49,7 @@
           </div>
         </div>
 
-        <!-- Date + Heure côte à côte -->
+        
         <div class="grille-2">
           <div class="champ">
             <label for="date">Date <span class="requis">*</span></label>
@@ -63,7 +63,7 @@
 
       </div>
 
-      <!-- Pied : bouton Enregistrer aligné à droite -->
+      
       <div class="modal-footer">
         <button class="btn-enregistrer" @click="enregistrer">Enregistrer</button>
       </div>
@@ -86,13 +86,12 @@ const form = reactive({
 })
 
 function enregistrer() {
-  // TODO : appel store / API
   emit('close')
 }
 </script>
 
 <style scoped>
-/* ── Overlay ──────────────────────────────────────────── */
+
 .overlay {
   position: fixed;
   inset: 0;
@@ -104,7 +103,7 @@ function enregistrer() {
   backdrop-filter: blur(1px);
 }
 
-/* ── Boîte ────────────────────────────────────────────── */
+
 .modal {
   width: 100%;
   max-width: 480px;
@@ -120,7 +119,7 @@ function enregistrer() {
   to   { opacity: 1; transform: translateY(0)    scale(1);    }
 }
 
-/* ── Header ───────────────────────────────────────────── */
+
 .modal-header {
   display: flex;
   align-items: center;
@@ -155,12 +154,12 @@ function enregistrer() {
   color: #111827;
 }
 
-/* ── Corps ────────────────────────────────────────────── */
+
 .modal-body {
   padding: 0 24px 4px;
 }
 
-/* ── Champs ───────────────────────────────────────────── */
+
 .champ {
   margin-bottom: 14px;
 }
@@ -177,7 +176,7 @@ function enregistrer() {
   color: #dc2626;
 }
 
-/* Inputs et selects : même apparence */
+
 .champ input,
 .champ select,
 .select-wrap select {
@@ -199,7 +198,7 @@ function enregistrer() {
   background: #ffffff;
 }
 
-/* Select avec flèche SVG superposée */
+
 .select-wrap {
   position: relative;
 }
@@ -220,14 +219,14 @@ function enregistrer() {
   color: #6b7280;
 }
 
-/* Grille Date + Heure */
+
 .grille-2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 14px;
 }
 
-/* ── Footer ───────────────────────────────────────────── */
+
 .modal-footer {
   display: flex;
   justify-content: flex-end;

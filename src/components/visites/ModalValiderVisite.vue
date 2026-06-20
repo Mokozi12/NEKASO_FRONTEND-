@@ -1,13 +1,3 @@
-<!--
-  ModalValiderVisite — Validation d'une demande de visite par le gestionnaire (§2).
-
-  La validation impose OBLIGATOIREMENT :
-    1. le choix d'un CRÉNEAU (date + heure),
-    2. l'affectation d'un AGENT disponible sur ce créneau.
-
-  Le gestionnaire choisit d'abord un créneau parmi le croisement des
-  disponibilités des agents, puis affecte l'un des agents disponibles.
--->
 <template>
   <div class="overlay" @click.self="$emit('close')">
     <div class="modal">
@@ -22,7 +12,7 @@
       </header>
 
       <div class="modal-body">
-        <!-- Étape 1 : créneau -->
+        
         <section>
           <h4 class="label">1. Choisir un créneau (selon les disponibilités des agents)</h4>
           <div v-if="creneaux.length === 0" class="vide">
@@ -44,8 +34,7 @@
           </div>
         </section>
 
-        <!-- Étape 2 : agent -->
-        <section v-if="creneauChoisi">
+<section v-if="creneauChoisi">
           <h4 class="label">2. Affecter un agent disponible</h4>
           <div class="agents">
             <label
@@ -76,7 +65,7 @@
 import { ref, computed } from 'vue'
 import { useAgentsStore } from '@/stores/agents.store'
 import { useFormat } from '@/composables/useFormat'
-import { getBien, getClient, nomComplet } from '@/mocks/db'
+import { nomComplet } from '@/utils/constants'
 
 const props = defineProps({
   visite: { type: Object, required: true },
@@ -86,8 +75,8 @@ const emit = defineEmits(['close', 'valider'])
 const agentsStore = useAgentsStore()
 const { formatDate } = useFormat()
 
-const bien = computed(() => getBien(props.visite.bienId))
-const nomClient = computed(() => nomComplet(getClient(props.visite.clientId)))
+const bien = computed(() => props.visite.bien || {})
+const nomClient = computed(() => nomComplet(props.visite.client || props.visite.locataire))
 
 const creneaux = computed(() => agentsStore.creneauxDisponibles)
 const creneauChoisi = ref(null)
