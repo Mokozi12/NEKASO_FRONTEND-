@@ -19,6 +19,7 @@ export function nomComplet(personne) {
 
 export const STATUT_VISITE = {
   EN_ATTENTE: 'EN_ATTENTE',
+  PROPOSEE: 'PROPOSEE',
   CONFIRMEE: 'CONFIRMEE',
   TERMINEE: 'TERMINEE',
   ANNULEE: 'ANNULEE',

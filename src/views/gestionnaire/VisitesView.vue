@@ -3,7 +3,7 @@
     <div class="page-header">
       <h1 class="page-title">Demandes de visites</h1>
       <p class="page-subtitle">
-        Affectez un agent et un créneau aux demandes ; le client valide la visite après son déroulement.
+        Proposez un créneau et un agent ; le client accepte, puis vous proposez le pré-contrat après la visite.
       </p>
     </div>
 
@@ -49,6 +49,30 @@
       <p v-else class="vide">Aucune demande en attente.</p>
     </div>
 
+<div v-if="ongletActif === 'proposees'" class="carte section-carte">
+      <table v-if="visitesStore.proposees.length" class="tableau">
+        <thead>
+          <tr>
+            <th>Client</th>
+            <th>Contact</th>
+            <th>Bien</th>
+            <th>Demande</th>
+            <th>Statut</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="v in itemsPage" :key="v.id">
+            <td class="fort">{{ nom(v.client) }}</td>
+            <td class="gris">{{ v.client?.telephone || '—' }}</td>
+            <td>{{ v.bien?.intitule }}</td>
+            <td class="gris">{{ formatDateHeure(v.dateCreation) }}</td>
+            <td><span class="chip chip--attente">Créneau proposé — en attente du client</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <p v-else class="vide">Aucun créneau en attente d'acceptation.</p>
+    </div>
+
 <div v-if="ongletActif === 'confirmees'" class="carte section-carte">
       <table v-if="visitesStore.confirmees.length" class="tableau">
         <thead>
@@ -66,7 +90,9 @@
             <td class="gris">{{ v.client?.telephone || '—' }}</td>
             <td>{{ v.bien?.intitule }}</td>
             <td class="gris">{{ formatDateHeure(v.dateCreation) }}</td>
-            <td><span class="chip chip--attente">En attente de validation du client</span></td>
+            <td>
+              <span class="chip chip--neutre">Visite physique en attente</span>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -81,7 +107,7 @@
             <th>Contact</th>
             <th>Bien</th>
             <th>Demande</th>
-            <th>Statut</th>
+            <th>Statut / Action</th>
           </tr>
         </thead>
         <tbody>
@@ -90,7 +116,20 @@
             <td class="gris">{{ v.client?.telephone || '—' }}</td>
             <td>{{ v.bien?.intitule }}</td>
             <td class="gris">{{ formatDateHeure(v.dateCreation) }}</td>
-            <td><span class="chip chip--ok">Terminée</span></td>
+            <td>
+              <div v-if="visitesStore.visiteAvecContrat(v) && !visitesStore.preContratExiste(v)" style="display:flex; flex-direction:column; gap:6px; align-items:flex-start;">
+                <span class="chip chip--attente">À contractualiser</span>
+                <button
+                  class="btn-act btn-valider"
+                  style="margin-left:0;"
+                  @click="ouvrirPrecontrat(v)"
+                >
+                  Générer pré-contrat
+                </button>
+              </div>
+              <span v-else-if="visitesStore.visiteAvecContrat(v)" class="chip chip--ok">Contrat généré</span>
+              <span v-else class="chip chip--neutre">Sans suite</span>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -105,6 +144,13 @@
       @close="visiteAValider = null"
       @valider="confirmerValidation"
     />
+    <ModalProposerPrecontrat
+      v-if="visitePrecontrat"
+      :visite="visitePrecontrat"
+      :en-cours="enCoursPrecontrat"
+      @close="visitePrecontrat = null"
+      @proposer="confirmerPrecontrat"
+    />
   </div>
 </template>
 
@@ -115,10 +161,12 @@ import { useNotification } from '@/composables/useNotification'
 import { useFormat } from '@/composables/useFormat'
 import { usePagination } from '@/composables/usePagination'
 import ModalValiderVisite from '@/components/visites/ModalValiderVisite.vue'
+import ModalProposerPrecontrat from '@/components/visites/ModalProposerPrecontrat.vue'
 import Pagination from '@/components/common/Pagination.vue'
+import { extraireMessageErreur } from '@/utils/apiResponse'
 
 const visitesStore = useVisitesGestionnaireStore()
-const { succes, info } = useNotification()
+const { succes, info, erreur } = useNotification()
 const { formatDateHeure } = useFormat()
 
 onMounted(() => visitesStore.charger())
@@ -126,14 +174,16 @@ onMounted(() => visitesStore.charger())
 const ongletActif = ref('attente')
 const onglets = computed(() => [
   { cle: 'attente', libelle: 'En attente', liste: visitesStore.enAttente, badge: '' },
+  { cle: 'proposees', libelle: 'Proposées', liste: visitesStore.proposees, badge: 'tab-badge--blue' },
   { cle: 'confirmees', libelle: 'Confirmées', liste: visitesStore.confirmees, badge: 'tab-badge--green' },
-  { cle: 'terminees', libelle: 'Terminées', liste: visitesStore.terminees, badge: '' },
+  { cle: 'terminees', libelle: 'Terminées', liste: visitesStore.terminees, badge: visitesStore.aContractualiser.length ? 'tab-badge--red' : '' },
 ])
 
 const listeActive = computed(
   () =>
     ({
       attente: visitesStore.enAttente,
+      proposees: visitesStore.proposees,
       confirmees: visitesStore.confirmees,
       terminees: visitesStore.terminees,
     })[ongletActif.value] || [],
@@ -156,14 +206,38 @@ function versCreneau(date, heure) {
 }
 async function confirmerValidation(payload) {
   const { date, heure, agentId } = payload
-  const bienId = visiteAValider.value.bien?.id || visiteAValider.value.bienId
-  await visitesStore.confirmer(visiteAValider.value.id, bienId, agentId, versCreneau(date, heure))
-  succes('Visite confirmée : un agent a été affecté.')
-  visiteAValider.value = null
+  try {
+    await visitesStore.proposerCreneau(visiteAValider.value.id, {
+      creneauVisite: versCreneau(date, heure),
+      idAgent: agentId,
+    })
+    succes('Créneau proposé au client (en attente de son acceptation).')
+    visiteAValider.value = null
+  } catch (e) {
+    erreur(extraireMessageErreur(e, 'Impossible de proposer le créneau'))
+  }
 }
 async function refuser(id) {
   await visitesStore.refuser(id)
   info('Demande de visite refusée.')
+}
+
+const visitePrecontrat = ref(null)
+const enCoursPrecontrat = ref(false)
+function ouvrirPrecontrat(v) {
+  visitePrecontrat.value = v
+}
+async function confirmerPrecontrat(payload) {
+  enCoursPrecontrat.value = true
+  try {
+    await visitesStore.proposerPrecontrat(visitePrecontrat.value.id, payload)
+    succes('Pré-contrat proposé au client. Visite terminée.')
+    visitePrecontrat.value = null
+  } catch (e) {
+    erreur(extraireMessageErreur(e, 'Impossible de proposer le pré-contrat'))
+  } finally {
+    enCoursPrecontrat.value = false
+  }
 }
 </script>
 
@@ -216,6 +290,10 @@ async function refuser(id) {
 .tab-badge--blue {
   background: #dbeafe;
   color: #2563eb;
+}
+.tab-badge--red {
+  background: #fee2e2;
+  color: #ef4444;
 }
 .section-carte {
   padding: 0;

@@ -46,19 +46,18 @@
         </router-link>
       </div>
 
-<router-link
-        v-if="preContratAValider"
-        :to="`/locataire/contrat/${preContratAValider.id}`"
+      <router-link
+        v-if="mesPreContratsAValider.length > 0"
+        to="/locataire/pre-contrats"
         class="banniere-precontrat"
       >
         <span class="bp-ic">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
         </span>
         <span class="bp-text">
-          <strong>Un pré-contrat vous attend</strong>
-          <span>{{ preContratAValider.bien?.intitule }} — à relire et valider.</span>
+          <strong>{{ mesPreContratsAValider.length }} demande(s) de contrat</strong>
+          <span> suite à une visite — finalisez les conditions du pré-contrat.</span>
         </span>
-        <span class="bp-cta">Valider →</span>
       </router-link>
 
 <section class="decouvrir">
@@ -106,7 +105,7 @@ const nbLocations = computed(() => contratsStore.mesContratsActifs.length)
 const nbVisites = computed(() => visitesStore.mesVisites.length)
 const nbDemandes = computed(() => demandesStore.mesDemandes.length)
 
-const preContratAValider = computed(() => contratsStore.mesPreContratsAValider[0] || null)
+const mesPreContratsAValider = computed(() => contratsStore.mesPreContratsAValider)
 
 onMounted(() => {
   if (!biensStore.biens.length) biensStore.chargerBiens({ page: 0, size: 20 })

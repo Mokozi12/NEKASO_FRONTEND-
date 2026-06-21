@@ -1,5 +1,6 @@
 import { onMounted, computed } from 'vue'
 import { useDashboardStore } from '@/stores/dashboard.store'
+import { useVisitesGestionnaireStore } from '@/stores/visitesGestionnaire.store'
 import { useFormat } from './useFormat'
 
 const COULEUR_PRIMAIRE = '#1a2234'
@@ -12,6 +13,10 @@ export function useDashboard() {
   onMounted(() => {
     if (!dashboardStore.statsChargees) {
       dashboardStore.charger()
+    }
+    const visitesStore = useVisitesGestionnaireStore()
+    if (visitesStore.visites.length === 0) {
+      visitesStore.charger()
     }
   })
 
@@ -27,6 +32,15 @@ export function useDashboard() {
   })
 
   const alertePrincipale = computed(() => {
+    const visitesStore = useVisitesGestionnaireStore()
+    const nbContrats = visitesStore.aContractualiser.length
+    if (nbContrats > 0) {
+      const v = visitesStore.aContractualiser[0]
+      const locataireNom = v.client ? `${v.client.prenom || ''} ${v.client.nom || ''}`.trim() || 'Un client' : 'Un client'
+      const bienNom = v.bien?.intitule || 'un bien'
+      return `${nbContrats} contrat(s) en attente : Le locataire ${locataireNom} souhaite un contrat pour le bien ${bienNom}.`
+    }
+    
     if (dashboardStore.loyersEnRetard <= 0) return null
     const nb = dashboardStore.loyersEnRetard
     const label = nb > 1 ? 'loyer(s)' : 'loyer'
@@ -111,5 +125,14 @@ export function useDashboard() {
     trendRevenus,
     trendOccupation,
     trendRetard,
+    aContractualiserListe: computed(() => {
+      const store = useVisitesGestionnaireStore()
+      return store.aContractualiser.map(v => ({
+        id: v.id,
+        nom: v.client ? `${v.client.prenom || ''} ${v.client.nom || ''}`.trim() || 'Client' : 'Client',
+        bien: v.bien?.intitule || 'Bien',
+        dateHeure: v.dateCreation
+      }))
+    }),
   }
 }

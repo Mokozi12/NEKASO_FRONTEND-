@@ -3,11 +3,12 @@
     <div class="container">
       <router-link to="/locataire/mes-locations" class="retour">← Mes locations</router-link>
 
-<div v-if="!contrat" class="carte vide">
+      <div v-if="!contrat" class="carte vide">
         Ce contrat est introuvable ou ne vous appartient pas.
       </div>
 
-<template v-else-if="estPreContrat">
+      <!-- ═══ PRÉ-CONTRAT ═══ -->
+      <template v-else-if="estPreContrat">
         <div class="page-header">
           <h1 class="page-title">Pré-contrat à valider</h1>
           <p class="page-subtitle">Relisez les termes proposés, validez ou envoyez vos suggestions au gestionnaire.</p>
@@ -32,7 +33,7 @@
 
           <div v-if="contrat.conditions" class="conditions">{{ contrat.conditions }}</div>
 
-<div v-if="contrat.retours.length" class="fil">
+          <div v-if="contrat.retours?.length" class="fil">
             <div
               v-for="r in contrat.retours"
               :key="r.id"
@@ -44,13 +45,9 @@
             </div>
           </div>
 
-<template v-if="['PRE_CONTRAT_ENVOYE', 'PRE_CONTRAT_CORRIGE'].includes(contrat.statut)">
-            <div class="suggestion">
-              <input v-model="suggestion" type="text" placeholder="Une suggestion ou un point à revoir ? (optionnel)" />
-              <button class="btn-secondaire" @click="suggerer">Envoyer un retour</button>
-            </div>
+          <template v-if="['PRE_CONTRAT_ENVOYE', 'PRE_CONTRAT_CORRIGE'].includes(contrat.statut)">
             <div class="actions-pc">
-              <button class="btn-rouge" @click="annuler">Annuler le pré-contrat</button>
+              <button class="btn-rouge" @click="annuler">Refuser le pré-contrat</button>
               <button class="btn-vert" @click="valider">Valider le pré-contrat</button>
             </div>
           </template>
@@ -63,7 +60,8 @@
         </div>
       </template>
 
-<template v-else-if="contrat.statut === 'ACTIF'">
+      <!-- ═══ CONTRAT ACTIF ═══ -->
+      <template v-else-if="contrat.statut === 'ACTIF' || contrat.statut === 'ROMPU'">
         <div class="page-header">
           <h1 class="page-title">Contrat &amp; Paiements</h1>
           <p class="page-subtitle">Consultez votre bail et l'historique des loyers validés par votre gestionnaire.</p>
@@ -74,7 +72,8 @@
           <button class="tab" :class="{ actif: onglet === 'historique' }" @click="onglet = 'historique'">Historique</button>
         </div>
 
-<div v-if="onglet === 'contrat'" class="carte">
+        <!-- Onglet Contrat -->
+        <div v-if="onglet === 'contrat'" class="carte">
           <div class="bail-head">
             <div class="bail-titre-bloc">
               <span class="doc-ic">
@@ -82,7 +81,7 @@
               </span>
               <div>
                 <h2 class="bail-titre">Bail de location résidentielle</h2>
-                <p class="ref">Référence : {{ contrat.numero }}</p>
+                <p class="ref">Référence : {{ contrat.numero || `NKS-${contrat.id}` }}</p>
               </div>
             </div>
             <button class="btn-pdf" @click="telechargerPdf">
@@ -92,14 +91,14 @@
           </div>
 
           <div class="bail-grille">
-            <div><span class="lbl">Bien loué</span><span class="val">{{ contrat.bien?.intitule }}</span></div>
-            <div><span class="lbl">Adresse</span><span class="val">{{ contrat.bien?.adresse }}</span></div>
+            <div><span class="lbl">Bien loué</span><span class="val">{{ contrat.bien?.intitule || '—' }}</span></div>
+            <div><span class="lbl">Adresse</span><span class="val">{{ contrat.bien?.adresse || '—' }}</span></div>
             <div><span class="lbl">Loyer mensuel</span><span class="val">{{ formatMontant(contrat.montantLoyer) }} FCFA</span></div>
             <div><span class="lbl">Caution</span><span class="val">{{ formatMontant(contrat.montantCaution) }} FCFA</span></div>
             <div><span class="lbl">Date de début</span><span class="val">{{ formatDate(contrat.dateDebut) }}</span></div>
-            <div><span class="lbl">Date de fin</span><span class="val">{{ formatDate(contrat.dateFin) }}</span></div>
-            <div><span class="lbl">Gestionnaire</span><span class="val">{{ nom(contrat.gestionnaire) }}</span></div>
-            <div><span class="lbl">Contact</span><span class="val">{{ contrat.gestionnaire?.telephone }}</span></div>
+            <div><span class="lbl">Date de fin</span><span class="val">{{ contrat.dateFin ? formatDate(contrat.dateFin) : '—' }}</span></div>
+            <div><span class="lbl">Gestionnaire</span><span class="val">{{ nom(contrat.gestionnaire) || '—' }}</span></div>
+            <div><span class="lbl">Contact</span><span class="val">{{ contrat.gestionnaire?.telephone || '—' }}</span></div>
           </div>
 
           <div class="banniere-info">
@@ -107,42 +106,46 @@
             Pour toute modification, contactez directement votre gestionnaire via WhatsApp.
           </div>
 
-<div class="signalement">
-            <h3 class="sous-titre">Signaler un problème</h3>
-            <div class="alerte-form">
-              <input v-model="alerte.titre" type="text" placeholder="Objet (ex : Fuite d'eau)" />
-              <textarea v-model="alerte.message" rows="2" placeholder="Décrivez le problème rencontré…"></textarea>
-              <button class="btn-foncé" :disabled="!alerte.titre.trim()" @click="signaler">Envoyer l'alerte</button>
-            </div>
-          </div>
+
         </div>
 
-<div v-else class="carte">
+        <!-- Onglet Historique -->
+        <div v-else class="carte">
           <div class="banniere-info">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9" /><line x1="12" y1="11" x2="12" y2="16" /><line x1="12" y1="8" x2="12" y2="8" /></svg>
             Historique validé par votre gestionnaire. Les paiements s'effectuent en Orange Money, Wave ou espèces — aucune transaction en ligne.
           </div>
 
-          <div class="table-scroll">
+          <div v-if="chargementPaiements" class="etat-chargement">Chargement de l'historique…</div>
+
+          <div v-else-if="paiements.length" class="table-scroll">
             <table class="tableau">
               <thead>
-                <tr><th>Mois</th><th>Montant</th><th>Date de validation</th><th>Statut</th></tr>
+                <tr>
+                  <th>Mois</th>
+                  <th>Montant</th>
+                  <th>Date de validation</th>
+                  <th>Statut</th>
+                </tr>
               </thead>
               <tbody>
-                <tr v-for="e in echeancesPage" :key="e.id">
-                  <td class="fort">{{ e.libelle }}</td>
-                  <td class="fort">{{ formatMontant(e.montant) }} FCFA</td>
-                  <td class="gris">{{ datePaiement(e) }}</td>
-                  <td><BadgeStatut :label="etat(e).label" :variant="etat(e).variant" :icon="etat(e).icon" /></td>
+                <tr v-for="p in paiementsPage" :key="p.id">
+                  <td class="fort">{{ formaterMois(p.mois) }}</td>
+                  <td class="fort">{{ formatMontant(p.montant) }} FCFA</td>
+                  <td class="gris">{{ p.datePaiement ? formatDate(p.datePaiement) : '—' }}</td>
+                  <td><BadgeStatut :label="statutPaiement(p).label" :variant="statutPaiement(p).variant" :icon="statutPaiement(p).icon" /></td>
                 </tr>
               </tbody>
             </table>
           </div>
-          <Pagination v-model="pageHist" :total-pages="totalPagesHist" />
+
+          <div v-else class="etat-vide-hist">Aucun paiement enregistré pour le moment.</div>
+
+          <Pagination v-model="pagePaiements" :total-pages="totalPagesPaiements" />
         </div>
       </template>
 
-<div v-else class="carte vide">
+      <div v-else class="carte vide">
         {{ contrat.statut === 'ANNULE' ? 'Ce pré-contrat a été invalidé.' : 'Contrat terminé.' }}
       </div>
     </div>
@@ -150,62 +153,113 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useContratsStore } from '@/stores/contrats.store'
 import { usePreContratsStore } from '@/stores/preContrats.store'
-import { useAlertesStore } from '@/stores/alertes.store'
 import { useNotification } from '@/composables/useNotification'
 import { useFormat } from '@/composables/useFormat'
-import { nomComplet, todayISO } from '@/utils/constants'
-import { useAuthStore } from '@/stores/auth.store'
+import { nomComplet } from '@/utils/constants'
 import BadgeStatut from '@/components/locataire/BadgeStatut.vue'
 import Pagination from '@/components/common/Pagination.vue'
 import { usePagination } from '@/composables/usePagination'
+import { paiementsLocataireService } from '@/services/paiements-locataire.service'
+import { mapPaiements } from '@/services/mappers'
 
 const route = useRoute()
 const contratsStore = useContratsStore()
 const preContratsStore = usePreContratsStore()
-const alertesStore = useAlertesStore()
 const { succes, info, erreur } = useNotification()
 const { formatMontant, formatDate } = useFormat()
-const authStore = useAuthStore()
 
 const onglet = ref('contrat')
 const suggestion = ref('')
-const alerte = reactive({ titre: '', message: '' })
 
-onMounted(() => contratsStore.chargerLocataire())
+// Paiements API
+const paiements = ref([])
+const chargementPaiements = ref(false)
 
+onMounted(async () => {
+  await contratsStore.chargerLocataire()
+})
+
+// ── Résolution du contrat ──
 const contrat = computed(() => {
   const id = Number(route.params.id)
-  return preContratsStore.preContrats.find(c => Number(c.id) === id)
+  // D'abord chercher dans les contrats définitifs (ACTIF/ROMPU)
+  const definitif = contratsStore.contrats.find(c => Number(c.id) === id)
+  if (definitif) return definitif
+  // Sinon dans les pré-contrats
+  return preContratsStore.preContrats.find(c => Number(c.id) === id) ?? null
 })
+
 const estPreContrat = computed(() =>
   ['PRE_CONTRAT_ENVOYE', 'PRE_CONTRAT_CORRIGE', 'RETOURS_CLIENT', 'VALIDE_CLIENT'].includes(
     contrat.value?.statut,
   ),
 )
 
-const echeances = computed(() =>
-  (contrat.value?.echeances || [])
-    .filter((e) => e.dateEcheance <= todayISO())
-    .sort((a, b) => new Date(b.dateEcheance) - new Date(a.dateEcheance)),
+// ── Charger les paiements réels depuis l'API ──
+watch(
+  () => contrat.value,
+  async (c) => {
+    if (c && (c.statut === 'ACTIF' || c.statut === 'ROMPU')) {
+      chargementPaiements.value = true
+      try {
+        const res = await paiementsLocataireService.getHistorique(c.id, { page: 0, size: 100 })
+        const body = res?.data ?? res
+        const items = body?.content || body?.items || body?.data || (Array.isArray(body) ? body : [])
+        paiements.value = mapPaiements(items).sort((a, b) => {
+          // Trier par mois décroissant
+          return (b.mois || '').localeCompare(a.mois || '')
+        })
+      } catch (e) {
+        console.warn('Impossible de charger l\'historique des paiements:', e)
+        paiements.value = []
+      } finally {
+        chargementPaiements.value = false
+      }
+    }
+  },
+  { immediate: true },
 )
-const { page: pageHist, totalPages: totalPagesHist, itemsPage: echeancesPage } = usePagination(
-  echeances,
-  6,
-)
+
+const { page: pagePaiements, totalPages: totalPagesPaiements, itemsPage: paiementsPage } = usePagination(paiements, 6)
 
 const nom = (p) => nomComplet(p)
 
-function datePaiement(e) {
-  const p = (contrat.value?.paiements || []).find((x) => x.echeanceId === e.id)
-  return p ? formatDate(p.datePaiement) : '—'
+// ── Formater le champ mois (ex: "2026-04" → "Avril 2026") ──
+const MOIS_FR = [
+  '', 'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
+  'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre',
+]
+function formaterMois(moisStr) {
+  if (!moisStr) return '—'
+  // Format attendu: "2026-04" ou "Avril 2026" ou "AVRIL_2026"
+  if (moisStr.includes('-') && moisStr.length <= 7) {
+    const [an, m] = moisStr.split('-')
+    return `${MOIS_FR[parseInt(m, 10)] || m} ${an}`
+  }
+  // Si c'est déjà un libellé
+  return moisStr.replace('_', ' ')
 }
-function etat(e) {
-  if (e.statut === 'PAYE') return { label: 'Payé', variant: 'green', icon: 'check' }
-  return { label: 'Retard', variant: 'red', icon: 'alert' }
+
+function statutPaiement(p) {
+  if (!p.datePaiement) {
+    return { label: 'Attente', variant: 'amber', icon: 'clock' }
+  }
+  // Si le paiement est en retard (date de paiement après le mois concerné)
+  if (p.mois && p.datePaiement) {
+    const [an, m] = (p.mois.includes('-') ? p.mois : '').split('-')
+    if (an && m) {
+      const finMois = new Date(Number(an), Number(m), 0) // dernier jour du mois
+      const datePaye = new Date(p.datePaiement)
+      if (datePaye > finMois) {
+        return { label: 'Retard', variant: 'red', icon: 'alert' }
+      }
+    }
+  }
+  return { label: 'Payé', variant: 'green', icon: 'check' }
 }
 
 function libellePre(s) {
@@ -236,34 +290,20 @@ async function valider() {
 async function annuler() {
   try {
     await preContratsStore.invalider(contrat.value.id)
-    info('Pré-contrat annulé.')
+    info('Pré-contrat refusé.')
   } catch (e) {
-    erreur('Erreur lors de l\'annulation.')
+    erreur('Erreur lors du refus.')
   }
-}
-async function suggerer() {
-  const msg = suggestion.value.trim()
-  if (!msg) {
-    info('Saisissez votre suggestion avant de l\'envoyer.')
-    return
-  }
-  await contratsStore.envoyerRetours(contrat.value.id, msg)
-  suggestion.value = ''
-  succes('Votre retour a été transmis au gestionnaire.')
-}
-async function signaler() {
-  if (!alerte.titre.trim()) return
-  await alertesStore.creerAlerte({
-    bienId: contrat.value.bienId,
-    titre: alerte.titre.trim(),
-    message: alerte.message.trim(),
-  })
-  alerte.titre = ''
-  alerte.message = ''
-  succes('Alerte envoyée à votre gestionnaire.')
 }
 function telechargerPdf() {
-  info('Le PDF de votre bail sera bientôt disponible au téléchargement.')
+  const chemin = contrat.value?.cheminPDF
+  if (chemin) {
+    const baseUrl = 'http://74.248.184.17:8080'
+    const url = chemin.startsWith('http') ? chemin : `${baseUrl}${chemin.startsWith('/') ? '' : '/'}${chemin}`
+    window.open(url, '_blank')
+  } else {
+    info('Le PDF de votre bail sera bientôt disponible au téléchargement.')
+  }
 }
 </script>
 
@@ -412,19 +452,6 @@ function telechargerPdf() {
   background: #f1f5f9;
   align-self: flex-start;
 }
-.suggestion {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 12px;
-}
-.suggestion input {
-  flex: 1;
-  padding: 11px 12px;
-  border: 1px solid #e2e8f0;
-  border-radius: 9px;
-  font-size: 14px;
-  font-family: inherit;
-}
 .info {
   background: #f8fafc;
   border-radius: 10px;
@@ -520,29 +547,6 @@ function telechargerPdf() {
   flex-shrink: 0;
   color: #64748b;
 }
-.signalement {
-  margin-top: 24px;
-}
-.sous-titre {
-  font-size: 15px;
-  font-weight: 600;
-  color: #1e293b;
-  margin-bottom: 12px;
-}
-.alerte-form {
-  display: flex;
-  flex-direction: column;
-  gap: 9px;
-}
-.alerte-form input,
-.alerte-form textarea {
-  width: 100%;
-  padding: 11px 12px;
-  border: 1px solid #e2e8f0;
-  border-radius: 9px;
-  font-size: 14px;
-  font-family: inherit;
-}
 .btn-foncé {
   align-self: flex-start;
   background: #1e293b;
@@ -570,9 +574,6 @@ function telechargerPdf() {
   cursor: pointer;
   flex: 1;
 }
-.btn-vert.pleine {
-  width: 100%;
-}
 .actions-pc {
   display: flex;
   gap: 12px;
@@ -588,16 +589,18 @@ function telechargerPdf() {
   cursor: pointer;
   flex: 1;
 }
-.btn-secondaire {
-  background: #fff;
-  border: 1px solid #cbd5e1;
-  color: #334155;
-  border-radius: 9px;
-  padding: 10px 16px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
+
+.etat-chargement {
+  text-align: center;
+  color: #94a3b8;
+  padding: 40px 0;
+  font-size: 14px;
+}
+.etat-vide-hist {
+  text-align: center;
+  color: #94a3b8;
+  padding: 40px 0;
+  font-size: 14px;
 }
 
 .table-scroll {
@@ -645,9 +648,6 @@ function telechargerPdf() {
   .bail-head {
     flex-direction: column;
     align-items: flex-start;
-  }
-  .suggestion {
-    flex-direction: column;
   }
   .actions-pc {
     flex-direction: column;

@@ -32,7 +32,18 @@
             <span class="etape-label" :class="`tl-${statut(v).ton}`">{{ statut(v).label }}</span>
           </div>
 
-<div v-if="v.statut === 'CONFIRMEE'" class="panneau">
+<div v-if="v.statut === 'PROPOSEE'" class="panneau">
+            <p class="pn-info">
+              Un créneau de visite vous a été proposé par le gestionnaire. Acceptez-le pour
+              confirmer la visite.
+            </p>
+            <div class="pn-actions">
+              <button class="btn-vert" @click="accepterCreneau(v)">Accepter le créneau</button>
+              <button class="btn-annuler" @click="annuler(v)">Refuser</button>
+            </div>
+          </div>
+
+<div v-else-if="v.statut === 'CONFIRMEE'" class="panneau">
             <p class="pn-info">Votre visite est confirmée. Une fois effectuée, validez-la ci-dessous.</p>
             <div class="pn-actions">
               <button class="btn-vert" @click="ouvrirCloture(v)">Valider la visite</button>
@@ -87,7 +98,7 @@ const { formatDate } = useFormat()
 
 onMounted(() => visitesStore.chargerVisites())
 
-const ETAPES = ['Demandée', 'Confirmée', 'Terminée']
+const ETAPES = ['Demandée', 'Proposée', 'Confirmée', 'Terminée']
 
 const visites = computed(() => visitesStore.visites)
 const { page, totalPages, itemsPage } = usePagination(visites, 5)
@@ -114,8 +125,9 @@ function preContratDe(v) {
 
 const STATUTS = {
   EN_ATTENTE: { label: 'En attente', variant: 'amber', etape: 0, ton: 'green' },
-  CONFIRMEE: { label: 'Confirmée', variant: 'green', etape: 1, ton: 'green' },
-  TERMINEE: { label: 'Terminée', variant: 'green', etape: 2, ton: 'green' },
+  PROPOSEE: { label: 'Créneau proposé', variant: 'info', etape: 1, ton: 'green' },
+  CONFIRMEE: { label: 'Confirmée', variant: 'green', etape: 2, ton: 'green' },
+  TERMINEE: { label: 'Terminée', variant: 'green', etape: 3, ton: 'green' },
   REFUSEE: { label: 'Refusée', variant: 'red', etape: 0, ton: 'red' },
   ANNULEE: { label: 'Annulée', variant: 'neutral', etape: 0, ton: 'red' },
 }
@@ -134,6 +146,15 @@ function message(v) {
 async function annuler(v) {
   info('Demande d\'annulation envoyée. La liste sera mise à jour prochainement.')
   await visitesStore.chargerVisites()
+}
+
+async function accepterCreneau(v) {
+  try {
+    await visitesStore.accepterCreneau(v.id)
+    succes('Créneau accepté — votre visite est confirmée.')
+  } catch (e) {
+    erreur(extraireMessageErreur(e, "Impossible d'accepter le créneau"))
+  }
 }
 
 const visiteACloturer = ref(null)

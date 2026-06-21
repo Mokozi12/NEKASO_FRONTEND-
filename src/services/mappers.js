@@ -49,6 +49,27 @@ export function mapDemandeLocation(d) {
 }
 export const mapDemandesLocation = (liste) => (liste || []).map(mapDemandeLocation)
 
+function normaliserCreneau(creneau) {
+  if (!creneau) return null
+  if (typeof creneau === 'object') {
+    return {
+      ...creneau,
+      date: creneau.date ?? '',
+      heure: creneau.heure ?? '',
+      label: creneau.label ?? `${creneau.date ?? ''} ${creneau.heure ?? ''}`.trim(),
+    }
+  }
+  const valeur = String(creneau)
+  const matchFr = valeur.match(/^(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}:\d{2})/)
+  if (matchFr) {
+    const [, d, m, y, heure] = matchFr
+    return { date: `${y}-${m}-${d}`, heure, label: valeur }
+  }
+  const matchIso = valeur.match(/^(\d{4}-\d{2}-\d{2})[T\s](\d{2}:\d{2})/)
+  if (matchIso) return { date: matchIso[1], heure: matchIso[2], label: valeur }
+  return { date: '', heure: '', label: valeur }
+}
+
 export function mapVisite(v) {
   if (!v) return null
   const locId = v.id_Locataire ?? v.locataireId ?? v.locataire?.id ?? null
@@ -58,36 +79,81 @@ export function mapVisite(v) {
       ? { id: locId, nom: v.locataireNom, prenom: v.locatairePrenom, telephone: v.locataireTelephone }
       : null
   const client = locImbrique || locPlat
+  const creneauBrut = v.creneauVisite ?? v.creneau ?? v.dateVisite ?? v.dateHeureVisite ?? null
+  let choixLocal = null
+  try {
+    const cloturesLocales = JSON.parse(localStorage.getItem('nekaso_visites_clotures') || '{}')
+    choixLocal = cloturesLocales[v.id]
+  } catch (e) {}
+
+  const choixCloture =
+    v.clotureVisite ??
+    v.choixCloture ??
+    v.choix ??
+    v.decisionCloture ??
+    v.suiteVisite ??
+    choixLocal ??
+    null
   return {
     ...v,
     id: v.id,
-    statut: v.statut,
+    statut: choixCloture ? 'TERMINEE' : v.statut,
     dateCreation: v.dateCreation,
     locataireId: locId,
     client,
     bienId: v.bien?.id ?? v.bienId ?? v.id_Bien ?? null,
     bien: v.bien ? mapBien(v.bien) : null,
-    agentId: v.agentId ?? v.agent?.id ?? null,
+    agentId: v.agentId ?? v.idAgent ?? v.agent?.id ?? v.agent?.idAgentImmobilier ?? null,
+    creneauVisite: creneauBrut,
+    creneau: normaliserCreneau(creneauBrut),
+    choixCloture,
+    clotureVisite: choixCloture,
+    avecContrat:
+      v.avecContrat === true ||
+      v.demandeContrat === true ||
+      v.souhaiteContrat === true ||
+      choixCloture === 'AVEC_CONTRAT',
   }
 }
 export const mapVisites = (liste) => (liste || []).map(mapVisite)
 
 export function mapPreContrat(p) {
   if (!p) return null
+
+  // Le backend utilise des statuts différents du frontend
+  const STATUT_BACKEND_TO_FRONTEND = {
+    'EN_ATTENTE': 'PRE_CONTRAT_ENVOYE',
+    'VALIDER': 'VALIDE_CLIENT',
+    'INVALIDER': 'ANNULE',
+  }
+  const statutBrut = p.statutPreContrat ?? p.statut ?? ''
+  const statutNormalise = STATUT_BACKEND_TO_FRONTEND[statutBrut] ?? statutBrut
+
+  let statutLocal = null
+  try {
+    const statutsLocaux = JSON.parse(localStorage.getItem('nekaso_precontrats_statuts') || '{}')
+    statutLocal = statutsLocaux[p.id]
+  } catch (e) {}
+
+  const statutFinal = statutLocal || statutNormalise
+
   return {
     ...p,
     id: p.id,
-    statut: p.statutPreContrat ?? p.statut,
-    statutPreContrat: p.statutPreContrat,
+    statut: statutFinal,
+    statutPreContrat: statutBrut,
     conditions: p.conditions ?? '',
     dateCreation: p.dateCreation,
     dateDebut: p.dateDebutPrevu ?? p.dateDebut,
     dateDebutPrevu: p.dateDebutPrevu,
     jourEcheance: p.jourEcheancePaiement ?? null,
+    jourEcheancePaiement: p.jourEcheancePaiement ?? null,
     montantLoyer: Number(p.montantLoyer) || 0,
     montantCaution: Number(p.montantCaution) || 0,
     bienId: p.bienImmobilierId ?? p.bienId ?? null,
     bienIntitule: p.bienLibelle ?? '',
+    demandeVisiteId: p.demandeVisiteId ?? p.idDemandeVisite ?? null,
+    demandeLocationId: p.demandeLocationId ?? p.idDemandeLocation ?? null,
     locataireId: p.locataireId ?? null,
     locataire: {
       id: p.locataireId,

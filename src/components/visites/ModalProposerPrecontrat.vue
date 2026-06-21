@@ -3,50 +3,41 @@
     <div class="modal">
       <header class="modal-head">
         <div>
-          <h3>Valider la visite</h3>
-          <p class="sub">{{ bien.intitule || bien.libelle || 'Bien' }}</p>
+          <h3>Proposer un pré-contrat</h3>
+          <p class="sub">{{ bien.intitule || bien.libelle || 'Bien' }} — {{ nomClient }}</p>
         </div>
         <button class="x" @click="$emit('close')" aria-label="Fermer">✕</button>
       </header>
 
       <div class="modal-body">
-        <section>
-          <h4 class="label">Quelle suite donner à cette visite ?</h4>
-          <div class="choix">
-            <button
-              type="button"
-              class="choix-carte"
-              :class="{ actif: choix === 'AVEC_CONTRAT' }"
-              @click="choix = 'AVEC_CONTRAT'"
-            >
-              <strong>Je veux louer ce bien</strong>
-              <span>Le bien m'intéresse — démarrer un contrat</span>
-            </button>
-            <button
-              type="button"
-              class="choix-carte"
-              :class="{ actif: choix === 'SANS_CONTRAT' }"
-              @click="choix = 'SANS_CONTRAT'"
-            >
-              <strong>Pas intéressé</strong>
-              <span>Visite effectuée, sans suite</span>
-            </button>
+        <p class="info">
+          Le client souhaite louer ce bien suite à la visite. Définissez les conditions du
+          pré-contrat ; il lui sera ensuite proposé pour validation.
+        </p>
+        <div class="grille-2">
+          <div class="champ">
+            <label>Date de début prévue *</label>
+            <input v-model="form.dateDebutPrevu" type="date" />
           </div>
-        </section>
-
-        <section v-if="choix === 'AVEC_CONTRAT'">
-          <p class="avertissement">
-            En confirmant, vous signalez votre intérêt pour ce bien. Le gestionnaire vous proposera
-            ensuite les conditions du bail (loyer, dates, clauses). Le bien vous est réservé en
-            attendant.
-          </p>
-        </section>
+          <div class="champ">
+            <label>Jour d'échéance (1-28) *</label>
+            <input v-model.number="form.jourEcheancePaiement" type="number" min="1" max="28" />
+          </div>
+        </div>
+        <div class="champ">
+          <label>Conditions particulières *</label>
+          <textarea
+            v-model="form.conditions"
+            rows="4"
+            placeholder="Loyer réajusté, clauses spécifiques, durée du bail..."
+          ></textarea>
+        </div>
       </div>
 
       <footer class="modal-foot">
         <button class="btn-secondaire" @click="$emit('close')">Annuler</button>
         <button class="btn-valider" :disabled="!peutValider || enCours" @click="confirmer">
-          {{ enCours ? 'Envoi...' : libelleValider }}
+          {{ enCours ? 'Envoi...' : 'Proposer le pré-contrat' }}
         </button>
       </footer>
     </div>
@@ -54,30 +45,41 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { reactive, computed } from 'vue'
 
 const props = defineProps({
   visite: { type: Object, required: true },
   enCours: { type: Boolean, default: false },
 })
-const emit = defineEmits(['close', 'valider'])
+const emit = defineEmits(['close', 'proposer'])
 
 const bien = computed(() => props.visite.bien || {})
+const nomClient = computed(() => {
+  const c = props.visite.client
+  return c ? `${c.prenom || ''} ${c.nom || ''}`.trim() || c.telephone || 'Client' : 'Client'
+})
 
-const choix = ref('')
+const form = reactive({
+  dateDebutPrevu: new Date().toISOString().split('T')[0],
+  jourEcheancePaiement: 5,
+  conditions: '',
+})
 
 const peutValider = computed(
-  () => choix.value === 'AVEC_CONTRAT' || choix.value === 'SANS_CONTRAT',
-)
-
-const libelleValider = computed(() =>
-  choix.value === 'AVEC_CONTRAT' ? 'Confirmer mon intérêt' : 'Valider la visite',
+  () =>
+    form.dateDebutPrevu &&
+    form.jourEcheancePaiement >= 1 &&
+    form.jourEcheancePaiement <= 28 &&
+    form.conditions.trim().length > 0,
 )
 
 function confirmer() {
   if (!peutValider.value) return
-  // On envoie uniquement le choix, le gestionnaire remplira les conditions plus tard
-  emit('valider', { choix: choix.value, payload: {} })
+  emit('proposer', {
+    dateDebutPrevu: form.dateDebutPrevu,
+    jourEcheancePaiement: form.jourEcheancePaiement,
+    conditions: form.conditions.trim(),
+  })
 }
 </script>
 
@@ -127,47 +129,14 @@ function confirmer() {
 }
 .modal-body {
   padding: 20px 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
 }
-.label {
-  font-size: 14px;
-  font-weight: 600;
-  color: #1e293b;
-  margin-bottom: 12px;
-}
-.choix {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-.choix-carte {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  text-align: left;
-  padding: 14px;
-  border: 1.5px solid #e2e8f0;
-  border-radius: 10px;
-  background: #fff;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-.choix-carte:hover {
-  border-color: #cbd5e1;
-}
-.choix-carte.actif {
-  border-color: #00d15a;
-  background: #f0fdf4;
-}
-.choix-carte strong {
-  font-size: 14px;
-  color: #1e293b;
-}
-.choix-carte span {
-  font-size: 12px;
-  color: #64748b;
+.info {
+  font-size: 13px;
+  color: #475569;
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 16px;
 }
 .grille-2 {
   display: grid;
@@ -193,13 +162,6 @@ function confirmer() {
   font-size: 14px;
   font-family: inherit;
   outline: none;
-}
-.avertissement {
-  font-size: 13px;
-  color: #b45309;
-  background: #fffbeb;
-  border-radius: 8px;
-  padding: 10px 12px;
 }
 .modal-foot {
   display: flex;

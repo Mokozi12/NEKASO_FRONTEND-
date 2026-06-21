@@ -23,14 +23,17 @@ export const useAgentsStore = defineStore('agents', () => {
       const telsConnus = new Set(sessionAvecId.map((a) => a.telephone))
       const depuisServeur = liste
         .filter((a) => !telsConnus.has(a.telephone))
-        .map((a, i) => ({
-          id: a.id ?? `srv-${i}`,
-          idAgent: a.id ?? null,
-          nom: a.nom,
-          prenom: a.prenom,
+        .map((a, i) => {
+          const vraiId = a.idAgentImmobilier ?? a.id
+          return {
+            id: vraiId ?? `srv-${i}`,
+            idAgent: vraiId ?? null,
+            nom: a.nom,
+            prenom: a.prenom,
           telephone: a.telephone,
           disponibilites: [],
-        }))
+        }
+      })
       agents.value = [...sessionAvecId, ...depuisServeur]
     } catch (e) {
       console.error('charger agents:', e?.response?.status, e?.response?.data)
@@ -48,9 +51,11 @@ export const useAgentsStore = defineStore('agents', () => {
       const disponibilites = (data.disponibilites || [])
         .filter((c) => c.date && c.heure)
         .map((c, i) => ({ id: `c-${seq}-${i}`, date: c.date, heure: c.heure, reserve: false }))
+      
+      const vraiId = cree.idAgentImmobilier ?? cree.id
       agents.value.unshift({
-        id: cree.id ?? `loc-${seq}`,
-        idAgent: cree.id ?? null,
+        id: vraiId ?? `loc-${seq}`,
+        idAgent: vraiId ?? null,
         nom: cree.nom ?? payload.nom,
         prenom: cree.prenom ?? payload.prenom,
         telephone: cree.telephone ?? payload.telephone,

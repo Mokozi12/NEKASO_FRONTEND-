@@ -164,6 +164,12 @@ const router = createRouter({
           meta: { title: 'Mes locations' },
         },
         {
+          path: 'pre-contrats',
+          name: 'pre-contrats-locataire',
+          component: () => import('@/views/locataire/MesPreContratsView.vue'),
+          meta: { title: 'Mes pré-contrats' },
+        },
+        {
           path: 'contrat/:id',
           name: 'contrat-locataire',
           component: () => import('@/views/locataire/MonContratView.vue'),

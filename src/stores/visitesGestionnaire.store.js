@@ -7,17 +7,56 @@ import { mapVisites, mapPreContrats } from '@/services/mappers'
 
 export const useVisitesGestionnaireStore = defineStore('visitesGestionnaire', () => {
   const visites = ref([])
+  const preContrats = ref([])
+  const preContratsCreesLocalement = ref(new Set())
   const chargement = ref(false)
   const erreur = ref(null)
 
   const enAttente  = computed(() => visites.value.filter((v) => v.statut === 'EN_ATTENTE'))
+  const proposees  = computed(() => visites.value.filter((v) => v.statut === 'PROPOSEE'))
   const confirmees = computed(() => visites.value.filter((v) => v.statut === 'CONFIRMEE'))
   const terminees  = computed(() => visites.value.filter((v) => v.statut === 'TERMINEE'))
+  const aContractualiser = computed(() =>
+    terminees.value.filter((v) => visiteAvecContrat(v) && !preContratExiste(v)),
+  )
+  const termineesSansSuite = computed(() =>
+    terminees.value.filter((v) => !visiteAvecContrat(v) || preContratExiste(v)),
+  )
   const refusees   = computed(() => visites.value.filter((v) => ['REFUSEE', 'ANNULEE'].includes(v.statut)))
 
-  async function chargerAnnuaireLocataires() {
+  function choixCloture(v) {
+    return String(v?.clotureVisite ?? v?.choixCloture ?? v?.choix ?? '').toUpperCase()
+  }
+
+  function visiteAvecContrat(v) {
+    const choix = choixCloture(v)
+    if (choix === 'AVEC_CONTRAT') return true
+    if (choix === 'SANS_CONTRAT') return false
+    if (v?.avecContrat === true || v?.demandeContrat === true || v?.souhaiteContrat === true) return true
+
+    const statutBien = String(v?.bien?.statutBien ?? v?.statutBien ?? '').toUpperCase()
+    return ['RESERVE', 'RESERVEE', 'CONFIRME', 'CONFIRMEE', 'BLOQUE', 'BLOQUEE'].includes(statutBien)
+  }
+
+  function preContratExiste(v) {
+    if (preContratsCreesLocalement.value.has(String(v.id))) return true
+    return preContrats.value.some((p) => {
+      if (p.demandeVisiteId != null && Number(p.demandeVisiteId) === Number(v.id)) return true
+      return (
+        p.bienId != null &&
+        v.bienId != null &&
+        Number(p.bienId) === Number(v.bienId) &&
+        p.locataireId != null &&
+        v.locataireId != null &&
+        Number(p.locataireId) === Number(v.locataireId)
+      )
+    })
+  }
+
+  async function chargerContextePreContrats() {
     try {
       const pcs = mapPreContrats(await listeOuVide(preContratsService.getParGestionnaire({ page: 0, size: 200 })))
+      preContrats.value = pcs
       const annuaire = new Map()
       for (const pc of pcs) {
         const loc = pc.locataire
@@ -32,6 +71,7 @@ export const useVisitesGestionnaireStore = defineStore('visitesGestionnaire', ()
       }
       return annuaire
     } catch (e) {
+      preContrats.value = []
       return new Map()
     }
   }
@@ -42,7 +82,7 @@ export const useVisitesGestionnaireStore = defineStore('visitesGestionnaire', ()
     try {
       const [liste, annuaire] = await Promise.all([
         listeOuVide(visitesService.getListe({ page: 0, size: 50, ...params })),
-        chargerAnnuaireLocataires(),
+        chargerContextePreContrats(),
       ])
       visites.value = mapVisites(liste).map((v) => ({
         ...v,
@@ -69,8 +109,21 @@ export const useVisitesGestionnaireStore = defineStore('visitesGestionnaire', ()
     await charger()
   }
 
-  async function confirmer(id, idBien, idAgent, dateCreneau) {
-    await visitesService.confirmer(id, idBien, idAgent, dateCreneau)
+  async function proposerCreneau(id, { creneauVisite, idAgent }) {
+    const numericIdAgent = Number(idAgent)
+    if (isNaN(numericIdAgent)) {
+      throw new Error("Erreur de synchronisation : L'identifiant de l'agent est invalide. Veuillez rafraîchir la page (F5) pour mettre à jour la liste des agents.")
+    }
+    await visitesService.proposerCreneau(id, { creneauVisite, IdAgent: numericIdAgent })
+    await charger()
+  }
+
+  async function proposerPrecontrat(id, payload) {
+    await preContratsService.creer({
+      ...payload,
+      demandeVisiteId: Number(id),
+    })
+    preContratsCreesLocalement.value.add(String(id))
     await charger()
   }
 
@@ -79,12 +132,18 @@ export const useVisitesGestionnaireStore = defineStore('visitesGestionnaire', ()
     chargement,
     erreur,
     enAttente,
+    proposees,
     confirmees,
     terminees,
+    aContractualiser,
+    termineesSansSuite,
     refusees,
+    visiteAvecContrat,
+    preContratExiste,
     charger,
     changerStatut,
     refuser,
-    confirmer,
+    proposerCreneau,
+    proposerPrecontrat,
   }
 })

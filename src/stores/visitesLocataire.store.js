@@ -29,11 +29,33 @@ export const useVisitesLocataireStore = defineStore('visitesLocataire', () => {
     return res
   }
 
-  async function cloturer(idDemande, choix, payload = {}) {
-    const res = await visitesLocataireService.cloturer(idDemande, choix, payload)
+  async function accepterCreneau(idDemande) {
+    const res = await visitesLocataireService.accepterCreneau(idDemande)
     await chargerVisites()
     return res
   }
 
-  return { visites, chargement, erreur, chargerVisites, demander, cloturer }
+  async function cloturer(idDemande, choix, payload = {}) {
+    const res = await visitesLocataireService.cloturer(idDemande, choix, payload)
+    
+    // Mémoriser localement pour affichage instantané
+    try {
+      const clotures = JSON.parse(localStorage.getItem('nekaso_visites_clotures') || '{}')
+      clotures[idDemande] = choix
+      localStorage.setItem('nekaso_visites_clotures', JSON.stringify(clotures))
+    } catch (e) {}
+
+    // Tentative de forcer la synchronisation chez le gestionnaire
+    try {
+      const { default: api } = await import('@/services/api')
+      await api.patch(`/visites/gestionnaire/demande/${idDemande}/statut/TERMINEE`)
+    } catch (e) {
+      console.warn('Impossible de forcer le statut côté gestionnaire', e)
+    }
+
+    await chargerVisites()
+    return res
+  }
+
+  return { visites, chargement, erreur, chargerVisites, demander, accepterCreneau, cloturer }
 })

@@ -20,26 +20,6 @@
           </div>
         </div>
 
-        <h4 class="creneaux-titre">Disponibilités</h4>
-        <div class="creneaux">
-          <span
-            v-for="d in agent.disponibilites"
-            :key="d.id"
-            class="creneau"
-            :class="{ 'creneau--reserve': d.reserve }"
-            :title="d.reserve ? 'Réservé pour une visite' : 'Disponible'"
-          >
-            {{ formatDate(d.date) }} · {{ d.heure }}
-            <span v-if="d.reserve" class="puce">réservé</span>
-          </span>
-          <span v-if="agent.disponibilites.length === 0" class="aucun">Aucun créneau</span>
-        </div>
-
-        <form class="ajout-creneau" @submit.prevent="ajouterCreneau(agent.id)">
-          <input v-model="nouveauCreneau[agent.id].date" type="date" />
-          <input v-model="nouveauCreneau[agent.id].heure" type="time" />
-          <button type="submit" class="btn-mini">Ajouter</button>
-        </form>
       </div>
     </div>
     <div v-else class="carte vide">Aucun agent enregistré pour le moment.</div>
@@ -73,13 +53,6 @@ const { page, totalPages, itemsPage: agentsPage } = usePagination(
   6,
 )
 
-const nouveauCreneau = reactive({})
-watchEffect(() => {
-  agentsStore.agents.forEach((a) => {
-    if (!nouveauCreneau[a.id]) nouveauCreneau[a.id] = { date: '', heure: '' }
-  })
-})
-
 function initiales(a) {
   return `${a.prenom?.[0] || ''}${a.nom?.[0] || ''}`.toUpperCase()
 }
@@ -92,16 +65,6 @@ async function creerAgent(data) {
   } catch (e) {
     erreur(extraireMessageErreur(e, "Impossible d'enregistrer l'agent"))
   }
-}
-
-
-function ajouterCreneau(agentId) {
-  const c = nouveauCreneau[agentId]
-  if (!c.date || !c.heure) return
-  agentsStore.ajouterCreneau(agentId, { date: c.date, heure: c.heure })
-  c.date = ''
-  c.heure = ''
-  succes('Créneau ajouté.')
 }
 </script>
 
@@ -161,70 +124,7 @@ function ajouterCreneau(agentId) {
   font-size: 13px;
   color: #64748b;
 }
-.creneaux-titre {
-  font-size: 12px;
-  font-weight: 700;
-  color: #94a3b8;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 10px;
-}
-.creneaux {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 16px;
-}
-.creneau {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: #f0fdf4;
-  color: #16a34a;
-  border-radius: 20px;
-  padding: 5px 12px;
-  font-size: 12.5px;
-  font-weight: 600;
-}
-.creneau--reserve {
-  background: #f3f4f6;
-  color: #9ca3af;
-}
-.puce {
-  background: #e5e7eb;
-  color: #6b7280;
-  border-radius: 10px;
-  padding: 1px 6px;
-  font-size: 10px;
-}
-.aucun {
-  font-size: 13px;
-  color: #94a3b8;
-}
-.ajout-creneau {
-  display: flex;
-  gap: 8px;
-  border-top: 1px solid #f1f5f9;
-  padding-top: 14px;
-}
-.ajout-creneau input {
-  flex: 1;
-  padding: 7px 9px;
-  border: 1px solid #e2e8f0;
-  border-radius: 7px;
-  font-size: 13px;
-  font-family: inherit;
-}
-.btn-mini {
-  background: #f1f5f9;
-  border: none;
-  border-radius: 7px;
-  padding: 7px 12px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #334155;
-  cursor: pointer;
-}
+
 .vide {
   text-align: center;
   color: #94a3b8;

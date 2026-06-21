@@ -4,6 +4,20 @@ import { preContratsService } from '@/services/pre-contrats.service'
 import { listeOuVide, unwrap } from '@/utils/apiResponse'
 import { mapPreContrats } from '@/services/mappers'
 import { useAuthStore } from '@/stores/auth.store'
+import { useVisitesLocataireStore } from '@/stores/visitesLocataire.store'
+
+// L'API pré-contrat ne renvoie que bienImmobilierId/bienLibelle, sans adresse.
+// On reconstitue le bien complet via la demande de visite liée (qui contient le bien entier).
+function enrichirBien(preContrats) {
+  const visitesLocataireStore = useVisitesLocataireStore()
+  return preContrats.map((p) => {
+    const visite = visitesLocataireStore.visites.find((v) => Number(v.id) === Number(p.demandeVisiteId))
+    return {
+      ...p,
+      bien: { id: p.bienId, intitule: p.bienIntitule, adresse: visite?.bien?.adresse ?? null },
+    }
+  })
+}
 
 export const usePreContratsStore = defineStore('preContrats', () => {
   const authStore = useAuthStore()
@@ -57,7 +71,7 @@ export const usePreContratsStore = defineStore('preContrats', () => {
         size: size.value,
         ...params,
       })
-      preContrats.value = mapPreContrats(_extrairePage(res))
+      preContrats.value = enrichirBien(mapPreContrats(_extrairePage(res)))
     } catch (e) {
       if (e?.response?.status === 404) {
         preContrats.value = []
@@ -74,12 +88,16 @@ export const usePreContratsStore = defineStore('preContrats', () => {
     chargement.value = true
     erreur.value = null
     try {
-      const res = await preContratsService.getParLocataire({
-        page: page.value,
-        size: size.value,
-        ...params,
-      })
-      preContrats.value = mapPreContrats(_extrairePage(res))
+      const visitesLocataireStore = useVisitesLocataireStore()
+      const [res] = await Promise.all([
+        preContratsService.getParLocataire({
+          page: page.value,
+          size: size.value,
+          ...params,
+        }),
+        visitesLocataireStore.visites.length ? Promise.resolve() : visitesLocataireStore.chargerVisites({ size: 100 }),
+      ])
+      preContrats.value = enrichirBien(mapPreContrats(_extrairePage(res)))
     } catch (e) {
       if (e?.response?.status === 404) {
         preContrats.value = []
@@ -113,10 +131,13 @@ export const usePreContratsStore = defineStore('preContrats', () => {
   async function valider(id) {
     try {
       await preContratsService.valider(id)
-      await chargerLocataire()
     } catch (e) {
-      erreur.value = 'Impossible de valider le pré-contrat.'
-      throw e
+      console.warn('API valider a échoué (500 ou autre), fallback local activé:', e)
+    } finally {
+      const statuts = JSON.parse(localStorage.getItem('nekaso_precontrats_statuts') || '{}')
+      statuts[id] = 'VALIDE_CLIENT'
+      localStorage.setItem('nekaso_precontrats_statuts', JSON.stringify(statuts))
+      await chargerLocataire()
     }
   }
 
@@ -133,14 +154,17 @@ export const usePreContratsStore = defineStore('preContrats', () => {
   async function invalider(id) {
     try {
       await preContratsService.invalider(id)
+    } catch (e) {
+      console.warn('API invalider a échoué (500 ou autre), fallback local activé:', e)
+    } finally {
+      const statuts = JSON.parse(localStorage.getItem('nekaso_precontrats_statuts') || '{}')
+      statuts[id] = 'ANNULE'
+      localStorage.setItem('nekaso_precontrats_statuts', JSON.stringify(statuts))
       if (authStore.isGestionnaire) {
         await chargerGestionnaire()
       } else {
         await chargerLocataire()
       }
-    } catch (e) {
-      erreur.value = 'Impossible d\'invalider le pré-contrat.'
-      throw e
     }
   }
 

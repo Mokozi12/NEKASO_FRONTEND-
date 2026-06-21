@@ -23,19 +23,34 @@
         <section>
           <h4 class="label">2. Affecter un agent</h4>
           <div v-if="!agents.length" class="vide">
-            Aucun agent sélectionnable. Créez un agent dans « Agents » (les agents créés dans cette session sont utilisables pour la validation).
+            Aucun agent sélectionnable. Créez un agent dans « Agents ».
           </div>
-          <div v-else class="agents">
-            <label
-              v-for="a in agents"
-              :key="a.id"
-              class="agent"
-              :class="{ actif: agentChoisi === a.idAgent }"
-            >
-              <input type="radio" :value="a.idAgent" v-model="agentChoisi" />
-              <span class="agent-nom">{{ a.prenom }} {{ a.nom }}</span>
-              <span class="agent-tel">{{ a.telephone }}</span>
-            </label>
+          <div v-else class="agent-search-container">
+            <input 
+              type="text" 
+              v-model="rechercheAgent" 
+              placeholder="Rechercher un agent (nom ou téléphone)..." 
+              class="dh-input search-input"
+            />
+            
+            <div class="agents-dropdown">
+              <div
+                v-for="a in agentsFiltres"
+                :key="a.id"
+                class="agent-option"
+                :class="{ actif: agentChoisi === (a.idAgent || a.id) }"
+                @click="agentChoisi = (a.idAgent || a.id)"
+              >
+                <div class="agent-info">
+                  <span class="agent-nom">{{ a.prenom }} {{ a.nom }}</span>
+                  <span class="agent-tel">{{ a.telephone }}</span>
+                </div>
+                <div v-if="agentChoisi === (a.idAgent || a.id)" class="check-icon">✓</div>
+              </div>
+              <div v-if="agentsFiltres.length === 0" class="agent-vide">
+                Aucun agent ne correspond à votre recherche.
+              </div>
+            </div>
           </div>
         </section>
       </div>
@@ -51,7 +66,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useAgentsStore } from '@/stores/agents.store'
 import { nomComplet } from '@/utils/constants'
 
@@ -62,10 +77,27 @@ const emit = defineEmits(['close', 'valider'])
 
 const agentsStore = useAgentsStore()
 
+onMounted(() => {
+  if (agentsStore.agents.length === 0) {
+    agentsStore.charger()
+  }
+})
+
 const bien = computed(() => props.visite.bien || {})
 const nomClient = computed(() => nomComplet(props.visite.client || props.visite.locataire))
 
-const agents = computed(() => agentsStore.agents.filter((a) => a.idAgent != null))
+const agents = computed(() => agentsStore.agents)
+const rechercheAgent = ref('')
+
+const agentsFiltres = computed(() => {
+  if (!rechercheAgent.value) return agents.value
+  const query = rechercheAgent.value.toLowerCase()
+  return agents.value.filter(a => 
+    `${a.prenom || ''} ${a.nom || ''}`.toLowerCase().includes(query) || 
+    (a.telephone && a.telephone.includes(query))
+  )
+})
+
 const dateVisite = ref('')
 const heureVisite = ref('')
 const agentChoisi = ref(null)
@@ -197,24 +229,46 @@ function confirmer() {
   font-size: 11px;
   color: #64748b;
 }
-.agents {
+.agent-search-container {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-}
-.agent {
-  display: flex;
-  align-items: center;
   gap: 12px;
-  padding: 12px 14px;
+}
+.search-input {
+  width: 100%;
+  box-sizing: border-box;
+}
+.agents-dropdown {
   border: 1.5px solid #e2e8f0;
   border-radius: 10px;
+  max-height: 200px;
+  overflow-y: auto;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+}
+.agent-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
   cursor: pointer;
+  border-bottom: 1px solid #f1f5f9;
   transition: all 0.15s;
 }
-.agent.actif {
-  border-color: #212d4d;
+.agent-option:last-child {
+  border-bottom: none;
+}
+.agent-option:hover {
   background: #f8fafc;
+}
+.agent-option.actif {
+  background: #f0fdf4;
+}
+.agent-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 .agent-nom {
   font-weight: 600;
@@ -222,9 +276,19 @@ function confirmer() {
   font-size: 14px;
 }
 .agent-tel {
-  margin-left: auto;
   font-size: 13px;
   color: #64748b;
+}
+.check-icon {
+  color: #00d15a;
+  font-weight: bold;
+  font-size: 16px;
+}
+.agent-vide {
+  padding: 16px;
+  text-align: center;
+  font-size: 13px;
+  color: #94a3b8;
 }
 .modal-foot {
   display: flex;

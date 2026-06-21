@@ -158,6 +158,24 @@
             </li>
           </ul>
           <p v-else class="list-panel__vide">Aucune visite en attente</p>
+        <article v-if="aContractualiserListe && aContractualiserListe.length" class="list-panel">
+          <header class="list-panel__head" style="color: #00d15a;">
+            <AppIcon name="document" :size="18" />
+            <h3>Pré-contrats à générer</h3>
+          </header>
+          <ul class="list-panel__items">
+            <li
+              v-for="demande in aContractualiserListe"
+              :key="demande.id"
+              class="list-panel__item"
+            >
+              <div class="list-panel__item-body list-panel__item-body--full">
+                <strong>{{ demande.nom }}</strong>
+                <span>{{ demande.bien }} — {{ formatDateHeure(demande.dateHeure) }}</span>
+              </div>
+              <button class="btn-relancer" style="background:#00d15a;" @click="$router.push('/gestionnaire/visites')">Générer</button>
+            </li>
+          </ul>
         </article>
       </div>
     </template>
@@ -209,9 +227,10 @@ const {
   trendRevenus,
   trendOccupation,
   trendRetard,
+  aContractualiserListe,
 } = useDashboard()
 
-const { formatMontant } = useFormat()
+const { formatMontant, formatDateHeure } = useFormat()
 
 const barOptions = {
   responsive: true,

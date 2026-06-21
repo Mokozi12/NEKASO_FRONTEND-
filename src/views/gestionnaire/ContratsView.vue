@@ -1,14 +1,24 @@
 <template>
   <div class="contrats-page">
-    <div class="page-header page-header--flex">
-      <div>
-        <h1 class="page-title">Contrats</h1>
-        <p class="page-subtitle">
-          Pré-contrats et contrats actifs. Ouvrez un contrat pour gérer les paiements.
-        </p>
-      </div>
-      <button class="btn-nouvelle" @click="wizardOuvert = true">+ Nouveau pré-contrat</button>
+    <div class="page-header">
+      <h1 class="page-title">Contrats</h1>
+      <p class="page-subtitle">
+        Pré-contrats et contrats actifs. Ouvrez un contrat pour gérer les paiements.
+      </p>
     </div>
+
+    <button
+      v-if="nbDemandesContrat > 0"
+      type="button"
+      class="alerte-contrat"
+      @click="filtreStatut = 'precontrats'"
+    >
+      <span class="alerte-contrat__icone">📑</span>
+      <span>
+        <strong>{{ nbDemandesContrat }} demande(s) de contrat</strong> suite à une visite —
+        finalisez les conditions du pré-contrat.
+      </span>
+    </button>
 
 <div class="barre-filtres carte">
       <div class="recherche">
@@ -27,36 +37,71 @@
           :key="t.cle"
           class="tab"
           :class="{ active: filtreStatut === t.cle }"
-          @click="filtreStatut = t.cle"
+          @click="filtreStatut = t.cle; sousFiltre = 'tous'"
         >
           {{ t.libelle }}
         </button>
       </div>
     </div>
 
+    <div class="sous-filtres">
+      <button
+        class="sous-filtre"
+        :class="{ active: sousFiltre === 'tous' }"
+        @click="sousFiltre = 'tous'"
+      >
+        Tous
+      </button>
+      <button
+        v-for="sf in sousFiltresActifs"
+        :key="sf.cle"
+        class="sous-filtre"
+        :class="{ active: sousFiltre === sf.cle }"
+        @click="sousFiltre = sf.cle"
+      >
+        {{ sf.libelle }}
+      </button>
+    </div>
+
     <div class="carte liste-carte">
       <table v-if="contratsAffiches.length" class="tableau">
         <thead>
           <tr>
-            <th>N° contrat</th>
             <th>Client</th>
             <th>Téléphone</th>
             <th>Bien</th>
-            <th>Loyer</th>
-            <th>Statut</th>
+            <th class="ta-right">Loyer</th>
+            <th class="ta-right">Caution</th>
+            <th class="ta-center">Date début</th>
+            <th class="ta-center">Statut</th>
             <th class="ta-right">Action</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="c in contratsPage" :key="c.id">
-            <td class="fort">{{ c.numero }}</td>
-            <td>{{ nom(c.client) }}</td>
-            <td class="gris">{{ c.client?.telephone }}</td>
-            <td>{{ c.bien?.intitule }}</td>
-            <td>{{ formatMontant(c.montantLoyer) }} FCFA</td>
-            <td><span class="chip" :class="chipClass(c.statut)">{{ libelleStatut(c.statut) }}</span></td>
+            <td class="fort">{{ nom(c.locataire || c.client) || '—' }}</td>
+            <td class="gris">{{ c.locataire?.telephone || c.client?.telephone || '—' }}</td>
+            <td>{{ c.bien?.intitule || c.bienIntitule || '—' }}</td>
+            <td class="ta-right">{{ formatMontant(c.montantLoyer) }} FCFA</td>
+            <td class="ta-right">{{ formatMontant(c.montantCaution) }} FCFA</td>
+            <td class="ta-center">{{ c.dateDebut ? formatDate(c.dateDebut) : '—' }}</td>
+            <td class="ta-center"><span class="chip" :class="chipClass(c.statut)">{{ libelleStatut(c.statut) }}</span></td>
             <td class="ta-right">
-              <button class="btn-ouvrir" @click="ouvrir(c.id)">Ouvrir</button>
+              <button
+                v-if="c.statut === 'VALIDE_CLIENT' || c.statut === 'VALIDER'"
+                class="btn-creer-contrat"
+                @click="creerContrat(c.id)"
+                :disabled="enCours"
+              >
+                Créer contrat
+              </button>
+              <template v-else-if="filtreStatut === 'contrats' || c.statut === 'ACTIF' || c.statut === 'ROMPU'">
+                <div class="actions-contrat">
+                  <button v-if="c.cheminPDF" class="btn-pdf" @click="ouvrirPDF(c.cheminPDF)">Voir PDF</button>
+                  <button class="btn-ouvrir" @click="ouvrir(c.id)">Gérer</button>
+                </div>
+              </template>
+              <button v-else class="btn-ouvrir" @click="ouvrir(c.id)">Ouvrir</button>
             </td>
           </tr>
         </tbody>
@@ -98,11 +143,16 @@ const preContratsStore = usePreContratsStore()
 const biensStore = useBiensStore()
 const demandesStore = useDemandesLocationStore()
 const { succes, erreur: notifErreur } = useNotification()
-const { formatMontant } = useFormat()
+const { formatMontant, formatDate } = useFormat()
 
 const recherche = ref('')
-const filtreStatut = ref('tous')
+const filtreStatut = ref('precontrats')
+const sousFiltre = ref('tous')
 const wizardOuvert = ref(false)
+
+const nbDemandesContrat = computed(
+  () => preContratsStore.preContrats.filter((p) => p.statut === 'EN_ATTENTE').length,
+)
 
 onMounted(() => {
   contratsStore.chargerGestionnaire()
@@ -111,10 +161,24 @@ onMounted(() => {
 })
 
 const tabs = [
-  { cle: 'tous', libelle: 'Tous' },
   { cle: 'precontrats', libelle: 'Pré-contrats' },
-  { cle: 'actifs', libelle: 'Actifs' },
+  { cle: 'contrats', libelle: 'Contrats' },
 ]
+
+const sousFiltresPrecontrat = [
+  { cle: 'EN_ATTENTE', libelle: 'En attente' },
+  { cle: 'VALIDER', libelle: 'Validé' },
+  { cle: 'INVALIDER', libelle: 'Invalidé' },
+]
+
+const sousFiltresContrat = [
+  { cle: 'ACTIF', libelle: 'Actif' },
+  { cle: 'ROMPU', libelle: 'Rompu' },
+]
+
+const sousFiltresActifs = computed(() => {
+  return filtreStatut.value === 'precontrats' ? sousFiltresPrecontrat : sousFiltresContrat
+})
 
 const demandesAcceptees = computed(() =>
   demandesStore.demandes
@@ -133,10 +197,16 @@ const contratsAffiches = computed(() => {
   const q = recherche.value.trim().toLowerCase()
   let liste = tousLesContrats.value
 
+  // Filtre principal : Pré-contrats vs Contrats
   if (filtreStatut.value === 'precontrats') {
-    liste = liste.filter((c) => STATUTS_PRE_CONTRAT.includes(c.statut))
-  } else if (filtreStatut.value === 'actifs') {
-    liste = liste.filter((c) => c.statut === STATUT_CONTRAT.ACTIF)
+    liste = liste.filter((c) => (STATUTS_PRE_CONTRAT.includes(c.statut) || c.statutPreContrat) && c.statut !== 'TERMINE' && c.statut !== 'ACTIF')
+  } else if (filtreStatut.value === 'contrats') {
+    liste = liste.filter((c) => ['ACTIF', 'ROMPU'].includes(c.statut))
+  }
+
+  // Sous-filtre par statut exact
+  if (sousFiltre.value !== 'tous') {
+    liste = liste.filter((c) => c.statut === sousFiltre.value || c.statutPreContrat === sousFiltre.value)
   }
 
   if (q) {
@@ -151,14 +221,46 @@ const contratsAffiches = computed(() => {
 })
 
 const { page, totalPages, itemsPage: contratsPage } = usePagination(contratsAffiches, 8)
-watch([recherche, filtreStatut], () => {
+watch([recherche, filtreStatut, sousFiltre], () => {
   page.value = 1
 })
 
 const nom = (p) => nomComplet(p)
 
+const enCours = ref(false)
+
 function ouvrir(id) {
   router.push(`/gestionnaire/contrats/${id}`)
+}
+
+function ouvrirPDF(cheminPDF) {
+  if (!cheminPDF) return
+  // Si le chemin ne commence pas par http, on le préfixe avec l'URL du backend
+  const baseUrl = 'http://74.248.184.17:8080'
+  const url = cheminPDF.startsWith('http') 
+    ? cheminPDF 
+    : `${baseUrl}${cheminPDF.startsWith('/') ? '' : '/'}${cheminPDF}`
+  window.open(url, '_blank')
+}
+
+async function creerContrat(id) {
+  if (enCours.value) return
+  enCours.value = true
+  try {
+    await contratsStore.creerContratDefinitif(id)
+    
+    // Masquer localement le pré-contrat converti
+    const statuts = JSON.parse(localStorage.getItem('nekaso_precontrats_statuts') || '{}')
+    statuts[id] = 'TERMINE'
+    localStorage.setItem('nekaso_precontrats_statuts', JSON.stringify(statuts))
+
+    succes('Le contrat a été créé et activé avec succès.')
+    await contratsStore.chargerGestionnaire()
+  } catch (e) {
+    notifErreur('Erreur lors de la création du contrat.')
+  } finally {
+    enCours.value = false
+  }
 }
 
 async function onPreContratCree(data) {
@@ -175,10 +277,14 @@ async function onPreContratCree(data) {
 function libelleStatut(s) {
   return {
     PRE_CONTRAT_ENVOYE: 'Pré-contrat envoyé',
+    EN_ATTENTE: 'En attente',
     RETOURS_CLIENT: 'Retours client',
     PRE_CONTRAT_CORRIGE: 'Corrigé (renvoyé)',
     VALIDE_CLIENT: 'Validé par le client',
+    VALIDER: 'Validé',
+    INVALIDER: 'Invalidé',
     ACTIF: 'Actif',
+    ROMPU: 'Rompu',
     TERMINE: 'Terminé',
     ANNULE: 'Annulé',
   }[s] || s
@@ -186,10 +292,14 @@ function libelleStatut(s) {
 function chipClass(s) {
   return {
     PRE_CONTRAT_ENVOYE: 'chip--info',
+    EN_ATTENTE: 'chip--warn',
     RETOURS_CLIENT: 'chip--warn',
     PRE_CONTRAT_CORRIGE: 'chip--info',
     VALIDE_CLIENT: 'chip--ok',
+    VALIDER: 'chip--ok',
+    INVALIDER: 'chip--danger',
     ACTIF: 'chip--green',
+    ROMPU: 'chip--danger',
     ANNULE: 'chip--danger',
   }[s] || 'chip--neutre'
 }
@@ -199,22 +309,51 @@ function chipClass(s) {
 .contrats-page {
   padding: 0;
 }
-.page-header--flex {
+.alerte-contrat {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 16px;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  color: #065f46;
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  cursor: pointer;
 }
-.btn-nouvelle {
-  background: #212d4d;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 9px 16px;
-  font-size: 13.5px;
+.alerte-contrat:hover {
+  background: #d1fae5;
+}
+.alerte-contrat__icone {
+  font-size: 20px;
+}
+.sous-filtres {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+.sous-filtre {
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  color: #64748b;
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-size: 12.5px;
   font-weight: 600;
   cursor: pointer;
-  white-space: nowrap;
+  transition: all 0.2s;
+}
+.sous-filtre:hover {
+  background: #f1f5f9;
+}
+.sous-filtre.active {
+  background: #1e293b;
+  color: #fff;
+  border-color: #1e293b;
 }
 .barre-filtres {
   display: flex;
@@ -299,6 +438,9 @@ function chipClass(s) {
 .ta-right {
   text-align: right;
 }
+.ta-center {
+  text-align: center;
+}
 .btn-ouvrir {
   background: #f1f5f9;
   border: none;
@@ -307,6 +449,35 @@ function chipClass(s) {
   font-size: 13px;
   font-weight: 600;
   color: #334155;
+  cursor: pointer;
+}
+.btn-creer-contrat {
+  background: var(--couleur-primaire, #212d4d);
+  border: none;
+  border-radius: 7px;
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #ffffff;
+  cursor: pointer;
+}
+.btn-creer-contrat:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.actions-contrat {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+.btn-pdf {
+  background: #fef2f2;
+  border: 1px solid #fca5a5;
+  border-radius: 7px;
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #dc2626;
   cursor: pointer;
 }
 .chip {
