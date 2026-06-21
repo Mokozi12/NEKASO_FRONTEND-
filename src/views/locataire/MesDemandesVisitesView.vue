@@ -96,7 +96,10 @@ const contratsStore = useContratsStore()
 const { succes, info, erreur } = useNotification()
 const { formatDate } = useFormat()
 
-onMounted(() => visitesStore.chargerVisites())
+onMounted(() => {
+  visitesStore.chargerVisites()
+  contratsStore.chargerLocataire()
+})
 
 const ETAPES = ['Demandée', 'Proposée', 'Confirmée', 'Terminée']
 
@@ -119,7 +122,7 @@ function metaLigne(v) {
 }
 function preContratDe(v) {
   return contratsStore.contrats.find(
-    (c) => c.origine?.type === 'VISITE' && c.origine?.refId === v.id,
+    (c) => c.demandeVisiteId != null && Number(c.demandeVisiteId) === Number(v.id),
   )
 }
 

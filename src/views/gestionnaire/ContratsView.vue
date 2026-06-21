@@ -151,6 +151,7 @@ import { useDemandesLocationStore } from '@/stores/demandesLocation.store'
 import { useNotification } from '@/composables/useNotification'
 import { useFormat } from '@/composables/useFormat'
 import { usePagination } from '@/composables/usePagination'
+import { extraireMessageErreur } from '@/utils/apiResponse'
 import { nomComplet, STATUTS_PRE_CONTRAT, STATUT_CONTRAT } from '@/utils/constants'
 import WizardContrat from '@/components/contrats/WizardContrat.vue'
 import Pagination from '@/components/common/Pagination.vue'
@@ -303,7 +304,14 @@ async function creerContrat(id) {
     succes('Le contrat a été créé et activé avec succès.')
     await contratsStore.chargerGestionnaire()
   } catch (e) {
-    notifErreur('Erreur lors de la création du contrat.')
+    const statut = e?.response?.status
+    if (statut === 500) {
+      notifErreur(
+        "La création du contrat a échoué côté serveur (erreur 500). Réessayez plus tard ou contactez le support.",
+      )
+    } else {
+      notifErreur(extraireMessageErreur(e, 'Erreur lors de la création du contrat.'))
+    }
   } finally {
     enCours.value = false
   }

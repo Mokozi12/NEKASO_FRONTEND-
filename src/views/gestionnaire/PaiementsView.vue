@@ -7,12 +7,12 @@
 
     <div class="stats">
       <div class="stat-carte">
-        <span class="stat-label">Total perçu ce mois</span>
-        <span class="stat-val vert">{{ formatMontant(totalPercuCeMois) }} FCFA</span>
+        <span class="stat-label">{{ libelleTotal }}</span>
+        <span class="stat-val vert">{{ formatMontant(totalPercu) }} FCFA</span>
       </div>
       <div class="stat-carte">
         <span class="stat-label">Nombre de paiements</span>
-        <span class="stat-val">{{ paiementsListe.length }}</span>
+        <span class="stat-val">{{ paiementsFiltres.length }}</span>
       </div>
     </div>
 
@@ -146,11 +146,6 @@ function normaliserMois(valeur) {
   return valeur
 }
 
-const moisCourant = computed(() => {
-  const d = new Date()
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
-})
-
 const paiementsListe = computed(() =>
   paiementsReels.value
     .map((p) => ({
@@ -191,11 +186,15 @@ const locatairesDisponibles = computed(() => {
   return [...map.values()]
 })
 
-const totalPercuCeMois = computed(() =>
-  paiementsListe.value
-    .filter((l) => l.moisCle === moisCourant.value)
-    .reduce((s, l) => s + Number(l.montant || 0), 0),
+const totalPercu = computed(() =>
+  paiementsFiltres.value.reduce((s, l) => s + Number(l.montant || 0), 0),
 )
+
+const libelleTotal = computed(() => {
+  if (filtreMois.value) return `Total perçu — ${formatMois(filtreMois.value)}`
+  if (filtreLocataire.value) return 'Total perçu (locataire)'
+  return 'Total perçu'
+})
 
 async function enregistrerPaiement(payload) {
   enregistrementEnCours.value = true

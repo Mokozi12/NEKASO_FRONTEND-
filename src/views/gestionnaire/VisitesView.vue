@@ -81,7 +81,7 @@
             <th>Contact</th>
             <th>Bien</th>
             <th>Demande</th>
-            <th>Statut</th>
+            <th class="ta-right">Action</th>
           </tr>
         </thead>
         <tbody>
@@ -90,8 +90,10 @@
             <td class="gris">{{ v.client?.telephone || '—' }}</td>
             <td>{{ v.bien?.intitule }}</td>
             <td class="gris">{{ formatDateHeure(v.dateCreation) }}</td>
-            <td>
-              <span class="chip chip--neutre">Visite physique en attente</span>
+            <td class="ta-right">
+              <button class="btn-act btn-valider" @click="ouvrirPrecontrat(v)">
+                Créer un pré-contrat
+              </button>
             </td>
           </tr>
         </tbody>
@@ -117,18 +119,8 @@
             <td>{{ v.bien?.intitule }}</td>
             <td class="gris">{{ formatDateHeure(v.dateCreation) }}</td>
             <td>
-              <div v-if="visitesStore.visiteAvecContrat(v) && !visitesStore.preContratExiste(v)" style="display:flex; flex-direction:column; gap:6px; align-items:flex-start;">
-                <span class="chip chip--attente">À contractualiser</span>
-                <button
-                  class="btn-act btn-valider"
-                  style="margin-left:0;"
-                  @click="ouvrirPrecontrat(v)"
-                >
-                  Générer pré-contrat
-                </button>
-              </div>
-              <span v-else-if="visitesStore.visiteAvecContrat(v)" class="chip chip--ok">Contrat généré</span>
-              <span v-else class="chip chip--neutre">Sans suite</span>
+              <span v-if="visitesStore.preContratExiste(v)" class="chip chip--ok">Pré-contrat envoyé au client</span>
+              <span v-else class="chip chip--neutre">Visite terminée</span>
             </td>
           </tr>
         </tbody>
@@ -175,8 +167,8 @@ const ongletActif = ref('attente')
 const onglets = computed(() => [
   { cle: 'attente', libelle: 'En attente', liste: visitesStore.enAttente, badge: '' },
   { cle: 'proposees', libelle: 'Proposées', liste: visitesStore.proposees, badge: 'tab-badge--blue' },
-  { cle: 'confirmees', libelle: 'Confirmées', liste: visitesStore.confirmees, badge: 'tab-badge--green' },
-  { cle: 'terminees', libelle: 'Terminées', liste: visitesStore.terminees, badge: visitesStore.aContractualiser.length ? 'tab-badge--red' : '' },
+  { cle: 'confirmees', libelle: 'Confirmées', liste: visitesStore.confirmees, badge: visitesStore.confirmees.length ? 'tab-badge--red' : 'tab-badge--green' },
+  { cle: 'terminees', libelle: 'Terminées', liste: visitesStore.terminees, badge: '' },
 ])
 
 const listeActive = computed(
@@ -231,7 +223,7 @@ async function confirmerPrecontrat(payload) {
   enCoursPrecontrat.value = true
   try {
     await visitesStore.proposerPrecontrat(visitePrecontrat.value.id, payload)
-    succes('Pré-contrat proposé au client. Visite terminée.')
+    succes('Pré-contrat envoyé au client pour validation. La visite passe en « Terminées ».')
     visitePrecontrat.value = null
   } catch (e) {
     erreur(extraireMessageErreur(e, 'Impossible de proposer le pré-contrat'))

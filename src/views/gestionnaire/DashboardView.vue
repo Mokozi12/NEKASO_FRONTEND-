@@ -158,6 +158,8 @@
             </li>
           </ul>
           <p v-else class="list-panel__vide">Aucune visite en attente</p>
+        </article>
+
         <article v-if="aContractualiserListe && aContractualiserListe.length" class="list-panel">
           <header class="list-panel__head" style="color: #00d15a;">
             <AppIcon name="document" :size="18" />

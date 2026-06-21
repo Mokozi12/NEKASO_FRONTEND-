@@ -61,7 +61,14 @@
                 class="btn-valider"
                 @click="valider(d)"
               >
-                Valider (créer contrat)
+                Valider
+              </button>
+              <button
+                v-else-if="d.statut === 'ACCEPTEE'"
+                class="btn-precontrat"
+                @click="ouvrirPrecontrat(d)"
+              >
+                Créer un pré-contrat
               </button>
               <span v-else class="gris">—</span>
             </td>
@@ -71,21 +78,33 @@
     </div>
 
     <div v-else class="carte vide">Bien introuvable.</div>
+
+    <ModalProposerPrecontrat
+      v-if="demandePrecontrat"
+      :visite="demandePrecontrat"
+      :en-cours="enCoursPrecontrat"
+      @close="demandePrecontrat = null"
+      @proposer="confirmerPrecontrat"
+    />
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useDemandesLocationStore } from '@/stores/demandesLocation.store'
+import { usePreContratsStore } from '@/stores/preContrats.store'
 import { useNotification } from '@/composables/useNotification'
 import { useFormat } from '@/composables/useFormat'
 import { nomComplet } from '@/utils/constants'
+import { extraireMessageErreur } from '@/utils/apiResponse'
+import ModalProposerPrecontrat from '@/components/visites/ModalProposerPrecontrat.vue'
 
 const route = useRoute()
 const router = useRouter()
 const store = useDemandesLocationStore()
-const { succes, info } = useNotification()
+const preContratsStore = usePreContratsStore()
+const { succes, info, erreur } = useNotification()
 const { formatMontant, formatDateHeure } = useFormat()
 
 const bienId = computed(() => Number(route.params.bienId))
@@ -121,14 +140,43 @@ function chipClass(s) {
 }
 
 async function valider(d) {
-  const contrat = await store.validerDemande(d.id)
-  succes(`Demande de ${nomClient(d)} validée. Les autres demandes ont été annulées et notifiées.`)
-  if (contrat) router.push(`/gestionnaire/contrats/${contrat.id}`)
+  await store.validerDemande(d.id)
+  succes(`Demande de ${nomClient(d)} validée. Vous pouvez maintenant créer le pré-contrat.`)
 }
 
 async function toutAnnuler() {
   await store.toutAnnuler(bienId.value)
   info('Toutes les demandes en attente ont été annulées.')
+}
+
+const demandePrecontrat = ref(null)
+const enCoursPrecontrat = ref(false)
+function ouvrirPrecontrat(d) {
+  demandePrecontrat.value = d
+}
+async function confirmerPrecontrat(payload) {
+  enCoursPrecontrat.value = true
+  try {
+    await preContratsStore.creer({
+      ...payload,
+      demandeLocationId: demandePrecontrat.value.id,
+    })
+    succes('Pré-contrat envoyé au client pour validation.')
+    demandePrecontrat.value = null
+  } catch (e) {
+    const status = e?.response?.status
+    if (status === 500) {
+      erreur(
+        "Le serveur a refusé la création du pré-contrat (erreur 500). " +
+          "Le bien passe « réservé » dès la validation de la demande, " +
+          "ce que le backend rejette ensuite : correction attendue côté serveur.",
+      )
+    } else {
+      erreur(extraireMessageErreur(e, 'Impossible de créer le pré-contrat'))
+    }
+  } finally {
+    enCoursPrecontrat.value = false
+  }
 }
 </script>
 
@@ -266,6 +314,16 @@ async function toutAnnuler() {
 }
 .btn-valider {
   background: #00d15a;
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-precontrat {
+  background: #212d4d;
   color: #fff;
   border: none;
   border-radius: 7px;

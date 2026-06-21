@@ -125,6 +125,7 @@ export function mapPreContrat(p) {
     'EN_ATTENTE': 'PRE_CONTRAT_ENVOYE',
     'VALIDER': 'VALIDE_CLIENT',
     'INVALIDER': 'ANNULE',
+    'CLOTURER': 'TERMINE',
   }
   const statutBrut = p.statutPreContrat ?? p.statut ?? ''
   const statutNormalise = STATUT_BACKEND_TO_FRONTEND[statutBrut] ?? statutBrut
