@@ -13,14 +13,19 @@ export const useDemandesLocationStore = defineStore('demandesLocation', () => {
   const chargement = ref(false)
 
   function normaliser(d) {
+    const clientId = d.id_Locataire ?? d.locataireId ?? d.clientId
+    const nom = d.nomLocataire ?? d.locataireNom ?? null
+    const prenom = d.prenomLocataire ?? d.locatairePrenom ?? null
+    const telephone = d.telephoneLocataire ?? d.locataireTelephone ?? null
+    const clientPlat = nom || prenom || telephone ? { id: clientId, nom, prenom, telephone } : null
     return {
       id: d.id ?? d.idDemande,
       bienId: d.bien?.id ?? d.id_Bien ?? d.bienId,
-      clientId: d.id_Locataire ?? d.locataireId ?? d.clientId,
+      clientId,
       statut: d.statut,
       dateCreation: d.dateDemande ?? d.dateCreation ?? new Date().toISOString(),
       bien: d.bien ? mapBien(d.bien) : null,
-      client: d.locataire ?? d.client ?? null,
+      client: d.locataire ?? d.client ?? clientPlat,
     }
   }
 
@@ -38,6 +43,10 @@ export const useDemandesLocationStore = defineStore('demandesLocation', () => {
   }
 
   const demandes = computed(() => demandesBackend.value)
+
+  const nbEnAttente = computed(
+    () => demandesBackend.value.filter((d) => d.statut === STATUT_DEMANDE.EN_ATTENTE).length,
+  )
 
   const biensAvecDemandes = computed(() => {
     const parBien = new Map()
@@ -122,6 +131,7 @@ export const useDemandesLocationStore = defineStore('demandesLocation', () => {
     chargement,
     chargerDemandesBackend,
     demandes,
+    nbEnAttente,
     biensAvecDemandes,
     mesDemandes,
     demandesDuBien,

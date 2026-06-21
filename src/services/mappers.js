@@ -74,9 +74,12 @@ export function mapVisite(v) {
   if (!v) return null
   const locId = v.id_Locataire ?? v.locataireId ?? v.locataire?.id ?? null
   const locImbrique = v.locataire ?? v.client ?? null
+  const nomLoc = v.nomLocataire ?? v.locataireNom ?? null
+  const prenomLoc = v.prenomLocataire ?? v.locatairePrenom ?? null
+  const telLoc = v.telephoneLocataire ?? v.locataireTelephone ?? null
   const locPlat =
-    v.locataireNom || v.locatairePrenom || v.locataireTelephone
-      ? { id: locId, nom: v.locataireNom, prenom: v.locatairePrenom, telephone: v.locataireTelephone }
+    nomLoc || prenomLoc || telLoc
+      ? { id: locId, nom: nomLoc, prenom: prenomLoc, telephone: telLoc }
       : null
   const client = locImbrique || locPlat
   const creneauBrut = v.creneauVisite ?? v.creneau ?? v.dateVisite ?? v.dateHeureVisite ?? null

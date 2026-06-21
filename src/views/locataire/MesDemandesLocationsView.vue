@@ -76,7 +76,7 @@ onMounted(() => store.chargerDemandes())
 const ETAPES = ['Demande envoyée', 'Pré-contrat', 'Bail actif']
 
 const demandes = computed(() => store.mesDemandes)
-const { page, totalPages, itemsPage } = usePagination(demandes, 6)
+const { page, totalPages, itemsPage } = usePagination(demandes, 5)
 
 function photo(b) {
   return b?.photos?.[0]?.urlPhoto || 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=300'

@@ -89,6 +89,7 @@
             <path d="M9 16l2 2 4-4"></path>
           </svg>
           <span>Visites</span>
+          <span v-if="nbVisitesEnAttente" class="badge-attente">{{ nbVisitesEnAttente }}</span>
         </RouterLink>
 
         <RouterLink
@@ -137,6 +138,7 @@
             <line x1="16" y1="17" x2="8" y2="17"/>
           </svg>
           <span>Demandes location</span>
+          <span v-if="nbDemandesEnAttente" class="badge-attente">{{ nbDemandesEnAttente }}</span>
         </RouterLink>
       </div>
 
@@ -245,11 +247,24 @@
 </template>
 
 <script setup>
+import { computed, onMounted } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth.store'
+import { useVisitesGestionnaireStore } from '@/stores/visitesGestionnaire.store'
+import { useDemandesLocationStore } from '@/stores/demandesLocation.store'
 
 const authStore = useAuthStore()
 const router = useRouter()
+const visitesStore = useVisitesGestionnaireStore()
+const demandesLocationStore = useDemandesLocationStore()
+
+const nbVisitesEnAttente = computed(() => visitesStore.enAttente.length)
+const nbDemandesEnAttente = computed(() => demandesLocationStore.nbEnAttente)
+
+onMounted(() => {
+  visitesStore.charger()
+  demandesLocationStore.chargerDemandesBackend()
+})
 
 function seDeconnecter() {
   authStore.logout()
@@ -359,5 +374,26 @@ function seDeconnecter() {
 
 .btn-deconnexion {
   margin-top: 8px;
+}
+
+.badge-attente {
+  margin-left: auto;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ef4444;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 10px;
+  line-height: 1;
+}
+
+.sidebar-lien--actif .badge-attente {
+  background-color: #ffffff;
+  color: var(--couleur-primaire, #1a2e4a);
 }
 </style>

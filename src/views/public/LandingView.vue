@@ -500,11 +500,15 @@ const handleSearch = () => {
     gap: 8px;
   }
 
+  .search-input-wrapper {
+    padding: 8px 14px;
+  }
+
   .btn-search {
-    width: auto;
-    align-self: flex-end;
-    padding: 9px 20px;
-    font-size: 13px;
+    width: 100%;
+    align-self: stretch;
+    padding: 12px 20px;
+    font-size: 14px;
   }
 
   .features-grid {

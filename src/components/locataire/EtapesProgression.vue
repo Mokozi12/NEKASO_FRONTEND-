@@ -33,7 +33,7 @@ defineProps({
   flex: 1;
   position: relative;
 }
-.etape:last-child {
+.etape:first-child {
   flex: 0 0 auto;
 }
 .liaison {

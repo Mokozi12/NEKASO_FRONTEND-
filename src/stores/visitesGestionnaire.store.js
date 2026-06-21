@@ -89,7 +89,7 @@ export const useVisitesGestionnaireStore = defineStore('visitesGestionnaire', ()
         client:
           v.client ||
           annuaire.get(String(v.locataireId)) ||
-          { id: v.locataireId, nom: `Client #${v.locataireId}`, prenom: '', telephone: '' },
+          { id: v.locataireId, nom: `Locataire #${v.locataireId}`, prenom: '', telephone: '' },
       }))
       visites.value = trierParDateDecroissante(enrichies, 'dateCreation')
     } catch (e) {
